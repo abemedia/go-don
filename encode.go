@@ -17,6 +17,7 @@ type EncoderConstraint interface {
 	Marshaler | ContextMarshaler | EncoderFactory | ResponseEncoder
 }
 
+// RegisterEncoder registers a response encoder.
 func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...string) {
 	switch e := any(enc).(type) {
 	case Marshaler:

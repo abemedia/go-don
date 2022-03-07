@@ -20,6 +20,7 @@ type Config struct {
 	DefaultEncoding string
 }
 
+// New creates a new API instance.
 func New(c *Config) *API {
 	if c == nil {
 		c = &Config{}
@@ -34,6 +35,7 @@ func New(c *Config) *API {
 	}
 }
 
+// Router creates a http.Handler for the API.
 func (a *API) Router() http.Handler {
 	rr := httprouter.New()
 	a.addRoutes(rr)

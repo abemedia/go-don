@@ -7,19 +7,23 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// StatusCoder allows you to customise the HTTP response code.
 type StatusCoder interface {
 	StatusCode() int
 }
 
+// Headerer allows you to customise the HTTP headers.
 type Headerer interface {
 	Header() http.Header
 }
 
-type Handle[T any] func(ctx context.Context, request T) (interface{}, error)
-
+// H wraps your handler function with the Go generics magic.
 func H[T any](handle Handle[T]) http.Handler {
 	return &handler[T]{handle: handle}
 }
+
+// Handle is the type for your handlers.
+type Handle[T any] func(ctx context.Context, request T) (interface{}, error)
 
 type handler[T any] struct {
 	config *Config

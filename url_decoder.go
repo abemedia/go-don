@@ -50,7 +50,6 @@ func (d *decoder) Check(v interface{}) bool {
 }
 
 func (d *decoder) has(typ reflect.Type) bool {
-	var res bool
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 
@@ -58,23 +57,21 @@ func (d *decoder) has(typ reflect.Type) bool {
 			continue // skip unexported fields
 		}
 
-		_, ok := f.Tag.Lookup(d.tag)
-		if ok {
-			res = true
-			break
+		if _, ok := f.Tag.Lookup(d.tag); ok {
+			return true
 		}
 
-		if f.Type.Kind() == reflect.Ptr {
-			f.Type = f.Type.Elem()
+		ft := f.Type
+		if ft.Kind() == reflect.Ptr {
+			ft = ft.Elem()
 		}
 
-		if f.Type.Kind() == reflect.Struct {
-			res = d.has(f.Type)
-			if res {
+		if ft.Kind() == reflect.Struct {
+			if d.has(ft) {
 				return true
 			}
 		}
 	}
 
-	return res
+	return false
 }

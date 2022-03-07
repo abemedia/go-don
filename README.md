@@ -17,26 +17,26 @@ import (
   "net/http"
 
   "github.com/abemedia/go-don"
-  _ "github.com/abemedia/go-don/encoding/form" // Enable form parsing.
   _ "github.com/abemedia/go-don/encoding/json" // Enable JSON parsing & rendering.
   _ "github.com/abemedia/go-don/encoding/yaml" // Enable YAML parsing & rendering.
 )
 
-type NameRequest struct {
+type GreetRequest struct {
   Name string `path:"name"`         // Get name from the URL path.
   Age  int    `header:"X-User-Age"` // Get age from HTTP header.
 }
 
-type NameResponse struct {
-  Greeting string `json:"data" yaml:"data"` // Remember to add all the tags for the renderers you enable.
+type GreetResponse struct {
+  // Remember to add all the tags for the renderers you enable.
+  Greeting string `json:"data" yaml:"data"`
 }
 
-func Greet(ctx context.Context, request NameRequest) (interface{}, error) {
+func Greet(ctx context.Context, request GreetRequest) (interface{}, error) {
   if request.Name == "" {
     return nil, don.ErrBadRequest
   }
 
-  res := &NameResponse{
+  res := &GreetResponse{
     Greeting: fmt.Sprintf("Hello %s, you're %d years old.", request.Name, request.Age),
   }
 

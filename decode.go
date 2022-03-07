@@ -18,6 +18,7 @@ type DecoderConstraint interface {
 	Unmarshaler | ContextUnmarshaler | DecoderFactory | RequestParser
 }
 
+// RegisterDecoder registers a request decoder.
 func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...string) {
 	switch d := any(dec).(type) {
 	case Unmarshaler:
