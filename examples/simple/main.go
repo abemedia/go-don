@@ -7,40 +7,47 @@ import (
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/json"
+	_ "github.com/abemedia/go-don/encoding/text"
+	_ "github.com/abemedia/go-don/encoding/yaml"
 )
 
-func Ping(ctx context.Context, _ struct{}) (interface{}, error) {
+// Returns 204 - No Content
+func Empty(context.Context, *don.Empty) (interface{}, error) {
+	return nil, nil
+}
+
+func Ping(context.Context, *don.Empty) (string, error) {
 	return "pong", nil
 }
 
-type NameRequest struct {
+type GreetRequest struct {
 	Name string `json:"name"`         // Get name from JSON body.
 	Age  int    `header:"X-User-Age"` // Get age from HTTP header.
 }
 
-type NameResponse struct {
+type GreetResponse struct {
 	Greeting string `json:"data"`
 }
 
 // Set a custom HTTP response code.
-func (nr *NameResponse) StatusCode() int {
+func (gr *GreetResponse) StatusCode() int {
 	return http.StatusTeapot
 }
 
 // Add custom headers to the response.
-func (nr *NameResponse) Header() http.Header {
+func (gr *GreetResponse) Header() http.Header {
 	header := http.Header{}
 	header.Set("foo", "bar")
 	return header
 }
 
-func Greet(ctx context.Context, request NameRequest) (interface{}, error) {
-	if request.Name == "" {
+func Greet(ctx context.Context, req *GreetRequest) (*GreetResponse, error) {
+	if req.Name == "" {
 		return nil, don.ErrBadRequest
 	}
 
-	res := &NameResponse{
-		Greeting: fmt.Sprintf("Hello %s, you're %d years old.", request.Name, request.Age),
+	res := &GreetResponse{
+		Greeting: fmt.Sprintf("Hello %s, you're %d years old.", req.Name, req.Age),
 	}
 
 	return res, nil
@@ -48,7 +55,7 @@ func Greet(ctx context.Context, request NameRequest) (interface{}, error) {
 
 func main() {
 	r := don.New(nil)
-	r.Get("/", don.H(Ping))
+	r.Get("/", don.H(Empty))
 
 	g := r.Group("/api")
 	g.Get("/ping", don.H(Ping))

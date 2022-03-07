@@ -6,7 +6,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var DefaultEncoding = "application/json"
+type Empty struct{}
+
+var DefaultEncoding = "text/plain"
 
 type Middleware func(http.Handler) http.Handler
 

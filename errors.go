@@ -12,7 +12,7 @@ import (
 )
 
 func E(err error) http.Handler {
-	return H(func(_ context.Context, _ interface{}) (interface{}, error) {
+	return H(func(context.Context, *Empty) (interface{}, error) {
 		return nil, err
 	})
 }
