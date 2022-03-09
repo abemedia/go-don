@@ -17,6 +17,7 @@ It's still very early alpha and is likely to change so it's not recommended for 
   - [Request parsing](#request-parsing)
   - [Headers & response codes](#headers--response-codes)
   - [Middleware](#middleware)
+  - [Sub-routers](#sub-routers)
 
 ## Basic Example
 
@@ -211,4 +212,32 @@ This can now be accessed in the handler:
 
 ```go
 user := ctx.Value(ContextUserKey).(string)
+```
+
+## Sub-routers
+
+You can create sub-routers using the `Group` function:
+
+```go
+r := don.New(nil)
+sub := r.Group("/api")
+sub.Get("/hello")
+```
+
+Middleware registered on a sub-router only applies to routes in that group and child groups.
+
+```go
+r := don.New(nil)
+r.Get("/login", don.H(loginHandler))
+r.Use(loggingMiddleware) // applied to all routes
+
+api := r.Group("/api")
+api.Get("/hello", don.H(helloHandler))
+api.Use(authMiddleware) // applied to routes `/api/hello` and `/api/v2/bye`
+
+
+v2 := g.Group("/v2")
+v2.Get("/bye", don.H(byeHandler))
+v2.Use(corsMiddleware) // only applied to `/api/v2/bye`
+
 ```
