@@ -11,8 +11,8 @@ import (
 	"github.com/goccy/go-json"
 )
 
-func E(err error) http.Handler {
-	return H(func(context.Context, *Empty) (interface{}, error) {
+func E(err error) Handler {
+	return H(func(context.Context, *Empty) (*Empty, error) {
 		return nil, err
 	})
 }

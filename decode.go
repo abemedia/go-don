@@ -53,18 +53,16 @@ func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...
 	}
 }
 
-func getDecoder(contentType, fallback string) (RequestParser, error) {
-	mime := parseMime(contentType, fallback)
-
-	if enc, ok := decoders[mime]; ok {
+func getDecoder(mime string) (RequestParser, error) {
+	if enc := decoders[mime]; enc != nil {
 		return enc, nil
 	}
 
-	if name, ok := decoderAliases[mime]; ok {
+	if name := decoderAliases[mime]; name != "" {
 		return decoders[name], nil
 	}
 
-	return nil, ErrUnsupportedMediaType
+	return nil, ErrNotAcceptable
 }
 
 var (

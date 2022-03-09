@@ -3,7 +3,9 @@ package don
 import (
 	"context"
 	"net/http"
+	"strings"
 
+	"github.com/abemedia/go-don/decoder"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -17,95 +19,128 @@ type Headerer interface {
 	Header() http.Header
 }
 
+type Handler interface {
+	http.Handler
+	handle(http.ResponseWriter, *http.Request, httprouter.Params)
+}
+
 // H wraps your handler function with the Go generics magic.
-func H[T any, O any](handle Handle[T, O]) http.Handler {
-	return &handler[T, O]{handle: handle}
+func H[T any, O any](handle Handle[T, O]) Handler {
+	var zero O
+	h := &handler[T, O]{
+		handler: handle,
+		zero:    zero,
+	}
+
+	var t *T
+
+	if hasTag(t, headerTag) {
+		dec, err := decoder.NewDecoder(t, headerTag)
+		if err == nil {
+			h.decodeHeader = dec
+		}
+	}
+
+	if hasTag(t, queryTag) {
+		dec, err := decoder.NewMapDecoder(t, queryTag)
+		if err == nil {
+			h.decodeQuery = dec
+		}
+	}
+
+	if hasTag(t, pathTag) {
+		dec, err := decoder.NewParamsDecoder(t, pathTag)
+		if err == nil {
+			h.decodePath = dec
+		}
+	}
+
+	return h
 }
 
 // Handle is the type for your handlers.
 type Handle[T any, O any] func(ctx context.Context, request *T) (O, error)
 
 type handler[T any, O any] struct {
-	config *Config
-	handle Handle[T, O]
+	config       *Config
+	handler      Handle[T, O]
+	decodeHeader *decoder.Decoder
+	decodePath   *decoder.ParamsDecoder
+	decodeQuery  *decoder.MapDecoder
+	zero         any
 }
 
 func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	enc, err := getEncoder(r.Header.Get("Accept"), h.config.DefaultEncoding)
+	h.handle(w, r, nil)
+}
+
+func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	enc, err := getEncoder(h.getEncoding(r.Header, "Accept"))
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
 
 	req := new(T)
+	var res any
 
 	// Decode the header.
-	if decodeHeader.Check(req) {
-		err := decodeHeader.Decode(req, r.Header)
+	if h.decodeHeader != nil {
+		err := h.decodeHeader.Decode(r.Header, req)
 		if err != nil {
-			enc(w, err)
-			return
+			res = ErrBadRequest
+			goto Encode
 		}
 	}
 
 	// Decode the URL query.
-	if r.URL.RawQuery != "" && decodePath.Check(req) {
-		err := decodeQuery.Decode(req, r.URL.Query())
+	if h.decodeQuery != nil && r.URL.RawQuery != "" {
+		err := h.decodeQuery.Decode(r.URL.Query(), req)
 		if err != nil {
-			enc(w, err)
-			return
+			res = ErrBadRequest
+			goto Encode
 		}
 	}
 
 	// Decode the path params.
-	p := httprouter.ParamsFromContext(r.Context())
-	if len(p) != 0 && decodePath.Check(req) {
-		params := make(map[string][]string, len(p))
-		for i := range p {
-			params[p[i].Key] = []string{p[i].Value}
-		}
-
-		err := decodePath.Decode(req, params)
+	if h.decodePath != nil && len(p) != 0 {
+		err := h.decodePath.Decode(p, req)
 		if err != nil {
-			enc(w, err)
-			return
+			res = ErrBadRequest
+			goto Encode
 		}
 	}
 
 	// Decode the body.
 	if r.ContentLength > 0 {
-		dec, err := getDecoder(r.Header.Get("Content-Type"), h.config.DefaultEncoding)
+		dec, err := getDecoder(h.getEncoding(r.Header, "Content-Type"))
 		if err != nil {
-			enc(w, err)
-			return
+			res = err
+			goto Encode
 		}
 
 		if err := dec(r, req); err != nil {
-			enc(w, err)
-			return
+			res = ErrBadRequest
+			goto Encode
 		}
 	}
 
-	ctx := context.WithValue(r.Context(), requestContextKey, r)
-	ctx = context.WithValue(ctx, responseContextKey, w)
-	res, err := h.handle(ctx, req)
+	res, err = h.handler(r.Context(), req)
 	if err != nil {
-		enc(w, res)
-		return
+		res = err
 	}
 
-	resAny := any(res)
-
-	if h, ok := resAny.(Headerer); ok {
+Encode:
+	if h, ok := res.(Headerer); ok {
 		headers := w.Header()
 		for k, v := range h.Header() {
 			headers[k] = v
 		}
 	}
 
-	if sc, ok := resAny.(StatusCoder); ok {
+	if sc, ok := res.(StatusCoder); ok {
 		w.WriteHeader(sc.StatusCode())
-	} else if resAny == nil {
+	} else if res == h.zero {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -113,6 +148,35 @@ func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	enc(w, res)
 }
 
+func (h *handler[T, O]) getEncoding(header http.Header, key string) string {
+	if header == nil {
+		return h.config.DefaultEncoding
+	}
+	v := header[key]
+	if len(v) == 0 {
+		return h.config.DefaultEncoding
+	}
+
+	contentType := v[0]
+
+	index := strings.Index(contentType, ";")
+	if index > 0 {
+		contentType = contentType[:index]
+	}
+
+	if contentType == "" || contentType == "*/*" {
+		return h.config.DefaultEncoding
+	}
+
+	return strings.TrimSpace(contentType)
+}
+
 func (h *handler[T, O]) setConfig(r *Config) {
 	h.config = r
 }
+
+const (
+	headerTag = "header"
+	pathTag   = "path"
+	queryTag  = "query"
+)

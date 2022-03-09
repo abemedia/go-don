@@ -29,12 +29,18 @@ func TestCheck(t *testing.T) {
 			}{},
 			true,
 		},
+		{
+			&struct {
+				Foo *struct {
+					Foo string `foo:"1"`
+				}
+			}{},
+			true,
+		},
 	}
 
-	tc := newDecoder("foo")
-
 	for _, test := range tests {
-		actual := tc.Check(test.in)
+		actual := hasTag(test.in, "foo")
 		if actual != test.expected {
 			t.Errorf("expected %t for %T", test.expected, test.in)
 		}

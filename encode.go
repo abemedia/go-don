@@ -54,15 +54,13 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 	}
 }
 
-func getEncoder(contentType, fallback string) (ResponseEncoder, error) {
-	mime := parseMime(contentType, fallback)
-
-	if enc, ok := encoders[mime]; ok {
+func getEncoder(mime string) (ResponseEncoder, error) {
+	if enc := encoders[mime]; enc != nil {
 		return enc, nil
 	}
 
-	if enc, ok := encoderAliases[mime]; ok {
-		return encoders[enc], nil
+	if name := encoderAliases[mime]; name != "" {
+		return encoders[name], nil
 	}
 
 	return nil, ErrNotAcceptable

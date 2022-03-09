@@ -1,47 +1,27 @@
 package don
 
 import (
-	"sync"
-	"unsafe"
-
 	"github.com/goccy/go-reflect"
 )
 
-type tagChecker struct {
-	tag   string
-	cache sync.Map
-}
-
-func newTagCheck(tag string) *tagChecker {
-	return &tagChecker{tag: tag}
-}
-
-func (tc *tagChecker) Check(v interface{}) bool {
-	typ := reflect.TypeOf(v).Elem()
-	if typ.Kind() != reflect.Struct {
+func hasTag(v interface{}, tag string) bool {
+	t := reflect.TypeOf(v).Elem()
+	if t.Kind() != reflect.Struct {
 		return false
 	}
 
-	id := uintptr(unsafe.Pointer(typ))
-	if res, ok := tc.cache.Load(id); ok {
-		return res.(bool)
-	}
-
-	res := tc.has(typ)
-	tc.cache.Store(id, res)
-
-	return res
+	return typeHasTag(t, tag)
 }
 
-func (tc *tagChecker) has(typ reflect.Type) bool {
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
+func typeHasTag(t reflect.Type, tag string) bool {
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
 
 		if f.PkgPath != "" {
 			continue // skip unexported fields
 		}
 
-		if _, ok := f.Tag.Lookup(tc.tag); ok {
+		if _, ok := f.Tag.Lookup(tag); ok {
 			return true
 		}
 
@@ -51,7 +31,7 @@ func (tc *tagChecker) has(typ reflect.Type) bool {
 		}
 
 		if ft.Kind() == reflect.Struct {
-			if tc.has(ft) {
+			if typeHasTag(ft, tag) {
 				return true
 			}
 		}
