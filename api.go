@@ -31,6 +31,10 @@ type API struct {
 
 type Config struct {
 	DefaultEncoding string
+
+	// DisableNoContent controls whether a nil or zero value response should
+	// automatically return 204 No Content with an empty body.
+	DisableNoContent bool
 }
 
 // New creates a new API instance.

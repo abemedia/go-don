@@ -26,11 +26,7 @@ type Handler interface {
 
 // H wraps your handler function with the Go generics magic.
 func H[T any, O any](handle Handle[T, O]) Handler {
-	var zero O
-	h := &handler[T, O]{
-		handler: handle,
-		zero:    zero,
-	}
+	h := &handler[T, O]{handler: handle}
 
 	var t *T
 
@@ -67,7 +63,7 @@ type handler[T any, O any] struct {
 	decodeHeader *decoder.Decoder
 	decodePath   *decoder.ParamsDecoder
 	decodeQuery  *decoder.MapDecoder
-	zero         any
+	isNil        func(v any) bool
 }
 
 func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +71,8 @@ func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	enc, err := getEncoder(h.getEncoding(r.Header, "Accept"))
+	contentType := h.getEncoding(r.Header, "Accept")
+	enc, err := getEncoder(contentType)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
@@ -131,6 +128,8 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 	}
 
 Encode:
+	w.Header().Set("Content-Type", contentType+"; charset=utf-8")
+
 	if h, ok := res.(Headerer); ok {
 		headers := w.Header()
 		for k, v := range h.Header() {
@@ -140,7 +139,7 @@ Encode:
 
 	if sc, ok := res.(StatusCoder); ok {
 		w.WriteHeader(sc.StatusCode())
-	} else if res == h.zero {
+	} else if !h.config.DisableNoContent && h.isNil(res) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -173,6 +172,9 @@ func (h *handler[T, O]) getEncoding(header http.Header, key string) string {
 
 func (h *handler[T, O]) setConfig(r *Config) {
 	h.config = r
+	if !r.DisableNoContent {
+		h.isNil = makeNilCheck(*new(O))
+	}
 }
 
 const (

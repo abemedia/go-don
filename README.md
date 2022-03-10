@@ -236,7 +236,7 @@ api.Get("/hello", don.H(helloHandler))
 api.Use(authMiddleware) // applied to routes `/api/hello` and `/api/v2/bye`
 
 
-v2 := g.Group("/v2")
+v2 := api.Group("/v2")
 v2.Get("/bye", don.H(byeHandler))
 v2.Use(corsMiddleware) // only applied to `/api/v2/bye`
 

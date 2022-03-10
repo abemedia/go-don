@@ -14,6 +14,7 @@ func TestDecode(t *testing.T) {
 
 	type test struct {
 		String    string   `header:"string"`
+		StringPtr *string  `header:"string"`
 		Int       int      `header:"int"`
 		Int8      int8     `header:"int8"`
 		Int16     int16    `header:"int16"`
@@ -52,23 +53,25 @@ func TestDecode(t *testing.T) {
 		"bytes":   {"bytes"},
 	}
 
+	s := "string"
 	expected := &test{
-		String:  "string",
-		Int:     1,
-		Int8:    1,
-		Int16:   1,
-		Int32:   1,
-		Int64:   1,
-		Uint:    1,
-		Uint8:   1,
-		Uint16:  1,
-		Uint32:  1,
-		Uint64:  1,
-		Float32: 1,
-		Float64: 1,
-		Bool:    true,
-		Bytes:   []byte("bytes"),
-		Strings: []string{"string", "string"},
+		String:    "string",
+		StringPtr: &s,
+		Int:       1,
+		Int8:      1,
+		Int16:     1,
+		Int32:     1,
+		Int64:     1,
+		Uint:      1,
+		Uint8:     1,
+		Uint16:    1,
+		Uint32:    1,
+		Uint64:    1,
+		Float32:   1,
+		Float64:   1,
+		Bool:      true,
+		Bytes:     []byte("bytes"),
+		Strings:   []string{"string", "string"},
 		Nested: child{
 			String: "string",
 		},

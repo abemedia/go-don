@@ -131,7 +131,32 @@ func decodeText(r *http.Request, v interface{}) error {
 }
 
 func encodeText(w http.ResponseWriter, v interface{}) error {
-	_, err := fmt.Fprint(w, v)
+	if v != nil {
+		switch v.(type) {
+		case *string, string:
+		case *[]byte, []byte:
+		case *int, int:
+		case *int8, int8:
+		case *int16, int16:
+		case *int32, int32:
+		case *int64, int64:
+		case *uint, uint:
+		case *uint8, uint8:
+		case *uint16, uint16:
+		case *uint32, uint32:
+		case *uint64, uint64:
+		case *float32, float32:
+		case *float64, float64:
+		case *bool, bool:
+		case error:
+
+		default:
+			http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+			return nil
+		}
+	}
+
+	_, err := fmt.Fprintln(w, v)
 	return err
 }
 

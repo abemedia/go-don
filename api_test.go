@@ -30,7 +30,7 @@ func TestAPI(t *testing.T) {
 	r := httptest.NewRequest("GET", "/?name=mike", nil)
 	w := httptest.NewRecorder()
 
-	expected := "Hello mike."
+	expected := "Hello mike.\n"
 
 	h.ServeHTTP(w, r)
 

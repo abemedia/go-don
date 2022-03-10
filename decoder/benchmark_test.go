@@ -8,20 +8,44 @@ import (
 )
 
 func BenchmarkDecoder(b *testing.B) {
+	type child struct {
+		String string `header:"string"`
+	}
+
 	type test struct {
-		String  string  `schema:"string"`
-		Int     int     `schema:"int"`
-		Int32   int32   `schema:"int32"`
-		Int64   int64   `schema:"int64"`
-		Float32 float32 `schema:"float32"`
-		Float64 float64 `schema:"float64"`
-		Bool    bool    `schema:"bool"`
+		String    string   `header:"string"`
+		StringPtr *string  `header:"string"`
+		Int       int      `header:"int"`
+		Int8      int8     `header:"int8"`
+		Int16     int16    `header:"int16"`
+		Int32     int32    `header:"int32"`
+		Int64     int64    `header:"int64"`
+		Uint      uint     `header:"uint"`
+		Uint8     uint8    `header:"uint8"`
+		Uint16    uint16   `header:"uint16"`
+		Uint32    uint32   `header:"uint32"`
+		Uint64    uint64   `header:"uint64"`
+		Float32   float32  `header:"float32"`
+		Float64   float64  `header:"float64"`
+		Bool      bool     `header:"bool"`
+		Strings   []string `header:"strings"`
+		Nested    child
+		NestedPtr *child
 	}
 
 	in := decoder.MapGetter{
+		"string":  {"string"},
+		"strings": {"string", "string"},
 		"int":     {"1"},
+		"int8":    {"1"},
+		"int16":   {"1"},
 		"int32":   {"1"},
 		"int64":   {"1"},
+		"uint":    {"1"},
+		"uint8":   {"1"},
+		"uint16":  {"1"},
+		"uint32":  {"1"},
+		"uint64":  {"1"},
 		"float32": {"1"},
 		"float64": {"1"},
 		"bool":    {"true"},
