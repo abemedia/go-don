@@ -55,7 +55,7 @@ func H[T any, O any](handle Handle[T, O]) Handler {
 }
 
 // Handle is the type for your handlers.
-type Handle[T any, O any] func(ctx context.Context, request *T) (O, error)
+type Handle[T any, O any] func(ctx context.Context, request T) (O, error)
 
 type handler[T any, O any] struct {
 	config       *Config
@@ -122,7 +122,7 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 		}
 	}
 
-	res, err = h.handler(r.Context(), req)
+	res, err = h.handler(r.Context(), *req)
 	if err != nil {
 		res = err
 	}

@@ -36,7 +36,7 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"text/plain; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
 		},
@@ -48,7 +48,7 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"application/json; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "application/json", DisableNoContent: true},
-			handler: don.H(func(ctx context.Context, req *don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
 		},
@@ -60,7 +60,7 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"application/json; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "application/json"},
-			handler: don.H(func(ctx context.Context, req *don.Empty) (map[string]string, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) (map[string]string, error) {
 				return map[string]string{"foo": "bar"}, nil
 			}),
 		},
@@ -72,7 +72,7 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"text/plain; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *struct{ Hello string }) (any, error) {
+			handler: don.H(func(ctx context.Context, req struct{ Hello string }) (any, error) {
 				return nil, nil
 			}),
 			body: `{"foo":"bar"}`,
@@ -88,7 +88,7 @@ func TestHandler(t *testing.T) {
 				},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *don.Empty) ([]string, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) ([]string, error) {
 				return []string{"foo", "bar"}, nil
 			}),
 			header: http.Header{"Accept": {"text/plain; charset=utf-8"}},
@@ -104,7 +104,7 @@ func TestHandler(t *testing.T) {
 				},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
 			header: http.Header{"Accept": {"application/msword"}},
@@ -117,7 +117,7 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"text/plain; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
 			body:   `foo`,
@@ -131,8 +131,8 @@ func TestHandler(t *testing.T) {
 				Header: http.Header{"Content-Type": {"text/plain; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req *string) (string, error) {
-				return *req, nil
+			handler: don.H(func(ctx context.Context, req string) (string, error) {
+				return req, nil
 			}),
 			body: `foo`,
 		},

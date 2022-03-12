@@ -45,7 +45,7 @@ type GreetResponse struct {
   Greeting string `json:"data" yaml:"data"`
 }
 
-func Greet(ctx context.Context, req *GreetRequest) (*GreetResponse, error) {
+func Greet(ctx context.Context, req GreetRequest) (*GreetResponse, error) {
   if req.Name == "" {
     return nil, don.ErrBadRequest
   }
@@ -57,12 +57,16 @@ func Greet(ctx context.Context, req *GreetRequest) (*GreetResponse, error) {
   return res, nil
 }
 
-func main() {
-  r := don.New(nil)
-  r.Post("/greet/:name", don.H(Greet)) // Handlers are wrapped with `don.H`.
-  http.ListenAndServe(":8080", r.Router())
+func Pong(context.Context, don.Empty) (string, error) {
+  return "pong", nil
 }
 
+func main() {
+  r := don.New(nil)
+  r.Get("/ping", don.H(Pong)) // Handlers are wrapped with `don.H`.
+  r.Post("/greet/:name", don.H(Greet))
+  http.ListenAndServe(":8080", r.Router())
+}
 ```
 
 ## Configuration
@@ -172,7 +176,7 @@ type MyRequest struct {
 }
 ```
 
-Please not that the request type in the handler **must** be a pointer.
+Please note that using a pointer as the request type negatively affects performance.
 
 ## Headers & response codes
 

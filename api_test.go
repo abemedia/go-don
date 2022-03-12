@@ -17,7 +17,7 @@ func TestAPI(t *testing.T) {
 	}
 
 	api := don.New(nil)
-	api.Get("/", don.H(func(ctx context.Context, req *GreetRequest) (string, error) {
+	api.Get("/", don.H(func(ctx context.Context, req GreetRequest) (string, error) {
 		if req.Name == "" {
 			return "", don.ErrBadRequest
 		}
