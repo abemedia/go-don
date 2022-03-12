@@ -11,13 +11,14 @@ It's still very early alpha and is likely to change so it's not recommended for 
 
 - [Overview](#don---go-api-framework)
   - [Basic Example](#basic-example)
+  - [Configuration](#configuration)
   - [Support multiple formats](#support-multiple-formats)
     - [Currently supported formats](#currently-supported-formats)
     - [Adding custom encoding](#adding-custom-encoding)
   - [Request parsing](#request-parsing)
   - [Headers & response codes](#headers--response-codes)
-  - [Middleware](#middleware)
   - [Sub-routers](#sub-routers)
+  - [Middleware](#middleware)
 
 ## Basic Example
 
@@ -63,6 +64,27 @@ func main() {
 }
 
 ```
+
+## Configuration
+
+Don is configured by passing in the `Config` struct to `don.New`.
+
+```go
+r := don.New(&don.Config{
+  DefaultEncoding: "application/json",
+  DisableNoContent: true,
+})
+```
+
+### DefaultEncoding
+
+Set this to the format you'd like to use if no `Content-Type` or `Accept` headers are in the
+request.
+
+### DisableNoContent
+
+If you return `nil` from your handler, Don will respond with an empty body and a `204 No Content`
+status code. Set this to `true` to disable that behaviour.
 
 ## Support multiple formats
 
@@ -174,6 +196,16 @@ func (nr *MyResponse) Header() http.Header {
 }
 ```
 
+## Sub-routers
+
+You can create sub-routers using the `Group` function:
+
+```go
+r := don.New(nil)
+sub := r.Group("/api")
+sub.Get("/hello")
+```
+
 ## Middleware
 
 Don uses the standard library middleware format of `func(http.Handler) http.Handler`.
@@ -189,12 +221,37 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 ```
 
-It is registered using `don.Use` e.g.
+It is registered on a router using `Use` e.g.
 
 ```go
 r := don.New(nil)
 r.Post("/", don.H(handler))
 r.Use(loggingMiddleware)
+```
+
+Middleware registered on a group only applies to routes in that group and child groups.
+
+```go
+r := don.New(nil)
+r.Get("/login", don.H(loginHandler))
+r.Use(loggingMiddleware) // applied to all routes
+
+api := r.Group("/api")
+api.Get("/hello", don.H(helloHandler))
+api.Use(authMiddleware) // applied to routes `/api/hello` and `/api/v2/bye`
+
+
+v2 := api.Group("/v2")
+v2.Get("/bye", don.H(byeHandler))
+v2.Use(corsMiddleware) // only applied to `/api/v2/bye`
+
+```
+
+You can also use middleware on just a single handler by wrapping it:
+
+```go
+r := don.New(nil)
+r.Post("/protected", authMiddleware(don.H(handler)))
 ```
 
 To pass values from the middleware to the handler extend the context e.g.
@@ -212,32 +269,4 @@ This can now be accessed in the handler:
 
 ```go
 user := ctx.Value(ContextUserKey).(string)
-```
-
-## Sub-routers
-
-You can create sub-routers using the `Group` function:
-
-```go
-r := don.New(nil)
-sub := r.Group("/api")
-sub.Get("/hello")
-```
-
-Middleware registered on a sub-router only applies to routes in that group and child groups.
-
-```go
-r := don.New(nil)
-r.Get("/login", don.H(loginHandler))
-r.Use(loggingMiddleware) // applied to all routes
-
-api := r.Group("/api")
-api.Get("/hello", don.H(helloHandler))
-api.Use(authMiddleware) // applied to routes `/api/hello` and `/api/v2/bye`
-
-
-v2 := api.Group("/v2")
-v2.Get("/bye", don.H(byeHandler))
-v2.Use(corsMiddleware) // only applied to `/api/v2/bye`
-
 ```
