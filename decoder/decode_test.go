@@ -80,7 +80,7 @@ func TestDecode(t *testing.T) {
 		},
 	}
 
-	dec, err := decoder.NewDecoder(test{}, "header")
+	dec, err := decoder.NewCachedDecoder(test{}, "header")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,8 @@ func TestDecodeNil(t *testing.T) {
 	}
 
 	var actual *test
-	dec, err := decoder.NewDecoder(actual, "header")
+
+	dec, err := decoder.NewCachedDecoder(actual, "header")
 	if err != nil {
 		t.Fatal(err)
 	}

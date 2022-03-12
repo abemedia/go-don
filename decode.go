@@ -27,6 +27,7 @@ func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...
 			if err != nil {
 				return err
 			}
+
 			return d(b, v)
 		}
 
@@ -36,6 +37,7 @@ func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...
 			if err != nil {
 				return err
 			}
+
 			return d(r.Context(), b, v)
 		}
 

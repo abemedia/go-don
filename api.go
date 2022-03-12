@@ -42,6 +42,7 @@ func New(c *Config) *API {
 	if c == nil {
 		c = &Config{}
 	}
+
 	if c.DefaultEncoding == "" {
 		c.DefaultEncoding = DefaultEncoding
 	}
@@ -59,6 +60,7 @@ func (r *API) Router() http.Handler {
 	for _, mw := range r.mw {
 		h = mw(h)
 	}
+
 	return h
 }
 
@@ -89,6 +91,7 @@ func (r *API) Handle(method, path string, handle http.Handler) {
 	} else {
 		hh = wrapHandler(handle)
 	}
+
 	r.router.Handle(method, path, hh)
 }
 
@@ -108,6 +111,7 @@ func withConfig(handle Handler, c *Config) Handler {
 	if h, ok := handle.(interface{ setConfig(*Config) }); ok {
 		h.setConfig(c)
 	}
+
 	return handle
 }
 

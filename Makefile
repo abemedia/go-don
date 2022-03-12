@@ -1,7 +1,7 @@
 all: lint test
 
 lint:
-	@go vet ./...
+	@golangci-lint run
 
 todo:
 	@golangci-lint run --no-config --disable-all --enable godox

@@ -20,6 +20,7 @@ func decodeForm(r *http.Request, v interface{}) error {
 	if err := r.ParseForm(); err != nil {
 		return err
 	}
+
 	return decoder.Decode(v, r.Form)
 }
 
@@ -27,6 +28,7 @@ func decodeMultipartForm(r *http.Request, v interface{}) error {
 	if err := r.ParseMultipartForm(MemoryLimit); err != nil {
 		return err
 	}
+
 	return decoder.Decode(v, r.Form)
 }
 

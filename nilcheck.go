@@ -26,7 +26,7 @@ func makeNilCheck(zero any) func(v any) bool {
 	case reflect.Map:
 		// Return true for and nil map.
 		return func(v any) bool {
-			return unsafe.Pointer((*emptyInterface)(unsafe.Pointer(&v)).ptr) == nil
+			return (*emptyInterface)(unsafe.Pointer(&v)).ptr == nil
 		}
 	case reflect.Slice:
 		// Return true for and nil slice.

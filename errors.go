@@ -45,9 +45,11 @@ func (e StatusError) MarshalText() ([]byte, error) {
 
 func (e StatusError) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
+
 	buf.WriteString(`{"message":`)
 	buf.WriteString(strconv.Quote(e.Error()))
 	buf.WriteRune('}')
+
 	return buf.Bytes(), nil
 }
 

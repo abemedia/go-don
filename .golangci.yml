@@ -1,0 +1,61 @@
+linters:
+  enable-all: true
+  disable:
+    - exhaustive
+    - exhaustivestruct
+    - forcetypeassert
+    - funlen
+    - gochecknoinits
+    - gochecknoglobals
+    - gci
+    - godox
+    - golint # deprecated
+    - gomnd
+    - interfacer # deprecated
+    - ireturn
+    - maligned # deprecated
+    - nlreturn
+    - paralleltest
+    - scopelint # deprecated
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    # no Go 1.18 support
+    - bodyclose
+    - contextcheck
+    - gocritic
+    - gosimple
+    - govet
+    - nilerr
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - tparallel
+    - typecheck # false positives
+    - unparam
+    - unused
+    - wastedassign
+
+linters-settings:
+  govet:
+    enable-all: true
+  depguard:
+    list-type: denylist
+    include-go-root: true
+    packages:
+      - encoding/json
+
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - errcheck
+        - funlen
+        - ifshort
+        - gosec
+    - linters:
+        - wsl
+      text: return statements should not be cuddled if block has more than two lines

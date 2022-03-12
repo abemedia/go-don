@@ -143,12 +143,12 @@ func TestHandler(t *testing.T) {
 		api := don.New(test.config)
 		api.Get("/", test.handler)
 
+		w := httptest.NewRecorder()
 		r := httptest.NewRequest("", "/", strings.NewReader(test.body))
 		r.Header = test.header
 
-		w := httptest.NewRecorder()
-
 		test.handler.ServeHTTP(w, r)
+
 		res := response{w.Code, w.Body.String(), w.HeaderMap}
 		if diff := cmp.Diff(test.expected, res); diff != "" {
 			t.Errorf("%s:\n%s", test.message, diff)

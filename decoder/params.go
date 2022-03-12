@@ -3,14 +3,15 @@ package decoder
 import "github.com/julienschmidt/httprouter"
 
 type ParamsDecoder struct {
-	dec *Decoder
+	dec *CachedDecoder
 }
 
 func NewParamsDecoder(v interface{}, tag string) (*ParamsDecoder, error) {
-	dec, err := NewDecoder(v, tag)
+	dec, err := NewCachedDecoder(v, tag)
 	if err != nil {
 		return nil, err
 	}
+
 	return &ParamsDecoder{dec}, nil
 }
 
@@ -26,6 +27,7 @@ func (ps ParamsGetter) Get(key string) string {
 			return ps[i].Value
 		}
 	}
+
 	return ""
 }
 
@@ -35,5 +37,6 @@ func (ps ParamsGetter) Values(key string) []string {
 			return []string{ps[i].Value}
 		}
 	}
+
 	return nil
 }

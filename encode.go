@@ -26,6 +26,7 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 			if err != nil {
 				return err
 			}
+
 			_, err = w.Write(b)
 			return err
 		}
@@ -36,6 +37,7 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 			if err != nil {
 				return err
 			}
+
 			_, err = w.Write(b)
 			return err
 		}

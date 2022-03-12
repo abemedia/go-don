@@ -6,9 +6,11 @@ import (
 
 func hasTag(v interface{}, tag string) bool {
 	t := reflect.TypeOf(v)
+
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	if t.Kind() != reflect.Struct {
 		return false
 	}

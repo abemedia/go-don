@@ -63,7 +63,7 @@ func BenchmarkDecoder(b *testing.B) {
 	})
 
 	b.Run("Don", func(b *testing.B) {
-		dec, err := decoder.NewDecoder(test{}, "schema")
+		dec, err := decoder.NewCachedDecoder(test{}, "schema")
 		if err != nil {
 			b.Fatal(err)
 		}

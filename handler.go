@@ -2,6 +2,7 @@ package don
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"strings"
 
@@ -31,7 +32,7 @@ func H[T any, O any](handle Handle[T, O]) Handler {
 	var t T
 
 	if hasTag(t, headerTag) {
-		dec, err := decoder.NewDecoder(t, headerTag)
+		dec, err := decoder.NewCachedDecoder(t, headerTag)
 		if err == nil {
 			h.decodeHeader = dec
 		}
@@ -60,7 +61,7 @@ type Handle[T any, O any] func(ctx context.Context, request T) (O, error)
 type handler[T any, O any] struct {
 	config       *Config
 	handler      Handle[T, O]
-	decodeHeader *decoder.Decoder
+	decodeHeader *decoder.CachedDecoder
 	decodePath   *decoder.ParamsDecoder
 	decodeQuery  *decoder.MapDecoder
 	isNil        func(v any) bool
@@ -70,8 +71,10 @@ func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.handle(w, r, nil)
 }
 
+//nolint:gocognit,cyclop
 func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	contentType := h.getEncoding(r.Header, "Accept")
+
 	enc, err := getEncoder(contentType)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
@@ -79,6 +82,7 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 	}
 
 	req := new(T)
+
 	var res any
 
 	// Decode the header.
@@ -144,13 +148,16 @@ Encode:
 		return
 	}
 
-	enc(w, res)
+	if err = enc(w, res); err != nil {
+		log.Println(err)
+	}
 }
 
 func (h *handler[T, O]) getEncoding(header http.Header, key string) string {
 	if header == nil {
 		return h.config.DefaultEncoding
 	}
+
 	v := header[key]
 	if len(v) == 0 {
 		return h.config.DefaultEncoding

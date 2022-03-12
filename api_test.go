@@ -30,8 +30,6 @@ func TestAPI(t *testing.T) {
 	r := httptest.NewRequest("GET", "/?name=mike", nil)
 	w := httptest.NewRecorder()
 
-	expected := "Hello mike.\n"
-
 	h.ServeHTTP(w, r)
 
 	if w.Result().StatusCode >= 300 {
@@ -39,9 +37,10 @@ func TestAPI(t *testing.T) {
 	}
 
 	buf, _ := ioutil.ReadAll(w.Result().Body)
-	s := string(buf)
+	actual := string(buf)
+	expected := "Hello mike.\n"
 
-	if s != expected {
-		t.Errorf("expected: '%s' actual: '%s'", expected, s)
+	if expected != actual {
+		t.Errorf("expected: '%s' actual: '%s'", expected, actual)
 	}
 }
