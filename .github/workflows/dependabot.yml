@@ -1,0 +1,35 @@
+name: Dependabot
+
+on:
+  pull_request_target:
+    branches:
+      - master
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        id: dependabot
+        uses: dependabot/fetch-metadata@v1.2.1
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Auto-merge patch updates
+        if: |
+          steps.dependabot.outputs.update-type == 'version-update:semver-patch'
+          || (
+            steps.dependabot.outputs.update-type == 'version-update:semver-minor' &&
+            endsWith(steps.dependabot.outputs.dependency-type, ':development')
+          )
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '@dependabot merge'
+            })

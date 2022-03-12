@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.go'
+      - go.mod
+      - go.sum
+
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+    paths:
+      - '**.go'
+      - go.mod
+      - go.sum
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.0-rc1
+          stable: false
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - run: go test ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.0-rc1
+          stable: false
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: golangci-lint.cache-${{ hashFiles('**/go.sum') }}
+          restore-keys: golangci-lint.cache-
+
+      - run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.2
+      - run: golangci-lint run
+
+  # Not supported with Go 1.18
+  #     - uses: golangci/golangci-lint-action@v3
+  #       with:
+  #         version: v1.44
