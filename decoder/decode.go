@@ -17,15 +17,12 @@ type Decoder struct {
 }
 
 func NewDecoder(v interface{}, tag string) (*Decoder, error) {
-	typ := reflect.TypeOf(v)
-	if typ.Kind() == reflect.Pointer {
-		typ = typ.Elem()
-	}
-	if typ.Kind() != reflect.Struct {
+	t, k, ptr := typeKind(reflect.TypeOf(v))
+	if k != reflect.Struct {
 		return nil, errors.New("not struct")
 	}
 
-	dec, err := compile(typ, tag)
+	dec, err := compile(t, tag, ptr)
 	if err != nil {
 		return nil, err
 	}
@@ -34,23 +31,21 @@ func NewDecoder(v interface{}, tag string) (*Decoder, error) {
 }
 
 func (d *Decoder) Decode(data Getter, v interface{}) error {
-	typ := reflect.ValueOf(v).Elem()
-	if typ.Kind() != reflect.Struct {
-		return errors.New("not struct")
-	}
-
-	return d.dec(typ, data)
+	return d.dec(reflect.ValueOf(v).Elem(), data)
 }
 
 type decoder func(reflect.Value, Getter) error
 
-func compile(typ reflect.Type, tagKey string) (decoder, error) {
+func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	decoders := []decoder{}
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
-		t, k, ptr := typeKind(f.Type)
+		if f.PkgPath != "" {
+			continue // skip unexported fields
+		}
 
+		t, k, ptr := typeKind(f.Type)
 		tag, ok := f.Tag.Lookup(tagKey)
 		if !ok && k != reflect.Struct {
 			continue
@@ -58,25 +53,15 @@ func compile(typ reflect.Type, tagKey string) (decoder, error) {
 
 		switch k {
 		case reflect.Struct:
-			dec, err := compile(t, tagKey)
+			dec, err := compile(t, tagKey, ptr)
 			if err != nil {
 				return nil, err
 			}
 			index := i
 
-			if ptr {
-				decoders = append(decoders, func(v reflect.Value, m Getter) error {
-					ff := v.Field(index)
-					if ff.IsNil() {
-						ff.Set(reflect.New(ff.Type().Elem()))
-					}
-					return dec(ff.Elem(), m)
-				})
-			} else {
-				decoders = append(decoders, func(v reflect.Value, m Getter) error {
-					return dec(v.Field(index), m)
-				})
-			}
+			decoders = append(decoders, func(v reflect.Value, m Getter) error {
+				return dec(v.Field(index), m)
+			})
 		case reflect.String:
 			decoders = append(decoders, decodeString(set[string](ptr, i, t), tag))
 		case reflect.Int:
@@ -118,7 +103,17 @@ func compile(typ reflect.Type, tagKey string) (decoder, error) {
 		}
 	}
 
+	if len(decoders) == 0 {
+		return func(reflect.Value, Getter) error { return nil }, nil
+	}
+
 	return func(v reflect.Value, d Getter) error {
+		if isPtr {
+			if v.IsNil() {
+				v.Set(reflect.New(typ))
+			}
+			v = v.Elem()
+		}
 		for _, dec := range decoders {
 			if err := dec(v, d); err != nil {
 				return err

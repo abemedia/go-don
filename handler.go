@@ -28,7 +28,7 @@ type Handler interface {
 func H[T any, O any](handle Handle[T, O]) Handler {
 	h := &handler[T, O]{handler: handle}
 
-	var t *T
+	var t T
 
 	if hasTag(t, headerTag) {
 		dec, err := decoder.NewDecoder(t, headerTag)

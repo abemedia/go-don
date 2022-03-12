@@ -94,3 +94,31 @@ func TestDecode(t *testing.T) {
 		t.Errorf(diff)
 	}
 }
+
+func TestDecodeNil(t *testing.T) {
+	type test struct {
+		String string `header:"string"`
+	}
+
+	in := decoder.MapGetter{
+		"string": {"string"},
+	}
+
+	expected := &test{
+		String: "string",
+	}
+
+	var actual *test
+	dec, err := decoder.NewDecoder(actual, "header")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = dec.Decode(in, &actual); err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(expected, actual); diff != "" {
+		t.Errorf(diff)
+	}
+}
