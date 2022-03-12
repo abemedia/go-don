@@ -38,7 +38,15 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      - run: go test ./...
+      - run: go test ./... -coverprofile coverage.out
+
+      - name: Code Climate Coverage Action
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: 66c0ba0b21c425efdcad846946111d21c0dd3b61bdffe68234d9fa09bb20c459
+        with:
+          coverageLocations: ${{github.workspace}}/coverage.out:gocov
+          prefix: github.com/abemedia/go-don
 
   lint:
     runs-on: ubuntu-latest
