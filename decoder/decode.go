@@ -10,8 +10,8 @@ type Decoder struct {
 	cache sync.Map
 }
 
-func NewDecoder(tag string) (*Decoder, error) {
-	return &Decoder{tag: tag}, nil
+func NewDecoder(tag string) *Decoder {
+	return &Decoder{tag: tag}
 }
 
 func (d *Decoder) Decode(data Getter, v any) (err error) {

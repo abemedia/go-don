@@ -4,24 +4,19 @@ import (
 	"net/http"
 
 	"github.com/abemedia/go-don"
-	"github.com/gorilla/schema"
+	"github.com/abemedia/go-don/decoder"
 )
 
 var MemoryLimit int64 = 1 << 20 // 1MB
 
-var decoder = func() *schema.Decoder {
-	d := schema.NewDecoder()
-	d.SetAliasTag("form")
-	d.IgnoreUnknownKeys(true)
-	return d
-}()
+var dec = decoder.NewDecoder("form")
 
 func decodeForm(r *http.Request, v interface{}) error {
 	if err := r.ParseForm(); err != nil {
 		return err
 	}
 
-	return decoder.Decode(v, r.Form)
+	return dec.Decode(decoder.MapGetter(r.Form), v)
 }
 
 func decodeMultipartForm(r *http.Request, v interface{}) error {
@@ -29,7 +24,7 @@ func decodeMultipartForm(r *http.Request, v interface{}) error {
 		return err
 	}
 
-	return decoder.Decode(v, r.Form)
+	return dec.Decode(decoder.MapGetter(r.Form), v)
 }
 
 func init() {

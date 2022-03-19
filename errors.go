@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/goccy/go-json"
+	"gopkg.in/yaml.v2"
 )
 
 func E(err error) Handler {
@@ -17,33 +18,40 @@ func E(err error) Handler {
 	})
 }
 
-// StatusError creates an error from an HTTP status code.
-type StatusError int
-
-const (
-	ErrBadRequest           = StatusError(http.StatusBadRequest)
-	ErrUnauthorized         = StatusError(http.StatusUnauthorized)
-	ErrForbidden            = StatusError(http.StatusForbidden)
-	ErrNotFound             = StatusError(http.StatusNotFound)
-	ErrMethodNotAllowed     = StatusError(http.StatusMethodNotAllowed)
-	ErrNotAcceptable        = StatusError(http.StatusNotAcceptable)
-	ErrUnsupportedMediaType = StatusError(http.StatusUnsupportedMediaType)
-	ErrInternalServerError  = StatusError(http.StatusInternalServerError)
-)
-
-func (e StatusError) Error() string {
-	return http.StatusText(int(e))
+type HTTPError struct {
+	err  error
+	code int
 }
 
-func (e StatusError) StatusCode() int {
-	return int(e)
+func Error(err error, code int) *HTTPError {
+	return &HTTPError{err, code}
 }
 
-func (e StatusError) MarshalText() ([]byte, error) {
+func (e *HTTPError) Error() string {
+	return e.err.Error()
+}
+
+func (e *HTTPError) IsPrivate() bool {
+	return e.StatusCode() == http.StatusInternalServerError
+}
+
+func (e *HTTPError) StatusCode() int {
+	if sc, ok := e.err.(StatusCoder); ok {
+		return sc.StatusCode()
+	}
+
+	if e.code == 0 {
+		return http.StatusInternalServerError
+	}
+
+	return e.code
+}
+
+func (e *HTTPError) MarshalText() ([]byte, error) {
 	return []byte(e.Error()), nil
 }
 
-func (e StatusError) MarshalJSON() ([]byte, error) {
+func (e *HTTPError) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 
 	buf.WriteString(`{"message":`)
@@ -53,14 +61,19 @@ func (e StatusError) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (e StatusError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
+func (e *HTTPError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
 	start := xml.StartElement{Name: xml.Name{Local: "message"}}
 	return enc.EncodeElement(e.Error(), start)
 }
 
+func (e *HTTPError) MarshalYAML() (interface{}, error) {
+	return map[string]string{"message": e.Error()}, nil
+}
+
 var (
-	_ error                  = (*StatusError)(nil)
-	_ encoding.TextMarshaler = (*StatusError)(nil)
-	_ json.Marshaler         = (*StatusError)(nil)
-	_ xml.Marshaler          = (*StatusError)(nil)
+	_ error                  = (*HTTPError)(nil)
+	_ encoding.TextMarshaler = (*HTTPError)(nil)
+	_ json.Marshaler         = (*HTTPError)(nil)
+	_ xml.Marshaler          = (*HTTPError)(nil)
+	_ yaml.Marshaler         = (*HTTPError)(nil)
 )

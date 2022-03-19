@@ -27,6 +27,7 @@ package main
 
 import (
   "context"
+  "errors"
   "fmt"
   "net/http"
 
@@ -47,7 +48,7 @@ type GreetResponse struct {
 
 func Greet(ctx context.Context, req GreetRequest) (*GreetResponse, error) {
   if req.Name == "" {
-    return nil, don.ErrBadRequest
+    return nil, don.Error(errors.New("missing name"), http.StatusBadRequest)
   }
 
   res := &GreetResponse{
@@ -76,7 +77,8 @@ Don is configured by passing in the `Config` struct to `don.New`.
 ```go
 r := don.New(&don.Config{
   DefaultEncoding: "application/json",
-  DisableNoContent: true,
+  DisableNoContent: false,
+  ShowPrivateErrors: false,
 })
 ```
 
@@ -89,6 +91,12 @@ request.
 
 If you return `nil` from your handler, Don will respond with an empty body and a `204 No Content`
 status code. Set this to `true` to disable that behaviour.
+
+### ShowPrivateErrors
+
+Returning errors from your handler that are either wrapped with `don.Error(err, 500)` or not wrapped
+at all and don't implement `don.StatusCoder` will hide the error from the client and only show
+`Internal Server Error`. Set this to true to return all errors to the client.
 
 ## Support multiple formats
 
@@ -143,7 +151,7 @@ MIME: `text/plain`
 Parses non-struct requests and encodes non-struct responses e.g. `string`, `int`, `bool` etc.
 
 ```go
-func MyHandler(ctx context.Context, req *int64) (string, error) {
+func MyHandler(ctx context.Context, req int64) (string, error) {
   // ...
 }
 ```

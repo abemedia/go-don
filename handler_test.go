@@ -67,8 +67,8 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return error on unprocessable request",
 			expected: response{
-				Code:   http.StatusBadRequest,
-				Body:   "Bad Request\n",
+				Code:   http.StatusUnsupportedMediaType,
+				Body:   "Unsupported Media Type\n",
 				Header: http.Header{"Content-Type": {"text/plain; charset=utf-8"}},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},

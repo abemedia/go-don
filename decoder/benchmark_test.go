@@ -55,22 +55,33 @@ func BenchmarkDecoder(b *testing.B) {
 		dec := schema.NewDecoder()
 
 		for i := 0; i < b.N; i++ {
-			actual := &test{}
-			if err := dec.Decode(actual, in); err != nil {
+			out := &test{}
+			if err := dec.Decode(out, in); err != nil {
 				b.Fatal(err)
 			}
 		}
 	})
 
-	b.Run("Don", func(b *testing.B) {
+	b.Run("DonCached", func(b *testing.B) {
 		dec, err := decoder.NewCachedDecoder(test{}, "schema")
 		if err != nil {
 			b.Fatal(err)
 		}
 
 		for i := 0; i < b.N; i++ {
-			actual := &test{}
-			if err = dec.Decode(in, actual); err != nil {
+			out := &test{}
+			if err := dec.Decode(in, out); err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+
+	b.Run("Don", func(b *testing.B) {
+		dec := decoder.NewDecoder("schema")
+
+		for i := 0; i < b.N; i++ {
+			out := &test{}
+			if err := dec.Decode(in, out); err != nil {
 				b.Fatal(err)
 			}
 		}

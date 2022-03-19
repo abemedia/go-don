@@ -35,6 +35,9 @@ type Config struct {
 	// DisableNoContent controls whether a nil or zero value response should
 	// automatically return 204 No Content with an empty body.
 	DisableNoContent bool
+
+	// Enable to return all errors to the client.
+	ShowPrivateErrors bool
 }
 
 // New creates a new API instance.

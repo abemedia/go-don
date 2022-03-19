@@ -83,13 +83,16 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 
 	req := new(T)
 
-	var res any
+	var (
+		res any
+		e   *HTTPError
+	)
 
 	// Decode the header.
 	if h.decodeHeader != nil {
-		err := h.decodeHeader.Decode(r.Header, req)
+		err = h.decodeHeader.Decode(r.Header, req)
 		if err != nil {
-			res = ErrBadRequest
+			e = Error(err, http.StatusBadRequest)
 			goto Encode
 		}
 	}
@@ -98,7 +101,7 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 	if h.decodeQuery != nil && r.URL.RawQuery != "" {
 		err := h.decodeQuery.Decode(r.URL.Query(), req)
 		if err != nil {
-			res = ErrBadRequest
+			e = Error(err, http.StatusBadRequest)
 			goto Encode
 		}
 	}
@@ -107,7 +110,7 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 	if h.decodePath != nil && len(p) != 0 {
 		err := h.decodePath.Decode(p, req)
 		if err != nil {
-			res = ErrBadRequest
+			e = Error(err, http.StatusBadRequest)
 			goto Encode
 		}
 	}
@@ -121,18 +124,26 @@ func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprou
 		}
 
 		if err := dec(r, req); err != nil {
-			res = ErrBadRequest
+			e = Error(err, http.StatusBadRequest)
 			goto Encode
 		}
 	}
 
 	res, err = h.handler(r.Context(), *req)
 	if err != nil {
-		res = err
+		e = Error(err, 0)
 	}
 
 Encode:
 	w.Header().Set("Content-Type", contentType+"; charset=utf-8")
+
+	if e != nil {
+		if !h.config.ShowPrivateErrors && e.StatusCode() == http.StatusInternalServerError {
+			res = ErrInternalServerError
+		} else {
+			res = e
+		}
+	}
 
 	if h, ok := res.(Headerer); ok {
 		headers := w.Header()
