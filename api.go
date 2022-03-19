@@ -27,6 +27,10 @@ type API struct {
 	router *httprouter.Router
 	config *Config
 	mw     []Middleware
+
+	NotFound         http.Handler
+	MethodNotAllowed http.Handler
+	PanicHandler     func(http.ResponseWriter, *http.Request, interface{})
 }
 
 type Config struct {
@@ -51,14 +55,21 @@ func New(c *Config) *API {
 	}
 
 	r := httprouter.New()
-	r.NotFound = withConfig(E(ErrNotFound), c)
-	r.MethodNotAllowed = withConfig(E(ErrMethodNotAllowed), c)
 
-	return &API{router: r, config: c}
+	return &API{
+		router:           r,
+		config:           c,
+		NotFound:         withConfig(E(ErrNotFound), c),
+		MethodNotAllowed: withConfig(E(ErrMethodNotAllowed), c),
+	}
 }
 
 // Router creates a http.Handler for the API.
 func (r *API) Router() http.Handler {
+	r.router.NotFound = r.NotFound
+	r.router.MethodNotAllowed = r.MethodNotAllowed
+	r.router.PanicHandler = r.PanicHandler
+
 	h := http.Handler(r.router)
 	for _, mw := range r.mw {
 		h = mw(h)
