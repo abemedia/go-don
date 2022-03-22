@@ -1,18 +1,17 @@
 package json
 
 import (
-	"net/http"
-
 	"github.com/abemedia/go-don"
 	"github.com/goccy/go-json"
+	"github.com/valyala/fasthttp"
 )
 
-func decodeJSON(r *http.Request, v interface{}) error {
-	return json.NewDecoder(r.Body).DecodeContext(r.Context(), v)
+func decodeJSON(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return json.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeJSON(w http.ResponseWriter, v interface{}) error {
-	return json.NewEncoder(w).Encode(v)
+func encodeJSON(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return json.NewEncoder(ctx).Encode(v)
 }
 
 func init() {

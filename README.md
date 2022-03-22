@@ -2,10 +2,13 @@
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/abemedia/go-don)](https://pkg.go.dev/github.com/abemedia/go-don)
 
-Don is a fast & simple API framework written in Go. It uses the new Go generics and requires Go 1.18
-to work.
+Don is a fast & simple API framework written in Go. It features a super-simple API and thanks to
+[fasthttp](https://github.com/valyala/fasthttp) and a custom version of
+[httprouter](https://github.com/abemedia/httprouter) it's blazing fast and has a low memory
+footprint.
 
-It's still very early alpha and is likely to change so it's not recommended for production use yet.
+As Don uses the new Go generics it requires Go 1.18 to work. Also, it's still in beta and the API
+may yet have breaking changes, so it's not recommended for production use yet.
 
 ## Contents
 
@@ -19,6 +22,7 @@ It's still very early alpha and is likely to change so it's not recommended for 
   - [Headers & response codes](#headers--response-codes)
   - [Sub-routers](#sub-routers)
   - [Middleware](#middleware)
+  - [Benchmarks](#benchmarks)
 
 ## Basic Example
 
@@ -66,7 +70,7 @@ func main() {
   r := don.New(nil)
   r.Get("/ping", don.H(Pong)) // Handlers are wrapped with `don.H`.
   r.Post("/greet/:name", don.H(Greet))
-  http.ListenAndServe(":8080", r.Router())
+  r.ListenAndServe(":8080")
 }
 ```
 
@@ -78,7 +82,6 @@ Don is configured by passing in the `Config` struct to `don.New`.
 r := don.New(&don.Config{
   DefaultEncoding: "application/json",
   DisableNoContent: false,
-  ShowPrivateErrors: false,
 })
 ```
 
@@ -91,12 +94,6 @@ request.
 
 If you return `nil` from your handler, Don will respond with an empty body and a `204 No Content`
 status code. Set this to `true` to disable that behaviour.
-
-### ShowPrivateErrors
-
-Returning errors from your handler that are either wrapped with `don.Error(err, 500)` or not wrapped
-at all and don't implement `don.StatusCoder` will hide the error from the client and only show
-`Internal Server Error`. Set this to true to return all errors to the client.
 
 ## Support multiple formats
 
@@ -282,3 +279,31 @@ This can now be accessed in the handler:
 ```go
 user := ctx.Value(ContextUserKey).(string)
 ```
+
+## Benchmarks
+
+To give you a rough idea of Don's performance, here is a comparison with Gin.
+
+### Request Parsing
+
+Don has extremely fast & efficient binding of request data.
+
+| Benchmark name           |     (1) |         (2) |       (3) |          (4) |
+| ------------------------ | ------: | ----------: | --------: | -----------: |
+| BenchmarkDon_BindRequest | 2497761 | 469.8 ns/op |  104 B/op |  2 allocs/op |
+| BenchmarkGin_BindRequest |  296085 |  3970 ns/op | 1273 B/op | 31 allocs/op |
+
+Source:
+[benchmarks/binding_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/binding_test.go)
+
+### Serving HTTP Requests
+
+Keep in mind that the majority of time here is actually the HTTP roundtrip.
+
+| Benchmark name    |   (1) |         (2) |       (3) |          (4) |
+| ----------------- | ----: | ----------: | --------: | -----------: |
+| BenchmarkDon_HTTP | 59714 | 19951 ns/op |   73 B/op |  3 allocs/op |
+| BenchmarkGin_HTTP | 34322 | 34331 ns/op | 2304 B/op | 20 allocs/op |
+
+Source:
+[benchmarks/http_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/http_test.go)

@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/julienschmidt/httprouter"
+import "github.com/abemedia/httprouter"
 
 type ParamsDecoder struct {
 	dec *CachedDecoder

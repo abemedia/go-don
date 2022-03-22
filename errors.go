@@ -9,13 +9,13 @@ import (
 	"strconv"
 
 	"github.com/goccy/go-json"
+	"github.com/valyala/fasthttp"
 	"gopkg.in/yaml.v2"
 )
 
-func E(err error) Handler {
-	return H(func(context.Context, *Empty) (*Empty, error) {
-		return nil, err
-	})
+func E(err error) fasthttp.RequestHandler {
+	h := H(func(context.Context, Empty) (*Empty, error) { return nil, err })
+	return func(ctx *fasthttp.RequestCtx) { h(ctx, nil) }
 }
 
 type HTTPError struct {
@@ -31,11 +31,8 @@ func (e *HTTPError) Error() string {
 	return e.err.Error()
 }
 
-func (e *HTTPError) IsPrivate() bool {
-	return e.StatusCode() == http.StatusInternalServerError
-}
-
 func (e *HTTPError) StatusCode() int {
+	//nolint:errorlint
 	if sc, ok := e.err.(StatusCoder); ok {
 		return sc.StatusCode()
 	}

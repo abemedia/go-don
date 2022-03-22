@@ -1,13 +1,14 @@
 package don
 
 import (
+	"bytes"
 	"context"
-	"log"
 	"net/http"
-	"strings"
 
 	"github.com/abemedia/go-don/decoder"
-	"github.com/julienschmidt/httprouter"
+	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/httprouter"
+	"github.com/valyala/fasthttp"
 )
 
 // StatusCoder allows you to customise the HTTP response code.
@@ -20,179 +21,141 @@ type Headerer interface {
 	Header() http.Header
 }
 
-type Handler interface {
-	http.Handler
-	handle(http.ResponseWriter, *http.Request, httprouter.Params)
-}
-
-// H wraps your handler function with the Go generics magic.
-func H[T any, O any](handle Handle[T, O]) Handler {
-	h := &handler[T, O]{handler: handle}
-
-	var t T
-
-	if hasTag(t, headerTag) {
-		dec, err := decoder.NewCachedDecoder(t, headerTag)
-		if err == nil {
-			h.decodeHeader = dec
-		}
-	}
-
-	if hasTag(t, queryTag) {
-		dec, err := decoder.NewMapDecoder(t, queryTag)
-		if err == nil {
-			h.decodeQuery = dec
-		}
-	}
-
-	if hasTag(t, pathTag) {
-		dec, err := decoder.NewParamsDecoder(t, pathTag)
-		if err == nil {
-			h.decodePath = dec
-		}
-	}
-
-	return h
-}
-
 // Handle is the type for your handlers.
 type Handle[T any, O any] func(ctx context.Context, request T) (O, error)
 
-type handler[T any, O any] struct {
-	config       *Config
-	handler      Handle[T, O]
-	decodeHeader *decoder.CachedDecoder
-	decodePath   *decoder.ParamsDecoder
-	decodeQuery  *decoder.MapDecoder
-	isNil        func(v any) bool
-}
-
-func (h *handler[T, O]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.handle(w, r, nil)
-}
-
+// H wraps your handler function with the Go generics magic.
 //nolint:gocognit,cyclop
-func (h *handler[T, O]) handle(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	contentType := h.getEncoding(r.Header, "Accept")
-
-	enc, err := getEncoder(contentType)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
-		return
-	}
-
-	req := new(T)
-
+func H[T any, O any](handle Handle[T, O]) httprouter.Handle {
 	var (
-		res any
-		e   *HTTPError
+		decodeHeader *decoder.HeaderDecoder
+		decodePath   *decoder.ParamsDecoder
+		decodeQuery  *decoder.ArgsDecoder
+		isNil        = makeNilCheck(*new(O))
 	)
 
-	// Decode the header.
-	if h.decodeHeader != nil {
-		err = h.decodeHeader.Decode(r.Header, req)
+	{
+		var t T
+		if hasTag(t, headerTag) {
+			dec, err := decoder.NewHeaderDecoder(t, headerTag)
+			if err == nil {
+				decodeHeader = dec
+			}
+		}
+		if hasTag(t, queryTag) {
+			dec, err := decoder.NewArgsDecoder(t, queryTag)
+			if err == nil {
+				decodeQuery = dec
+			}
+		}
+		if hasTag(t, pathTag) {
+			dec, err := decoder.NewParamsDecoder(t, pathTag)
+			if err == nil {
+				decodePath = dec
+			}
+		}
+	}
+
+	return func(ctx *fasthttp.RequestCtx, p httprouter.Params) {
+		contentType := getEncoding(ctx.Request.Header.Peek(fasthttp.HeaderAccept))
+
+		enc, err := getEncoder(contentType)
 		if err != nil {
-			e = Error(err, http.StatusBadRequest)
-			goto Encode
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotAcceptable), fasthttp.StatusNotAcceptable)
+			return
 		}
-	}
 
-	// Decode the URL query.
-	if h.decodeQuery != nil && r.URL.RawQuery != "" {
-		err := h.decodeQuery.Decode(r.URL.Query(), req)
+		req := new(T)
+
+		var (
+			res any
+			e   *HTTPError
+		)
+
+		// Decode the header.
+		if decodeHeader != nil {
+			err = decodeHeader.Decode(&ctx.Request.Header, req)
+			if err != nil {
+				e = Error(err, http.StatusBadRequest)
+				goto Encode
+			}
+		}
+
+		// Decode the URL query.
+		if decodeQuery != nil {
+			if q := ctx.URI().QueryArgs(); q.Len() > 0 {
+				err := decodeQuery.Decode(q, req)
+				if err != nil {
+					e = Error(err, http.StatusBadRequest)
+					goto Encode
+				}
+			}
+		}
+
+		// Decode the path params.
+		if decodePath != nil && len(p) != 0 {
+			err := decodePath.Decode(p, req)
+			if err != nil {
+				e = Error(err, http.StatusBadRequest)
+				goto Encode
+			}
+		}
+
+		// Decode the body.
+		if ctx.Request.Header.ContentLength() > 0 {
+			dec, err := getDecoder(getEncoding(ctx.Request.Header.ContentType()))
+			if err != nil {
+				res = err
+				goto Encode
+			}
+
+			if err := dec(ctx, req); err != nil {
+				e = Error(err, http.StatusBadRequest)
+				goto Encode
+			}
+		}
+
+		res, err = handle(ctx, *req)
 		if err != nil {
-			e = Error(err, http.StatusBadRequest)
-			goto Encode
-		}
-	}
-
-	// Decode the path params.
-	if h.decodePath != nil && len(p) != 0 {
-		err := h.decodePath.Decode(p, req)
-		if err != nil {
-			e = Error(err, http.StatusBadRequest)
-			goto Encode
-		}
-	}
-
-	// Decode the body.
-	if r.ContentLength > 0 {
-		dec, err := getDecoder(h.getEncoding(r.Header, "Content-Type"))
-		if err != nil {
-			res = err
-			goto Encode
+			e = Error(err, 0)
 		}
 
-		if err := dec(r, req); err != nil {
-			e = Error(err, http.StatusBadRequest)
-			goto Encode
-		}
-	}
+	Encode:
+		ctx.SetContentType(contentType + "; charset=utf-8")
 
-	res, err = h.handler(r.Context(), *req)
-	if err != nil {
-		e = Error(err, 0)
-	}
-
-Encode:
-	w.Header().Set("Content-Type", contentType+"; charset=utf-8")
-
-	if e != nil {
-		if !h.config.ShowPrivateErrors && e.StatusCode() == http.StatusInternalServerError {
-			res = ErrInternalServerError
-		} else {
+		if e != nil {
 			res = e
 		}
-	}
 
-	if h, ok := res.(Headerer); ok {
-		headers := w.Header()
-		for k, v := range h.Header() {
-			headers[k] = v
+		if h, ok := res.(Headerer); ok {
+			for k, v := range h.Header() {
+				ctx.Response.Header.Set(k, v[0])
+			}
+		}
+
+		if sc, ok := res.(StatusCoder); ok {
+			ctx.SetStatusCode(sc.StatusCode())
+		}
+
+		if isNil(res) {
+			res = nil
+			ctx.Response.Header.SetContentLength(-3)
+		}
+
+		if err = enc(ctx, res); err != nil {
+			ctx.Logger().Printf("%v", err)
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusInternalServerError), fasthttp.StatusInternalServerError)
 		}
 	}
-
-	if sc, ok := res.(StatusCoder); ok {
-		w.WriteHeader(sc.StatusCode())
-	} else if !h.config.DisableNoContent && h.isNil(res) {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	if err = enc(w, res); err != nil {
-		log.Println(err)
-	}
 }
 
-func (h *handler[T, O]) getEncoding(header http.Header, key string) string {
-	if header == nil {
-		return h.config.DefaultEncoding
-	}
-
-	v := header[key]
-	if len(v) == 0 {
-		return h.config.DefaultEncoding
-	}
-
-	contentType := v[0]
-
-	index := strings.Index(contentType, ";")
+func getEncoding(b []byte) string {
+	index := bytes.IndexRune(b, ';')
 	if index > 0 {
-		contentType = contentType[:index]
+		b = b[:index]
 	}
 
-	if contentType == "" || contentType == "*/*" {
-		return h.config.DefaultEncoding
-	}
-
-	return strings.TrimSpace(contentType)
-}
-
-func (h *handler[T, O]) setConfig(r *Config) {
-	h.config = r
-	if !r.DisableNoContent {
-		h.isNil = makeNilCheck(*new(O))
-	}
+	return internal.Btoa(bytes.TrimSpace(b))
 }
 
 const (
