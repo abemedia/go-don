@@ -1,18 +1,17 @@
 package yaml
 
 import (
-	"net/http"
-
 	"github.com/abemedia/go-don"
+	"github.com/valyala/fasthttp"
 	"gopkg.in/yaml.v2"
 )
 
-func decodeYAML(r *http.Request, v interface{}) error {
-	return yaml.NewDecoder(r.Body).Decode(v)
+func decodeYAML(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return yaml.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeYAML(w http.ResponseWriter, v interface{}) error {
-	return yaml.NewEncoder(w).Encode(v)
+func encodeYAML(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return yaml.NewEncoder(ctx).Encode(v)
 }
 
 func init() {

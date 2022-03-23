@@ -1,30 +1,24 @@
 package form
 
 import (
-	"net/http"
-
 	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/decoder"
+	"github.com/valyala/fasthttp"
 )
-
-var MemoryLimit int64 = 1 << 20 // 1MB
 
 var dec = decoder.NewDecoder("form")
 
-func decodeForm(r *http.Request, v interface{}) error {
-	if err := r.ParseForm(); err != nil {
-		return err
-	}
-
-	return dec.Decode(decoder.MapGetter(r.Form), v)
+func decodeForm(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return dec.Decode((*decoder.ArgsGetter)(ctx.PostArgs()), v)
 }
 
-func decodeMultipartForm(r *http.Request, v interface{}) error {
-	if err := r.ParseMultipartForm(MemoryLimit); err != nil {
+func decodeMultipartForm(ctx *fasthttp.RequestCtx, v interface{}) error {
+	f, err := ctx.MultipartForm()
+	if err != nil {
 		return err
 	}
 
-	return dec.Decode(decoder.MapGetter(r.Form), v)
+	return dec.Decode(decoder.MapGetter(f.Value), v)
 }
 
 func init() {

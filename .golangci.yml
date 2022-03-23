@@ -11,6 +11,7 @@ linters:
     - godox
     - golint # deprecated
     - gomnd
+    - ifshort # false positives
     - interfacer # deprecated
     - ireturn
     - maligned # deprecated
@@ -56,6 +57,7 @@ issues:
         - funlen
         - ifshort
         - gosec
-    - linters:
-        - wsl
+    - linters: [wsl]
       text: return statements should not be cuddled if block has more than two lines
+    - linters: [wsl]
+      text: only cuddled expressions if assigning variable or using from line above

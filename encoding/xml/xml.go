@@ -2,17 +2,17 @@ package xml
 
 import (
 	"encoding/xml"
-	"net/http"
 
 	"github.com/abemedia/go-don"
+	"github.com/valyala/fasthttp"
 )
 
-func decodeXML(r *http.Request, v interface{}) error {
-	return xml.NewDecoder(r.Body).Decode(v)
+func decodeXML(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return xml.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeXML(w http.ResponseWriter, v interface{}) error {
-	return xml.NewEncoder(w).Encode(v)
+func encodeXML(ctx *fasthttp.RequestCtx, v interface{}) error {
+	return xml.NewEncoder(ctx).Encode(v)
 }
 
 func init() {

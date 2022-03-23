@@ -13,16 +13,14 @@ func makeNilCheck(zero any) func(v any) bool {
 	}
 
 	// Return true for don.Empty.
-	if zero == *new(Empty) {
+	if _, ok := zero.(Empty); ok {
 		return func(v any) bool { return true }
 	}
 
 	switch reflect.TypeOf(zero).Kind() {
 	case reflect.String, reflect.Ptr:
 		// Return true for empty strings and nil pointer.
-		return func(v any) bool {
-			return v == zero
-		}
+		return func(v any) bool { return v == zero }
 	case reflect.Map:
 		// Return true for and nil map.
 		return func(v any) bool {
@@ -36,9 +34,7 @@ func makeNilCheck(zero any) func(v any) bool {
 		}
 	default:
 		// Return false for all others.
-		return func(v any) bool {
-			return false
-		}
+		return func(v any) bool { return false }
 	}
 }
 

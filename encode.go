@@ -2,49 +2,43 @@ package don
 
 import (
 	"context"
-	"io"
-	"net/http"
+
+	"github.com/valyala/fasthttp"
 )
 
 type (
 	Marshaler        = func(v interface{}) ([]byte, error)
 	ContextMarshaler = func(ctx context.Context, v interface{}) ([]byte, error)
-	EncoderFactory   = func(io.Writer) interface{ Encode(interface{}) error }
-	ResponseEncoder  = func(w http.ResponseWriter, v interface{}) error
+	ResponseEncoder  = func(ctx *fasthttp.RequestCtx, v interface{}) error
 )
 
 type EncoderConstraint interface {
-	Marshaler | ContextMarshaler | EncoderFactory | ResponseEncoder
+	Marshaler | ContextMarshaler | ResponseEncoder
 }
 
 // RegisterEncoder registers a response encoder.
 func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...string) {
 	switch e := any(enc).(type) {
 	case Marshaler:
-		encoders[contentType] = func(w http.ResponseWriter, v interface{}) error {
+		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
 			b, err := e(v)
 			if err != nil {
 				return err
 			}
 
-			_, err = w.Write(b)
+			_, err = ctx.Write(b)
 			return err
 		}
 
 	case ContextMarshaler:
-		encoders[contentType] = func(w http.ResponseWriter, v interface{}) error {
-			b, err := e(context.TODO(), v)
+		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+			b, err := e(ctx, v)
 			if err != nil {
 				return err
 			}
 
-			_, err = w.Write(b)
+			_, err = ctx.Write(b)
 			return err
-		}
-
-	case EncoderFactory:
-		encoders[contentType] = func(w http.ResponseWriter, v interface{}) error {
-			return e(w).Encode(v)
 		}
 
 	case ResponseEncoder:

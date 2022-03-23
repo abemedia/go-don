@@ -3,12 +3,12 @@ package don_test
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
+	"github.com/abemedia/go-don/internal/httptest"
+	"github.com/valyala/fasthttp"
 )
 
 func TestAPI(t *testing.T) {
@@ -25,19 +25,17 @@ func TestAPI(t *testing.T) {
 		return fmt.Sprintf("Hello %s.", req.Name), nil
 	}))
 
-	h := api.Router()
+	h := api.RequestHandler()
 
-	r := httptest.NewRequest("GET", "/?name=mike", nil)
-	w := httptest.NewRecorder()
+	ctx := httptest.NewRequest(fasthttp.MethodGet, "/?name=mike", "", nil)
 
-	h.ServeHTTP(w, r)
+	h(ctx)
 
-	if w.Result().StatusCode >= 300 {
-		t.Error(w.Result().Status)
+	if ctx.Response.StatusCode() >= 300 {
+		t.Error(ctx.Response.Header.StatusMessage())
 	}
 
-	buf, _ := ioutil.ReadAll(w.Result().Body)
-	actual := string(buf)
+	actual := string(ctx.Response.Body())
 	expected := "Hello mike.\n"
 
 	if expected != actual {

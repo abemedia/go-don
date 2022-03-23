@@ -2,40 +2,33 @@ package json
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"unsafe"
 
 	"github.com/abemedia/go-don"
-	"github.com/valyala/bytebufferpool"
+	"github.com/valyala/fasthttp"
 )
 
 func b2s(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-//nolint:gocyclo,cyclop
-func decodeText(r *http.Request, v interface{}) error {
-	buf := bytebufferpool.Get()
-	defer bytebufferpool.Put(buf)
-
-	if _, err := buf.ReadFrom(r.Body); err != nil {
-		return err
-	}
-
-	if buf.Len() == 0 {
+//nolint:cyclop
+func decodeText(ctx *fasthttp.RequestCtx, v interface{}) error {
+	b := ctx.Request.Body()
+	if len(b) == 0 {
 		return nil
 	}
 
 	switch t := v.(type) {
 	case *string:
-		*t = b2s(buf.Bytes())
+		*t = b2s(b)
 
 	case *[]byte:
-		*t = buf.Bytes()
+		*t = b
 
 	case *int:
-		d, err := strconv.ParseInt(b2s(buf.Bytes()), 10, 64)
+		d, err := strconv.ParseInt(b2s(b), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -43,7 +36,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = int(d)
 
 	case *int8:
-		d, err := strconv.ParseInt(b2s(buf.Bytes()), 10, 8)
+		d, err := strconv.ParseInt(b2s(b), 10, 8)
 		if err != nil {
 			return err
 		}
@@ -51,7 +44,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = int8(d)
 
 	case *int16:
-		d, err := strconv.ParseInt(b2s(buf.Bytes()), 10, 16)
+		d, err := strconv.ParseInt(b2s(b), 10, 16)
 		if err != nil {
 			return err
 		}
@@ -59,7 +52,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = int16(d)
 
 	case *int32:
-		d, err := strconv.ParseInt(b2s(buf.Bytes()), 10, 32)
+		d, err := strconv.ParseInt(b2s(b), 10, 32)
 		if err != nil {
 			return err
 		}
@@ -67,7 +60,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = int32(d)
 
 	case *int64:
-		d, err := strconv.ParseInt(b2s(buf.Bytes()), 10, 64)
+		d, err := strconv.ParseInt(b2s(b), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -75,7 +68,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = d
 
 	case *uint:
-		d, err := strconv.ParseUint(b2s(buf.Bytes()), 10, 64)
+		d, err := strconv.ParseUint(b2s(b), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -83,7 +76,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = uint(d)
 
 	case *uint8:
-		d, err := strconv.ParseUint(b2s(buf.Bytes()), 10, 8)
+		d, err := strconv.ParseUint(b2s(b), 10, 8)
 		if err != nil {
 			return err
 		}
@@ -91,7 +84,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = uint8(d)
 
 	case *uint16:
-		d, err := strconv.ParseUint(b2s(buf.Bytes()), 10, 16)
+		d, err := strconv.ParseUint(b2s(b), 10, 16)
 		if err != nil {
 			return err
 		}
@@ -99,7 +92,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = uint16(d)
 
 	case *uint32:
-		d, err := strconv.ParseUint(b2s(buf.Bytes()), 10, 32)
+		d, err := strconv.ParseUint(b2s(b), 10, 32)
 		if err != nil {
 			return err
 		}
@@ -107,7 +100,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = uint32(d)
 
 	case *uint64:
-		d, err := strconv.ParseUint(b2s(buf.Bytes()), 10, 64)
+		d, err := strconv.ParseUint(b2s(b), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -115,7 +108,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = d
 
 	case *float32:
-		d, err := strconv.ParseFloat(b2s(buf.Bytes()), 32)
+		d, err := strconv.ParseFloat(b2s(b), 32)
 		if err != nil {
 			return err
 		}
@@ -123,7 +116,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = float32(d)
 
 	case *float64:
-		d, err := strconv.ParseFloat(b2s(buf.Bytes()), 64)
+		d, err := strconv.ParseFloat(b2s(b), 64)
 		if err != nil {
 			return err
 		}
@@ -131,7 +124,7 @@ func decodeText(r *http.Request, v interface{}) error {
 		*t = d
 
 	case *bool:
-		d, err := strconv.ParseBool(b2s(buf.Bytes()))
+		d, err := strconv.ParseBool(b2s(b))
 		if err != nil {
 			return err
 		}
@@ -145,7 +138,7 @@ func decodeText(r *http.Request, v interface{}) error {
 	return nil
 }
 
-func encodeText(w http.ResponseWriter, v interface{}) error {
+func encodeText(ctx *fasthttp.RequestCtx, v interface{}) error {
 	if v != nil {
 		switch v.(type) {
 		case *string, string,
@@ -166,12 +159,12 @@ func encodeText(w http.ResponseWriter, v interface{}) error {
 			error:
 
 		default:
-			http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotAcceptable), fasthttp.StatusNotAcceptable)
 			return nil
 		}
 	}
 
-	_, err := fmt.Fprintln(w, v)
+	_, err := fmt.Fprintln(ctx, v)
 
 	return err
 }

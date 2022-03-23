@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/abemedia/go-don"
@@ -61,5 +62,5 @@ func main() {
 	g.Get("/ping", don.H(Ping))
 	g.Post("/greet", don.H(Greet))
 
-	http.ListenAndServe(":8080", r.Router())
+	log.Fatal(r.ListenAndServe(":8080"))
 }

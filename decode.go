@@ -2,48 +2,31 @@ package don
 
 import (
 	"context"
-	"io"
-	"io/ioutil"
-	"net/http"
+
+	"github.com/valyala/fasthttp"
 )
 
 type (
 	Unmarshaler        = func(data []byte, v interface{}) error
 	ContextUnmarshaler = func(ctx context.Context, data []byte, v interface{}) error
-	DecoderFactory     = func(io.Reader) interface{ Decode(interface{}) error }
-	RequestParser      = func(r *http.Request, v interface{}) error
+	RequestParser      = func(ctx *fasthttp.RequestCtx, v interface{}) error
 )
 
 type DecoderConstraint interface {
-	Unmarshaler | ContextUnmarshaler | DecoderFactory | RequestParser
+	Unmarshaler | ContextUnmarshaler | RequestParser
 }
 
 // RegisterDecoder registers a request decoder.
 func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...string) {
 	switch d := any(dec).(type) {
 	case Unmarshaler:
-		decoders[contentType] = func(r *http.Request, v interface{}) error {
-			b, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-
-			return d(b, v)
+		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+			return d(ctx.Request.Body(), v)
 		}
 
 	case ContextUnmarshaler:
-		decoders[contentType] = func(r *http.Request, v interface{}) error {
-			b, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-
-			return d(r.Context(), b, v)
-		}
-
-	case DecoderFactory:
-		decoders[contentType] = func(r *http.Request, v interface{}) error {
-			return d(r.Body).Decode(v)
+		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+			return d(ctx, ctx.Request.Body(), v)
 		}
 
 	case RequestParser:
@@ -64,7 +47,7 @@ func getDecoder(mime string) (RequestParser, error) {
 		return decoders[name], nil
 	}
 
-	return nil, ErrNotAcceptable
+	return nil, ErrUnsupportedMediaType
 }
 
 var (

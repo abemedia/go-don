@@ -1,45 +1,45 @@
 package don_test
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
+	"github.com/abemedia/httprouter"
+	"github.com/valyala/fasthttp"
 )
 
 func TestGroup(t *testing.T) {
 	mwCalled := false
 
 	api := don.New(nil)
-	api.Get("/", don.E(nil))
+	api.Get("/", func(*fasthttp.RequestCtx, httprouter.Params) {})
 
 	group := api.Group("/group")
-	group.Get("/foo", don.E(nil))
-	group.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/group/") {
+	group.Get("/foo", func(*fasthttp.RequestCtx, httprouter.Params) {})
+	group.Use(func(next fasthttp.RequestHandler) fasthttp.RequestHandler {
+		return func(ctx *fasthttp.RequestCtx) {
+			if strings.HasPrefix(string(ctx.Path()), "/group/") {
 				mwCalled = true
 			} else {
 				t.Error("middleware called outside of group")
 			}
-		})
+		}
 	})
 
-	h := api.Router()
+	h := api.RequestHandler()
 
 	urls := []string{"/", "/group/foo"}
-
 	for _, url := range urls {
-		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", url, nil)
+		ctx := &fasthttp.RequestCtx{}
+		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
+		ctx.Request.SetRequestURI(url)
 
-		h.ServeHTTP(w, r)
+		h(ctx)
 
-		if w.Result().StatusCode >= 300 {
-			t.Error(w.Result().Status)
+		if ctx.Response.StatusCode() >= 300 {
+			t.Errorf("expected success status got %d", ctx.Response.Header.StatusCode())
 		}
 	}
 
