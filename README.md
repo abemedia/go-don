@@ -217,15 +217,16 @@ sub.Get("/hello")
 
 ## Middleware
 
-Don uses the standard library middleware format of `func(http.Handler) http.Handler`.
+Don uses the standard fasthttp middleware format of
+`func(fasthttp.RequestHandler) fasthttp.RequestHandler`.
 
 For example:
 
 ```go
-func loggingMiddleware(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    log.Println(r.RequestURI)
-    next.ServeHTTP(w, r)
+func loggingMiddleware(next fasthttp.RequestHandler) fasthttp.RequestHandler {
+  return func(ctx *fasthttp.RequestCtx) {
+    log.Println(string(ctx.RequestURI()))
+    next(ctx)
   })
 }
 ```
@@ -256,20 +257,13 @@ v2.Use(corsMiddleware) // only applied to `/api/v2/bye`
 
 ```
 
-You can also use middleware on just a single handler by wrapping it:
-
-```go
-r := don.New(nil)
-r.Post("/protected", authMiddleware(don.H(handler)))
-```
-
 To pass values from the middleware to the handler extend the context e.g.
 
 ```go
-func myMiddleware(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    ctx := context.WithValue(r.Context(), ContextUserKey, "my_user")
-    next.ServeHTTP(w, r.WithContext(ctx))
+func myMiddleware(next fasthttp.RequestHandler) fasthttp.RequestHandler {
+  return func(ctx *fasthttp.RequestCtx) {
+    ctx.SetUserValue(ContextUserKey, "my_user")
+    next(ctx)
   })
 }
 ```
