@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/abemedia/httprouter v0.0.0-20220322190908-e57cbe4767db
 	github.com/gin-gonic/gin v1.7.7
-	github.com/goccy/go-json v0.9.5
+	github.com/goccy/go-json v0.9.6
 	github.com/goccy/go-reflect v1.1.0
 	github.com/google/go-cmp v0.5.7
 	github.com/gorilla/schema v1.2.0
