@@ -7,71 +7,71 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+type unmarshaler string
+
+func (h *unmarshaler) UnmarshalText(b []byte) error {
+	*h = unmarshaler(":" + string(b) + ":")
+	return nil
+}
+
 func TestDecode(t *testing.T) {
 	type child struct {
 		String string `header:"string"`
 	}
 
 	type test struct {
-		String    string   `header:"string"`
-		StringPtr *string  `header:"string"`
-		Int       int      `header:"int"`
-		Int8      int8     `header:"int8"`
-		Int16     int16    `header:"int16"`
-		Int32     int32    `header:"int32"`
-		Int64     int64    `header:"int64"`
-		Uint      uint     `header:"uint"`
-		Uint8     uint8    `header:"uint8"`
-		Uint16    uint16   `header:"uint16"`
-		Uint32    uint32   `header:"uint32"`
-		Uint64    uint64   `header:"uint64"`
-		Float32   float32  `header:"float32"`
-		Float64   float64  `header:"float64"`
-		Bool      bool     `header:"bool"`
-		Bytes     []byte   `header:"bytes"`
-		Strings   []string `header:"strings"`
-		Nested    child
-		NestedPtr *child
+		Unmarshaler    unmarshaler  `header:"string"`
+		UnmarshalerPtr *unmarshaler `header:"string"`
+		String         string       `header:"string"`
+		StringPtr      *string      `header:"string"`
+		Int            int          `header:"number"`
+		Int8           int8         `header:"number"`
+		Int16          int16        `header:"number"`
+		Int32          int32        `header:"number"`
+		Int64          int64        `header:"number"`
+		Uint           uint         `header:"number"`
+		Uint8          uint8        `header:"number"`
+		Uint16         uint16       `header:"number"`
+		Uint32         uint32       `header:"number"`
+		Uint64         uint64       `header:"number"`
+		Float32        float32      `header:"number"`
+		Float64        float64      `header:"number"`
+		Bool           bool         `header:"bool"`
+		Bytes          []byte       `header:"string"`
+		Strings        []string     `header:"strings"`
+		Nested         child
+		NestedPtr      *child
 	}
 
 	in := decoder.MapGetter{
 		"string":  {"string"},
 		"strings": {"string", "string"},
-		"int":     {"1"},
-		"int8":    {"1"},
-		"int16":   {"1"},
-		"int32":   {"1"},
-		"int64":   {"1"},
-		"uint":    {"1"},
-		"uint8":   {"1"},
-		"uint16":  {"1"},
-		"uint32":  {"1"},
-		"uint64":  {"1"},
-		"float32": {"1"},
-		"float64": {"1"},
+		"number":  {"1"},
 		"bool":    {"true"},
-		"bytes":   {"bytes"},
 	}
 
 	s := "string"
+	u := unmarshaler(":string:")
 	expected := &test{
-		String:    "string",
-		StringPtr: &s,
-		Int:       1,
-		Int8:      1,
-		Int16:     1,
-		Int32:     1,
-		Int64:     1,
-		Uint:      1,
-		Uint8:     1,
-		Uint16:    1,
-		Uint32:    1,
-		Uint64:    1,
-		Float32:   1,
-		Float64:   1,
-		Bool:      true,
-		Bytes:     []byte("bytes"),
-		Strings:   []string{"string", "string"},
+		Unmarshaler:    ":string:",
+		UnmarshalerPtr: &u,
+		String:         "string",
+		StringPtr:      &s,
+		Int:            1,
+		Int8:           1,
+		Int16:          1,
+		Int32:          1,
+		Int64:          1,
+		Uint:           1,
+		Uint8:          1,
+		Uint16:         1,
+		Uint32:         1,
+		Uint64:         1,
+		Float32:        1,
+		Float64:        1,
+		Bool:           true,
+		Bytes:          []byte("string"),
+		Strings:        []string{"string", "string"},
 		Nested: child{
 			String: "string",
 		},

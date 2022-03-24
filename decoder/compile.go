@@ -1,10 +1,13 @@
 package decoder
 
 import (
+	"encoding"
 	"errors"
 	"reflect"
 	"strconv"
 	"unsafe"
+
+	"github.com/abemedia/go-don/internal"
 )
 
 var ErrUnsupportedType = errors.New("decoder: unsupported type")
@@ -14,6 +17,8 @@ type decoder func(reflect.Value, Getter) error
 //nolint:cyclop
 func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	decoders := []decoder{}
+
+	unmarshalerType := reflect.TypeOf(new(encoding.TextUnmarshaler)).Elem()
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
@@ -25,6 +30,11 @@ func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 
 		tag, ok := f.Tag.Lookup(tagKey)
 		if !ok && k != reflect.Struct {
+			continue
+		}
+
+		if reflect.PointerTo(t).Implements(unmarshalerType) {
+			decoders = append(decoders, decodeTextUnmarshaler(get(ptr, i, t), tag))
 			continue
 		}
 
@@ -131,6 +141,33 @@ func set[T any](ptr bool, i int, t reflect.Type) func(reflect.Value, T) {
 
 	return func(v reflect.Value, d T) {
 		*(*T)(unsafe.Pointer(v.Field(i).UnsafeAddr())) = d
+	}
+}
+
+func get(ptr bool, i int, t reflect.Type) func(v reflect.Value) reflect.Value {
+	if ptr {
+		return func(v reflect.Value) reflect.Value {
+			f := v.Field(i)
+			if f.IsNil() {
+				f.Set(reflect.New(t))
+			}
+
+			return f
+		}
+	}
+
+	return func(v reflect.Value) reflect.Value {
+		return v.Field(i).Addr()
+	}
+}
+
+func decodeTextUnmarshaler(get func(reflect.Value) reflect.Value, k string) decoder {
+	return func(v reflect.Value, g Getter) error {
+		if s := g.Get(k); s != "" {
+			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(internal.Atob(s))
+		}
+
+		return nil
 	}
 }
 
@@ -342,11 +379,7 @@ func decodeBool(set func(reflect.Value, bool), k string) decoder {
 func decodeBytes(set func(reflect.Value, []byte), k string) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			sp := unsafe.Pointer(&s)
-			b := *(*[]byte)(sp)
-			(*reflect.SliceHeader)(unsafe.Pointer(&b)).Cap = (*reflect.StringHeader)(sp).Len
-
-			set(v, b)
+			set(v, internal.Atob(s))
 		}
 
 		return nil
