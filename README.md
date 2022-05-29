@@ -156,6 +156,13 @@ func MyHandler(ctx context.Context, req int64) (string, error) {
 If the request is a struct and the `Content-Type` header is set to `text/plain` it returns a
 `415 Unsupported Media Type` error.
 
+#### MessagePack
+
+MIME: `application/x-msgpack`
+
+Parses MessagePack requests & encodes responses as MessagePack. Use the `msgpack` tag in your
+request & response structs.
+
 ### Adding custom encoding
 
 Adding your own is easy. See [encoding/json/json.go](./blob/master/encoding/json/json.go).
