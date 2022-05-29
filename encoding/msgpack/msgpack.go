@@ -1,4 +1,4 @@
-package json
+package msgpack
 
 import (
 	"github.com/abemedia/go-don"
