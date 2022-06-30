@@ -2,8 +2,8 @@ package msgpack
 
 import (
 	"github.com/abemedia/go-don"
-	"github.com/vmihailenco/msgpack/v5"
 	"github.com/valyala/fasthttp"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 func decodeMsgpack(ctx *fasthttp.RequestCtx, v interface{}) error {
