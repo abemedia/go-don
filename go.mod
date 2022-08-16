@@ -9,7 +9,7 @@ require (
 	github.com/goccy/go-reflect v1.2.0
 	github.com/google/go-cmp v0.5.8
 	github.com/gorilla/schema v1.2.0
-	github.com/valyala/fasthttp v1.38.0
+	github.com/valyala/fasthttp v1.39.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	gopkg.in/yaml.v2 v2.4.0
 )
