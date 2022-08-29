@@ -2,11 +2,11 @@ name: Dependabot
 
 on:
   pull_request_target:
-    branches:
-      - master
+    branches: [master]
 
 jobs:
-  dependabot:
+  merge:
+    name: Merge
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     steps:
@@ -17,12 +17,7 @@ jobs:
           github-token: '${{ secrets.GITHUB_TOKEN }}'
 
       - name: Auto-merge patch updates
-        if: |
-          steps.dependabot.outputs.update-type == 'version-update:semver-patch'
-          || (
-            steps.dependabot.outputs.update-type == 'version-update:semver-minor' &&
-            endsWith(steps.dependabot.outputs.dependency-type, ':development')
-          )
+        if: steps.dependabot.outputs.update-type == 'version-update:semver-patch'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
