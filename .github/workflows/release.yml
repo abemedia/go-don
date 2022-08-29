@@ -1,0 +1,16 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release
+        uses: GoogleCloudPlatform/release-please-action@v3
+        with:
+          release-type: go
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
