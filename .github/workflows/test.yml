@@ -1,67 +1,49 @@
-name: Test
+name: CI
 
 on:
   pull_request:
-    branches:
-      - master
-    paths:
-      - '**.go'
-      - go.mod
-      - go.sum
-
-  push:
-    branches:
-      - master
-    tags:
-      - v*
-    paths:
-      - '**.go'
-      - go.mod
-      - go.sum
+    branches: [master]
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version-file: go.mod
+          cache: true
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go-
+      - name: Run tests
+        run: go test ./... -coverprofile coverage.out
 
-      - run: go test ./... -coverprofile coverage.out
-
-      - name: Code Climate Coverage Action
+      - name: Upload code coverage
         uses: paambaati/codeclimate-action@v3.0.0
         env:
-          CC_TEST_REPORTER_ID: 66c0ba0b21c425efdcad846946111d21c0dd3b61bdffe68234d9fa09bb20c459
+          CC_TEST_REPORTER_ID: 978041ab309611af2a98dfb9328f0f117f5a5cf09df36a39c305487158819d5a
         with:
           coverageLocations: ${{github.workspace}}/coverage.out:gocov
           prefix: github.com/abemedia/go-don
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version-file: go.mod
+          cache: true
 
-      - uses: actions/cache@v3
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: golangci-lint.cache-${{ hashFiles('**/go.sum') }}
-          restore-keys: golangci-lint.cache-
-
-      - uses: golangci/golangci-lint-action@v3
+          skip-pkg-cache: true
+          skip-build-cache: true
