@@ -22,16 +22,15 @@ type Headerer interface {
 }
 
 // Handle is the type for your handlers.
-type Handle[T any, O any] func(ctx context.Context, request T) (O, error)
+type Handle[T, O any] func(ctx context.Context, request T) (O, error)
 
 // H wraps your handler function with the Go generics magic.
-//nolint:gocognit,cyclop
-func H[T any, O any](handle Handle[T, O]) httprouter.Handle {
+func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cyclop
 	var (
 		decodeHeader *decoder.HeaderDecoder
 		decodePath   *decoder.ParamsDecoder
 		decodeQuery  *decoder.ArgsDecoder
-		isNil        = makeNilCheck(*new(O))
+		isNil        = makeNilCheck(*new(O)) //nolint:gocritic
 	)
 
 	{

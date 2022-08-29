@@ -8,7 +8,7 @@ import (
 
 func makeNilCheck(zero any) func(v any) bool {
 	// Return true for nil interfaces.
-	if zero == *new(any) {
+	if zero == any(nil) {
 		return func(v any) bool { return v == nil }
 	}
 

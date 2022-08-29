@@ -14,7 +14,7 @@ func NewDecoder(tag string) *Decoder {
 	return &Decoder{tag: tag}
 }
 
-func (d *Decoder) Decode(data Getter, v any) (err error) {
+func (d *Decoder) Decode(data Getter, v any) error {
 	val := reflect.ValueOf(v).Elem()
 	if val.Kind() != reflect.Struct {
 		return ErrUnsupportedType
@@ -24,6 +24,7 @@ func (d *Decoder) Decode(data Getter, v any) (err error) {
 
 	dec, ok := d.cache.Load(t)
 	if !ok {
+		var err error
 		dec, err = compile(t, d.tag, t.Kind() == reflect.Ptr)
 		if err != nil {
 			return err
