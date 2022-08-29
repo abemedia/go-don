@@ -14,3 +14,6 @@ jobs:
         with:
           release-type: go
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          bootstrap-sha: 8d7d992a2e4fae93c6e8eb5ab4070d7aefeb737e
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
