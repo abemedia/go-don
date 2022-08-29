@@ -291,8 +291,8 @@ Don has extremely fast & efficient binding of request data.
 
 | Benchmark name           |     (1) |         (2) |       (3) |          (4) |
 | ------------------------ | ------: | ----------: | --------: | -----------: |
-| BenchmarkDon_BindRequest | 2497761 | 469.8 ns/op |  104 B/op |  2 allocs/op |
-| BenchmarkGin_BindRequest |  296085 |  3970 ns/op | 1273 B/op | 31 allocs/op |
+| BenchmarkDon_BindRequest | 6671070 | 172.1 ns/op |    0 B/op |  0 allocs/op |
+| BenchmarkGin_BindRequest |  313760 |  3581 ns/op | 1201 B/op | 22 allocs/op |
 
 Source:
 [benchmarks/binding_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/binding_test.go)
@@ -303,8 +303,8 @@ Keep in mind that the majority of time here is actually the HTTP roundtrip.
 
 | Benchmark name    |   (1) |         (2) |       (3) |          (4) |
 | ----------------- | ----: | ----------: | --------: | -----------: |
-| BenchmarkDon_HTTP | 59714 | 19951 ns/op |   73 B/op |  3 allocs/op |
-| BenchmarkGin_HTTP | 34322 | 34331 ns/op | 2304 B/op | 20 allocs/op |
+| BenchmarkDon_HTTP | 66678 | 17452 ns/op |   32 B/op |  2 allocs/op |
+| BenchmarkGin_HTTP | 34054 | 34205 ns/op | 2301 B/op | 20 allocs/op |
 
 Source:
 [benchmarks/http_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/http_test.go)
