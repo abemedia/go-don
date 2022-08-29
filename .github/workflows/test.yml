@@ -64,10 +64,4 @@ jobs:
           key: golangci-lint.cache-${{ hashFiles('**/go.sum') }}
           restore-keys: golangci-lint.cache-
 
-      - run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.44.2
-      - run: golangci-lint run
-
-  # Not supported with Go 1.18
-  #     - uses: golangci/golangci-lint-action@v3
-  #       with:
-  #         version: v1.44
+      - uses: golangci/golangci-lint-action@v3

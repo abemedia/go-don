@@ -14,11 +14,11 @@ var ErrUnsupportedType = errors.New("decoder: unsupported type")
 
 type decoder func(reflect.Value, Getter) error
 
+var unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+
 //nolint:cyclop
 func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	decoders := []decoder{}
-
-	unmarshalerType := reflect.TypeOf(new(encoding.TextUnmarshaler)).Elem()
 
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)

@@ -1,63 +1,62 @@
 linters:
   enable-all: true
   disable:
+    - deadcode # deprecated
     - exhaustive
     - exhaustivestruct
+    - exhaustruct
     - forcetypeassert
     - funlen
     - gochecknoinits
     - gochecknoglobals
-    - gci
     - godox
     - golint # deprecated
     - gomnd
-    - ifshort # false positives
+    - ifshort # false positives - deprecated
     - interfacer # deprecated
     - ireturn
     - maligned # deprecated
+    - nosnakecase # deprecated
     - nlreturn
     - paralleltest
     - scopelint # deprecated
+    - structcheck # deprecated
     - testpackage
     - varnamelen
+    - varcheck # deprecated
     - wrapcheck
-    # no Go 1.18 support
-    - bodyclose
-    - contextcheck
-    - gocritic
-    - gosimple
-    - govet
-    - nilerr
-    - noctx
-    - rowserrcheck
-    - sqlclosecheck
-    - staticcheck
-    - structcheck
-    - stylecheck
-    - tparallel
-    - typecheck # false positives
-    - unparam
-    - unused
-    - wastedassign
+    - wsl
 
 linters-settings:
-  govet:
-    enable-all: true
   depguard:
     list-type: denylist
     include-go-root: true
     packages:
       - encoding/json
+      - github.com/pkg/errors
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/optimusmine/optimusmine)
+  gofumpt:
+    extra-rules: true
+  govet:
+    enable-all: true
+  nolintlint:
+    allow-leading-space: false
+    require-specific: true
 
 issues:
+  fix: true
   exclude-rules:
     - path: (.+)_test.go
       linters:
         - errcheck
         - funlen
-        - ifshort
         - gosec
-    - linters: [wsl]
-      text: return statements should not be cuddled if block has more than two lines
-    - linters: [wsl]
-      text: only cuddled expressions if assigning variable or using from line above
+    - path: (.+)_test.go
+      linters: [govet]
+      text: '^fieldalignment:'
+    - linters: [govet]
+      text: '^shadow: declaration of "err" shadows declaration'

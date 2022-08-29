@@ -219,7 +219,7 @@ You can create sub-routers using the `Group` function:
 ```go
 r := don.New(nil)
 sub := r.Group("/api")
-sub.Get("/hello")
+sub.Get("/hello", don.H(Hello))
 ```
 
 ## Middleware

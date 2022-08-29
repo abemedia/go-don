@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding"
 	"encoding/xml"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -32,8 +33,8 @@ func (e *HTTPError) Error() string {
 }
 
 func (e *HTTPError) StatusCode() int {
-	//nolint:errorlint
-	if sc, ok := e.err.(StatusCoder); ok {
+	var sc StatusCoder
+	if errors.As(e.err, &sc) {
 		return sc.StatusCode()
 	}
 
@@ -45,12 +46,21 @@ func (e *HTTPError) StatusCode() int {
 }
 
 func (e *HTTPError) MarshalText() ([]byte, error) {
+	var m encoding.TextMarshaler
+	if errors.As(e.err, &m) {
+		return m.MarshalText()
+	}
+
 	return []byte(e.Error()), nil
 }
 
 func (e *HTTPError) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
+	var m json.Marshaler
+	if errors.As(e.err, &m) {
+		return m.MarshalJSON()
+	}
 
+	var buf bytes.Buffer
 	buf.WriteString(`{"message":`)
 	buf.WriteString(strconv.Quote(e.Error()))
 	buf.WriteRune('}')
@@ -58,12 +68,22 @@ func (e *HTTPError) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (e *HTTPError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
-	start := xml.StartElement{Name: xml.Name{Local: "message"}}
+func (e *HTTPError) MarshalXML(enc *xml.Encoder, start xml.StartElement) error {
+	var m xml.Marshaler
+	if errors.As(e.err, &m) {
+		return m.MarshalXML(enc, start)
+	}
+
+	start = xml.StartElement{Name: xml.Name{Local: "message"}}
 	return enc.EncodeElement(e.Error(), start)
 }
 
 func (e *HTTPError) MarshalYAML() (interface{}, error) {
+	var m yaml.Marshaler
+	if errors.As(e.err, &m) {
+		return m.MarshalYAML()
+	}
+
 	return map[string]string{"message": e.Error()}, nil
 }
 

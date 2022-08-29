@@ -27,13 +27,13 @@ type Router interface {
 }
 
 type API struct {
-	router *httprouter.Router
-	config *Config
-	mw     []Middleware
-
 	NotFound         fasthttp.RequestHandler
 	MethodNotAllowed fasthttp.RequestHandler
 	PanicHandler     func(*fasthttp.RequestCtx, interface{})
+
+	router *httprouter.Router
+	config *Config
+	mw     []Middleware
 }
 
 type Config struct {
@@ -89,7 +89,7 @@ func (r *API) Handle(method, path string, handle httprouter.Handle) {
 }
 
 func (r *API) Handler(method, path string, handle http.Handler) {
-	r.Handler(method, path, handle)
+	r.router.Handler(method, path, handle)
 }
 
 func (r *API) HandleFunc(method, path string, handle http.HandlerFunc) {
