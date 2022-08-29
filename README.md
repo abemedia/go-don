@@ -165,7 +165,7 @@ request & response structs.
 
 ### Adding custom encoding
 
-Adding your own is easy. See [encoding/json/json.go](./blob/master/encoding/json/json.go).
+Adding your own is easy. See [encoding/json/json.go](./encoding/json/json.go).
 
 ## Request parsing
 
@@ -295,7 +295,7 @@ Don has extremely fast & efficient binding of request data.
 | BenchmarkGin_BindRequest |  313760 |  3581 ns/op | 1201 B/op | 22 allocs/op |
 
 Source:
-[benchmarks/binding_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/binding_test.go)
+[benchmarks/binding_test.go](./benchmarks/binding_test.go)
 
 ### Serving HTTP Requests
 
@@ -307,4 +307,4 @@ Keep in mind that the majority of time here is actually the HTTP roundtrip.
 | BenchmarkGin_HTTP | 34054 | 34205 ns/op | 2301 B/op | 20 allocs/op |
 
 Source:
-[benchmarks/http_test.go](https://github.com/abemedia/go-don/blob/master/benchmarks/http_test.go)
+[benchmarks/http_test.go](./benchmarks/http_test.go)
