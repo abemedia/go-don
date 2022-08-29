@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -24,9 +26,9 @@ jobs:
       - name: Upload code coverage
         uses: paambaati/codeclimate-action@v3.0.0
         env:
-          CC_TEST_REPORTER_ID: 978041ab309611af2a98dfb9328f0f117f5a5cf09df36a39c305487158819d5a
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
-          coverageLocations: ${{github.workspace}}/coverage.out:gocov
+          coverageLocations: ${{ github.workspace }}/coverage.out:gocov
           prefix: github.com/abemedia/go-don
 
   lint:
