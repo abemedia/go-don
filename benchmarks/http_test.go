@@ -19,7 +19,7 @@ func BenchmarkDon_HTTP(b *testing.B) {
 		return "foo", nil
 	}))
 
-	ln, err := net.Listen("tcp", ":0")
+	ln, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func BenchmarkDon_HTTP(b *testing.B) {
 	srv := fasthttp.Server{Handler: api.RequestHandler()}
 	go srv.Serve(ln)
 
-	url := fmt.Sprintf("http://localhost:%d/path", ln.Addr().(*net.TCPAddr).Port)
+	url := fmt.Sprintf("http://%s/path", ln.Addr())
 
 	for i := 0; i < b.N; i++ {
 		fasthttp.Get(nil, url)
@@ -45,7 +45,7 @@ func BenchmarkGin_HTTP(b *testing.B) {
 	router := gin.New()
 	router.POST("/:path", h)
 
-	ln, err := net.Listen("tcp", ":0")
+	ln, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func BenchmarkGin_HTTP(b *testing.B) {
 	srv := http.Server{Handler: router}
 	go srv.Serve(ln)
 
-	url := fmt.Sprintf("http://localhost:%d/path", ln.Addr().(*net.TCPAddr).Port)
+	url := fmt.Sprintf("http://%s/path", ln.Addr())
 
 	for i := 0; i < b.N; i++ {
 		fasthttp.Get(nil, url)
