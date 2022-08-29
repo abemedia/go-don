@@ -28,12 +28,12 @@ func decodeText(ctx *fasthttp.RequestCtx, v interface{}) error {
 		*t = b
 
 	case *int:
-		d, err := strconv.ParseInt(b2s(b), 10, 64)
+		d, err := strconv.Atoi(b2s(b))
 		if err != nil {
 			return err
 		}
 
-		*t = int(d)
+		*t = d
 
 	case *int8:
 		d, err := strconv.ParseInt(b2s(b), 10, 8)
@@ -68,7 +68,7 @@ func decodeText(ctx *fasthttp.RequestCtx, v interface{}) error {
 		*t = d
 
 	case *uint:
-		d, err := strconv.ParseUint(b2s(b), 10, 64)
+		d, err := strconv.ParseUint(b2s(b), 10, 0)
 		if err != nil {
 			return err
 		}
