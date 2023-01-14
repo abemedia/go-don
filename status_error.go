@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/goccy/go-json"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // StatusError creates an error from an HTTP status code.

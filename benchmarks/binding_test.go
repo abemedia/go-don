@@ -1,4 +1,4 @@
-package don_test
+package benchmarks_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/abemedia/go-don"
-	"github.com/abemedia/go-don/internal/httptest"
+	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/gin-gonic/gin"
 	"github.com/valyala/fasthttp"
 )

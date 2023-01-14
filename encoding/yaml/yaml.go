@@ -3,7 +3,7 @@ package yaml
 import (
 	"github.com/abemedia/go-don"
 	"github.com/valyala/fasthttp"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func decodeYAML(ctx *fasthttp.RequestCtx, v interface{}) error {

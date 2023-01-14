@@ -1,8 +1,6 @@
 package don
 
-import (
-	"github.com/goccy/go-reflect"
-)
+import "reflect"
 
 func hasTag(v interface{}, tag string) bool {
 	t := reflect.TypeOf(v)
