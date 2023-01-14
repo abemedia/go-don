@@ -1,4 +1,4 @@
-package don_test
+package benchmarks_test
 
 import (
 	"context"

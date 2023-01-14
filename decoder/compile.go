@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/go-don/internal/byteconv"
 )
 
 var ErrUnsupportedType = errors.New("decoder: unsupported type")
@@ -164,7 +164,7 @@ func get(ptr bool, i int, t reflect.Type) func(v reflect.Value) reflect.Value {
 func decodeTextUnmarshaler(get func(reflect.Value) reflect.Value, k string) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(internal.Atob(s))
+			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(byteconv.Atob(s))
 		}
 
 		return nil
@@ -379,7 +379,7 @@ func decodeBool(set func(reflect.Value, bool), k string) decoder {
 func decodeBytes(set func(reflect.Value, []byte), k string) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			set(v, internal.Atob(s))
+			set(v, byteconv.Atob(s))
 		}
 
 		return nil

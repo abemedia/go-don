@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/abemedia/go-don/decoder"
-	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
@@ -154,7 +154,7 @@ func getEncoding(b []byte) string {
 		b = b[:index]
 	}
 
-	return internal.Btoa(bytes.TrimSpace(b))
+	return byteconv.Btoa(bytes.TrimSpace(b))
 }
 
 const (

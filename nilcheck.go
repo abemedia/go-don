@@ -1,9 +1,8 @@
 package don
 
 import (
+	"reflect"
 	"unsafe"
-
-	"github.com/goccy/go-reflect"
 )
 
 func makeNilCheck(zero any) func(v any) bool {

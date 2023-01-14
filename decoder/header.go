@@ -1,7 +1,7 @@
 package decoder
 
 import (
-	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/valyala/fasthttp"
 )
 
@@ -25,7 +25,7 @@ func (d *HeaderDecoder) Decode(data *fasthttp.RequestHeader, v interface{}) erro
 type HeaderGetter fasthttp.RequestHeader
 
 func (ps *HeaderGetter) Get(key string) string {
-	return internal.Btoa((*fasthttp.RequestHeader)(ps).Peek(key))
+	return byteconv.Btoa((*fasthttp.RequestHeader)(ps).Peek(key))
 }
 
 func (ps *HeaderGetter) Values(key string) []string {
@@ -34,5 +34,5 @@ func (ps *HeaderGetter) Values(key string) []string {
 		return nil
 	}
 
-	return []string{internal.Btoa(arg)}
+	return []string{byteconv.Btoa(arg)}
 }

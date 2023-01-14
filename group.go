@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
@@ -59,7 +59,7 @@ func (g *group) Use(mw ...Middleware) {
 
 		return func(ctx *fasthttp.RequestCtx) {
 			// Only use the middleware if path belongs to group.
-			if strings.HasPrefix(internal.Btoa(ctx.Path()), g.prefix) {
+			if strings.HasPrefix(byteconv.Btoa(ctx.Path()), g.prefix) {
 				mwNext(ctx)
 			} else {
 				next(ctx)

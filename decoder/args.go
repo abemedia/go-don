@@ -1,7 +1,7 @@
 package decoder
 
 import (
-	"github.com/abemedia/go-don/internal"
+	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/valyala/fasthttp"
 )
 
@@ -25,7 +25,7 @@ func (d *ArgsDecoder) Decode(data *fasthttp.Args, v interface{}) error {
 type ArgsGetter fasthttp.Args
 
 func (ps *ArgsGetter) Get(key string) string {
-	return internal.Btoa((*fasthttp.Args)(ps).Peek(key))
+	return byteconv.Btoa((*fasthttp.Args)(ps).Peek(key))
 }
 
 func (ps *ArgsGetter) Values(key string) []string {
@@ -36,7 +36,7 @@ func (ps *ArgsGetter) Values(key string) []string {
 
 	res := make([]string, len(args))
 	for i := range args {
-		res[i] = internal.Btoa(args[i])
+		res[i] = byteconv.Btoa(args[i])
 	}
 
 	return res

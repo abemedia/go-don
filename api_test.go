@@ -7,7 +7,7 @@ import (
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
-	"github.com/abemedia/go-don/internal/httptest"
+	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/valyala/fasthttp"
 )
 
