@@ -159,8 +159,7 @@ func encodeText(ctx *fasthttp.RequestCtx, v interface{}) error {
 			error:
 
 		default:
-			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotAcceptable), fasthttp.StatusNotAcceptable)
-			return nil
+			return don.ErrNotAcceptable
 		}
 	}
 

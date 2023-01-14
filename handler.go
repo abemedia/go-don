@@ -36,22 +36,13 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 	{
 		var t T
 		if hasTag(t, headerTag) {
-			dec, err := decoder.NewHeaderDecoder(t, headerTag)
-			if err == nil {
-				decodeHeader = dec
-			}
+			decodeHeader, _ = decoder.NewHeaderDecoder(t, headerTag)
 		}
 		if hasTag(t, queryTag) {
-			dec, err := decoder.NewArgsDecoder(t, queryTag)
-			if err == nil {
-				decodeQuery = dec
-			}
+			decodeQuery, _ = decoder.NewArgsDecoder(t, queryTag)
 		}
 		if hasTag(t, pathTag) {
-			dec, err := decoder.NewParamsDecoder(t, pathTag)
-			if err == nil {
-				decodePath = dec
-			}
+			decodePath, _ = decoder.NewParamsDecoder(t, pathTag)
 		}
 	}
 
@@ -60,7 +51,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 
 		enc, err := getEncoder(contentType)
 		if err != nil {
-			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusNotAcceptable), fasthttp.StatusNotAcceptable)
+			handleError(ctx, ErrNotAcceptable)
 			return
 		}
 
@@ -142,10 +133,20 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 		}
 
 		if err = enc(ctx, res); err != nil {
-			ctx.Logger().Printf("%v", err)
-			ctx.Error(fasthttp.StatusMessage(fasthttp.StatusInternalServerError), fasthttp.StatusInternalServerError)
+			handleError(ctx, err)
 		}
 	}
+}
+
+func handleError(ctx *fasthttp.RequestCtx, err error) {
+	if statusCoder, ok := err.(StatusCoder); ok { //nolint:errorlint
+		if sc := statusCoder.StatusCode(); sc < http.StatusInternalServerError {
+			ctx.Error(err.Error()+"\n", sc)
+			return
+		}
+	}
+	ctx.Error(fasthttp.StatusMessage(http.StatusInternalServerError)+"\n", http.StatusInternalServerError)
+	ctx.Logger().Printf("%v", err)
 }
 
 func getEncoding(b []byte) string {

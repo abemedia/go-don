@@ -10,4 +10,4 @@ test:
 	@go test ./...
 
 bench:
-	@go test -bench=. -benchmem ./benchmarks
+	@cd ./benchmarks && go test -bench=. -benchmem .
