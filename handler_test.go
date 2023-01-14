@@ -2,7 +2,6 @@ package don_test
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/abemedia/go-don"
@@ -32,7 +31,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return no content",
 			expected: response{
-				Code: http.StatusNoContent,
+				Code: fasthttp.StatusNoContent,
 				Body: "",
 				Header: map[string]string{
 					"Content-Length": "0",
@@ -47,7 +46,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return null",
 			expected: response{
-				Code: http.StatusOK,
+				Code: fasthttp.StatusOK,
 				Body: "null\n",
 				Header: map[string]string{
 					"Content-Length": "0",
@@ -62,7 +61,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should JSON encode map",
 			expected: response{
-				Code:   http.StatusOK,
+				Code:   fasthttp.StatusOK,
 				Body:   `{"foo":"bar"}` + "\n",
 				Header: map[string]string{"Content-Type": "application/json; charset=utf-8"},
 			},
@@ -74,7 +73,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return error on unprocessable request",
 			expected: response{
-				Code:   http.StatusUnsupportedMediaType,
+				Code:   fasthttp.StatusUnsupportedMediaType,
 				Body:   "Unsupported Media Type\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
@@ -87,8 +86,8 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return error on unacceptable",
 			expected: response{
-				Code:   http.StatusNotAcceptable,
-				Body:   "Not Acceptable",
+				Code:   fasthttp.StatusNotAcceptable,
+				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
@@ -100,8 +99,8 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return error on unsupported accept",
 			expected: response{
-				Code:   http.StatusNotAcceptable,
-				Body:   "Not Acceptable",
+				Code:   fasthttp.StatusNotAcceptable,
+				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			config: &don.Config{DefaultEncoding: "text/plain"},
@@ -113,7 +112,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should return error on unsupported content type",
 			expected: response{
-				Code:   http.StatusUnsupportedMediaType,
+				Code:   fasthttp.StatusUnsupportedMediaType,
 				Body:   "Unsupported Media Type\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
@@ -127,7 +126,7 @@ func TestHandler(t *testing.T) {
 		{
 			message: "should read text request",
 			expected: response{
-				Code:   http.StatusOK,
+				Code:   fasthttp.StatusOK,
 				Body:   "foo\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},

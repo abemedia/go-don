@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/goccy/go-json"
 	"github.com/valyala/fasthttp"
 	"gopkg.in/yaml.v3"
@@ -51,7 +52,7 @@ func (e *HTTPError) MarshalText() ([]byte, error) {
 		return m.MarshalText()
 	}
 
-	return []byte(e.Error()), nil
+	return byteconv.Atob(e.Error()), nil
 }
 
 func (e *HTTPError) MarshalJSON() ([]byte, error) {
@@ -93,4 +94,57 @@ var (
 	_ json.Marshaler         = (*HTTPError)(nil)
 	_ xml.Marshaler          = (*HTTPError)(nil)
 	_ yaml.Marshaler         = (*HTTPError)(nil)
+)
+
+// StatusError creates an error from an HTTP status code.
+type StatusError int
+
+const (
+	ErrBadRequest           = StatusError(fasthttp.StatusBadRequest)
+	ErrUnauthorized         = StatusError(fasthttp.StatusUnauthorized)
+	ErrForbidden            = StatusError(fasthttp.StatusForbidden)
+	ErrNotFound             = StatusError(fasthttp.StatusNotFound)
+	ErrMethodNotAllowed     = StatusError(fasthttp.StatusMethodNotAllowed)
+	ErrNotAcceptable        = StatusError(fasthttp.StatusNotAcceptable)
+	ErrUnsupportedMediaType = StatusError(fasthttp.StatusUnsupportedMediaType)
+	ErrInternalServerError  = StatusError(fasthttp.StatusInternalServerError)
+)
+
+func (e StatusError) Error() string {
+	return fasthttp.StatusMessage(int(e))
+}
+
+func (e StatusError) StatusCode() int {
+	return int(e)
+}
+
+func (e StatusError) MarshalText() ([]byte, error) {
+	return byteconv.Atob(e.Error()), nil
+}
+
+func (e StatusError) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+
+	buf.WriteString(`{"message":`)
+	buf.WriteString(strconv.Quote(e.Error()))
+	buf.WriteRune('}')
+
+	return buf.Bytes(), nil
+}
+
+func (e StatusError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
+	start := xml.StartElement{Name: xml.Name{Local: "message"}}
+	return enc.EncodeElement(e.Error(), start)
+}
+
+func (e StatusError) MarshalYAML() (interface{}, error) {
+	return map[string]string{"message": e.Error()}, nil
+}
+
+var (
+	_ error                  = (*StatusError)(nil)
+	_ encoding.TextMarshaler = (*StatusError)(nil)
+	_ json.Marshaler         = (*StatusError)(nil)
+	_ xml.Marshaler          = (*StatusError)(nil)
+	_ yaml.Marshaler         = (*StatusError)(nil)
 )

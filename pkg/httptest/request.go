@@ -1,7 +1,7 @@
 package httptest
 
 import (
-	"bytes"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 )
@@ -15,8 +15,7 @@ func NewRequest(method, url, body string, header map[string]string) *fasthttp.Re
 		ctx.Request.Header.Set(k, v)
 	}
 
-	b := []byte(body)
-	ctx.Request.SetBodyStream(bytes.NewReader(b), len(b))
+	ctx.Request.SetBodyStream(strings.NewReader(body), len(body))
 
 	return ctx
 }

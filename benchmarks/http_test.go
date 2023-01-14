@@ -8,14 +8,14 @@ import (
 	"testing"
 
 	"github.com/abemedia/go-don"
+	_ "github.com/abemedia/go-don/encoding/text"
 	"github.com/gin-gonic/gin"
 	"github.com/valyala/fasthttp"
 )
 
 func BenchmarkDon_HTTP(b *testing.B) {
 	api := don.New(nil)
-
-	api.Post("/:path", don.H(func(ctx context.Context, req don.Empty) (string, error) {
+	api.Get("/:path", don.H(func(ctx context.Context, req don.Empty) (string, error) {
 		return "foo", nil
 	}))
 
@@ -37,13 +37,12 @@ func BenchmarkDon_HTTP(b *testing.B) {
 }
 
 func BenchmarkGin_HTTP(b *testing.B) {
-	h := func(c *gin.Context) {
-		c.String(200, "foo")
-	}
-
 	gin.SetMode("release")
+
 	router := gin.New()
-	router.POST("/:path", h)
+	router.GET("/:path", func(c *gin.Context) {
+		c.String(200, "foo")
+	})
 
 	ln, err := net.Listen("tcp", "localhost:0")
 	if err != nil {

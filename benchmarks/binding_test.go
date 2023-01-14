@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/abemedia/go-don"
+	_ "github.com/abemedia/go-don/encoding/text"
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/gin-gonic/gin"
-	"github.com/valyala/fasthttp"
 )
 
 func BenchmarkDon_BindRequest(b *testing.B) {
@@ -19,14 +19,12 @@ func BenchmarkDon_BindRequest(b *testing.B) {
 	}
 
 	api := don.New(nil)
-
 	api.Post("/:path", don.H(func(ctx context.Context, req request) (any, error) {
 		return nil, nil
 	}))
 
 	h := api.RequestHandler()
-
-	ctx := httptest.NewRequest(fasthttp.MethodPost, "/path?query=query", "", map[string]string{"header": "header"})
+	ctx := httptest.NewRequest("POST", "/path?query=query", "", map[string]string{"header": "header"})
 
 	for i := 0; i < b.N; i++ {
 		h(ctx)
