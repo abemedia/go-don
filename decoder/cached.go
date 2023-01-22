@@ -13,7 +13,7 @@ type CachedDecoder struct {
 	dec decoder
 }
 
-func NewCachedDecoder(v interface{}, tag string) (*CachedDecoder, error) {
+func NewCachedDecoder(v any, tag string) (*CachedDecoder, error) {
 	t, k, ptr := typeKind(reflect.TypeOf(v))
 	if k != reflect.Struct {
 		return nil, ErrUnsupportedType
@@ -27,6 +27,6 @@ func NewCachedDecoder(v interface{}, tag string) (*CachedDecoder, error) {
 	return &CachedDecoder{dec}, nil
 }
 
-func (d *CachedDecoder) Decode(data Getter, v interface{}) error {
+func (d *CachedDecoder) Decode(data Getter, v any) error {
 	return d.dec(reflect.ValueOf(v).Elem(), data)
 }

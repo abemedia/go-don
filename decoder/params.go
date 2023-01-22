@@ -6,7 +6,7 @@ type ParamsDecoder struct {
 	dec *CachedDecoder
 }
 
-func NewParamsDecoder(v interface{}, tag string) (*ParamsDecoder, error) {
+func NewParamsDecoder(v any, tag string) (*ParamsDecoder, error) {
 	dec, err := NewCachedDecoder(v, tag)
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func NewParamsDecoder(v interface{}, tag string) (*ParamsDecoder, error) {
 	return &ParamsDecoder{dec}, nil
 }
 
-func (d *ParamsDecoder) Decode(data []httprouter.Param, v interface{}) error {
+func (d *ParamsDecoder) Decode(data []httprouter.Param, v any) error {
 	return d.dec.Decode(ParamsGetter(data), v)
 }
 

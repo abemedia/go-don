@@ -6,11 +6,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func decodeYAML(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeYAML(ctx *fasthttp.RequestCtx, v any) error {
 	return yaml.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeYAML(ctx *fasthttp.RequestCtx, v interface{}) error {
+func encodeYAML(ctx *fasthttp.RequestCtx, v any) error {
 	return yaml.NewEncoder(ctx).Encode(v)
 }
 

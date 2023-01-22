@@ -9,7 +9,7 @@ type ArgsDecoder struct {
 	dec *CachedDecoder
 }
 
-func NewArgsDecoder(v interface{}, tag string) (*ArgsDecoder, error) {
+func NewArgsDecoder(v any, tag string) (*ArgsDecoder, error) {
 	dec, err := NewCachedDecoder(v, tag)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func NewArgsDecoder(v interface{}, tag string) (*ArgsDecoder, error) {
 	return &ArgsDecoder{dec}, nil
 }
 
-func (d *ArgsDecoder) Decode(data *fasthttp.Args, v interface{}) error {
+func (d *ArgsDecoder) Decode(data *fasthttp.Args, v any) error {
 	return d.dec.Decode((*ArgsGetter)(data), v)
 }
 

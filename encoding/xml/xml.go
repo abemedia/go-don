@@ -7,11 +7,11 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func decodeXML(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeXML(ctx *fasthttp.RequestCtx, v any) error {
 	return xml.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeXML(ctx *fasthttp.RequestCtx, v interface{}) error {
+func encodeXML(ctx *fasthttp.RequestCtx, v any) error {
 	return xml.NewEncoder(ctx).Encode(v)
 }
 

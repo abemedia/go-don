@@ -8,11 +8,11 @@ import (
 
 var dec = decoder.NewDecoder("form")
 
-func decodeForm(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeForm(ctx *fasthttp.RequestCtx, v any) error {
 	return dec.Decode((*decoder.ArgsGetter)(ctx.PostArgs()), v)
 }
 
-func decodeMultipartForm(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeMultipartForm(ctx *fasthttp.RequestCtx, v any) error {
 	f, err := ctx.MultipartForm()
 	if err != nil {
 		return err

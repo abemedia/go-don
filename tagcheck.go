@@ -2,7 +2,7 @@ package don
 
 import "reflect"
 
-func hasTag(v interface{}, tag string) bool {
+func hasTag(v any, tag string) bool {
 	t := reflect.TypeOf(v)
 
 	if t.Kind() == reflect.Ptr {

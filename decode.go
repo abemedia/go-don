@@ -7,9 +7,9 @@ import (
 )
 
 type (
-	Unmarshaler        = func(data []byte, v interface{}) error
-	ContextUnmarshaler = func(ctx context.Context, data []byte, v interface{}) error
-	RequestParser      = func(ctx *fasthttp.RequestCtx, v interface{}) error
+	Unmarshaler        = func(data []byte, v any) error
+	ContextUnmarshaler = func(ctx context.Context, data []byte, v any) error
+	RequestParser      = func(ctx *fasthttp.RequestCtx, v any) error
 )
 
 type DecoderConstraint interface {
@@ -20,12 +20,12 @@ type DecoderConstraint interface {
 func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...string) {
 	switch d := any(dec).(type) {
 	case Unmarshaler:
-		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
 			return d(ctx.Request.Body(), v)
 		}
 
 	case ContextUnmarshaler:
-		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
 			return d(ctx, ctx.Request.Body(), v)
 		}
 

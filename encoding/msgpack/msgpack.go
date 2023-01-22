@@ -6,11 +6,11 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func decodeMsgpack(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeMsgpack(ctx *fasthttp.RequestCtx, v any) error {
 	return msgpack.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeMsgpack(ctx *fasthttp.RequestCtx, v interface{}) error {
+func encodeMsgpack(ctx *fasthttp.RequestCtx, v any) error {
 	return msgpack.NewEncoder(ctx).Encode(v)
 }
 

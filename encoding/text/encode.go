@@ -11,7 +11,7 @@ import (
 )
 
 //nolint:cyclop
-func encode(ctx *fasthttp.RequestCtx, v interface{}) error {
+func encode(ctx *fasthttp.RequestCtx, v any) error {
 	var (
 		b   []byte
 		err error
