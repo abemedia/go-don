@@ -1,0 +1,44 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    desc: Runs the default tasks
+    cmds:
+      - task: init
+      - task: mod
+      - task: lint
+      - task: test
+
+  init:
+    desc: Setup git hooks
+    cmds:
+      - cp -f scripts/pre-commit.sh .git/hooks/pre-commit
+
+  mod:
+    desc: Download Go modules
+    cmds:
+      - go mod tidy
+
+  lint:
+    desc: Runs golangci-lint
+    aliases: [l]
+    sources:
+      - ./**/*.go
+      - .golangci.yml
+    cmds:
+      - golangci-lint run --fix
+
+  test:
+    desc: Runs test suite
+    aliases: [t]
+    cmds:
+      - go test -cover ./...
+
+  benchmark:
+    desc: Runs benchmarks
+    aliases: [b]
+    dir: benchmarks
+    cmds:
+      - go test -bench=. -benchmem .

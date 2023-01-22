@@ -47,7 +47,6 @@ linters-settings:
     require-specific: true
 
 issues:
-  fix: true
   exclude-rules:
     - path: (.+)_test.go
       linters:
