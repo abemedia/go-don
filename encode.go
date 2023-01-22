@@ -7,9 +7,9 @@ import (
 )
 
 type (
-	Marshaler        = func(v interface{}) ([]byte, error)
-	ContextMarshaler = func(ctx context.Context, v interface{}) ([]byte, error)
-	ResponseEncoder  = func(ctx *fasthttp.RequestCtx, v interface{}) error
+	Marshaler        = func(v any) ([]byte, error)
+	ContextMarshaler = func(ctx context.Context, v any) ([]byte, error)
+	ResponseEncoder  = func(ctx *fasthttp.RequestCtx, v any) error
 )
 
 type EncoderConstraint interface {
@@ -20,7 +20,7 @@ type EncoderConstraint interface {
 func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...string) {
 	switch e := any(enc).(type) {
 	case Marshaler:
-		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
 			b, err := e(v)
 			if err != nil {
 				return err
@@ -31,7 +31,7 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 		}
 
 	case ContextMarshaler:
-		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v interface{}) error {
+		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
 			b, err := e(ctx, v)
 			if err != nil {
 				return err

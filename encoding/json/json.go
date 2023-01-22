@@ -6,11 +6,11 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func decodeJSON(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decodeJSON(ctx *fasthttp.RequestCtx, v any) error {
 	return json.NewDecoder(ctx.RequestBodyStream()).Decode(v)
 }
 
-func encodeJSON(ctx *fasthttp.RequestCtx, v interface{}) error {
+func encodeJSON(ctx *fasthttp.RequestCtx, v any) error {
 	return json.NewEncoder(ctx).Encode(v)
 }
 

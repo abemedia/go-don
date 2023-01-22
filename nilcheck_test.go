@@ -92,7 +92,7 @@ func TestNilCheck(t *testing.T) {
 		{
 			message: "non-zero slice pointer",
 			typ:     (*[]string)(nil),
-			data: func() interface{} {
+			data: func() any {
 				m := []string{"aa"}
 				return &m
 			}(),

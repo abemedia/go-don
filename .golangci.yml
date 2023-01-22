@@ -34,11 +34,10 @@ linters-settings:
     packages:
       - encoding/json
       - github.com/pkg/errors
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/optimusmine/optimusmine)
+  gofmt:
+    rewrite-rules:
+      - pattern: interface{}
+        replacement: any
   gofumpt:
     extra-rules: true
   govet:

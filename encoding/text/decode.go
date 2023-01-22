@@ -13,7 +13,7 @@ import (
 )
 
 //nolint:cyclop
-func decode(ctx *fasthttp.RequestCtx, v interface{}) error {
+func decode(ctx *fasthttp.RequestCtx, v any) error {
 	b := bytes.TrimSpace(ctx.Request.Body())
 	if len(b) == 0 {
 		return nil

@@ -6,7 +6,7 @@ import (
 
 func TestCheck(t *testing.T) {
 	tests := []struct {
-		in       interface{}
+		in       any
 		expected bool
 	}{
 		{

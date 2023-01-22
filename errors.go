@@ -79,7 +79,7 @@ func (e *HTTPError) MarshalXML(enc *xml.Encoder, start xml.StartElement) error {
 	return enc.EncodeElement(e.Error(), start)
 }
 
-func (e *HTTPError) MarshalYAML() (interface{}, error) {
+func (e *HTTPError) MarshalYAML() (any, error) {
 	var m yaml.Marshaler
 	if errors.As(e.err, &m) {
 		return m.MarshalYAML()
@@ -137,7 +137,7 @@ func (e StatusError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
 	return enc.EncodeElement(e.Error(), start)
 }
 
-func (e StatusError) MarshalYAML() (interface{}, error) {
+func (e StatusError) MarshalYAML() (any, error) {
 	return map[string]string{"message": e.Error()}, nil
 }
 

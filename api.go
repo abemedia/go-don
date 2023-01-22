@@ -29,7 +29,7 @@ type Router interface {
 type API struct {
 	NotFound         fasthttp.RequestHandler
 	MethodNotAllowed fasthttp.RequestHandler
-	PanicHandler     func(*fasthttp.RequestCtx, interface{})
+	PanicHandler     func(*fasthttp.RequestCtx, any)
 
 	router *httprouter.Router
 	config *Config

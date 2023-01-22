@@ -9,7 +9,7 @@ type HeaderDecoder struct {
 	dec *CachedDecoder
 }
 
-func NewHeaderDecoder(v interface{}, tag string) (*HeaderDecoder, error) {
+func NewHeaderDecoder(v any, tag string) (*HeaderDecoder, error) {
 	dec, err := NewCachedDecoder(v, tag)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func NewHeaderDecoder(v interface{}, tag string) (*HeaderDecoder, error) {
 	return &HeaderDecoder{dec}, nil
 }
 
-func (d *HeaderDecoder) Decode(data *fasthttp.RequestHeader, v interface{}) error {
+func (d *HeaderDecoder) Decode(data *fasthttp.RequestHeader, v any) error {
 	return d.dec.Decode((*HeaderGetter)(data), v)
 }
 
