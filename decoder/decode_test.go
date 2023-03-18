@@ -16,38 +16,38 @@ func (h *unmarshaler) UnmarshalText(b []byte) error {
 
 func TestDecode(t *testing.T) {
 	type child struct {
-		String string `header:"string"`
+		String string `header:"String"`
 	}
 
 	type test struct {
-		Unmarshaler    unmarshaler  `header:"string"`
-		UnmarshalerPtr *unmarshaler `header:"string"`
-		String         string       `header:"string"`
-		StringPtr      *string      `header:"string"`
-		Int            int          `header:"number"`
-		Int8           int8         `header:"number"`
-		Int16          int16        `header:"number"`
-		Int32          int32        `header:"number"`
-		Int64          int64        `header:"number"`
-		Uint           uint         `header:"number"`
-		Uint8          uint8        `header:"number"`
-		Uint16         uint16       `header:"number"`
-		Uint32         uint32       `header:"number"`
-		Uint64         uint64       `header:"number"`
-		Float32        float32      `header:"number"`
-		Float64        float64      `header:"number"`
-		Bool           bool         `header:"bool"`
-		Bytes          []byte       `header:"string"`
-		Strings        []string     `header:"strings"`
+		Unmarshaler    unmarshaler  `header:"String"`
+		UnmarshalerPtr *unmarshaler `header:"String"`
+		String         string       `header:"String"`
+		StringPtr      *string      `header:"String"`
+		Int            int          `header:"Number"`
+		Int8           int8         `header:"Number"`
+		Int16          int16        `header:"Number"`
+		Int32          int32        `header:"Number"`
+		Int64          int64        `header:"Number"`
+		Uint           uint         `header:"Number"`
+		Uint8          uint8        `header:"Number"`
+		Uint16         uint16       `header:"Number"`
+		Uint32         uint32       `header:"Number"`
+		Uint64         uint64       `header:"Number"`
+		Float32        float32      `header:"Number"`
+		Float64        float64      `header:"Number"`
+		Bool           bool         `header:"Bool"`
+		Bytes          []byte       `header:"String"`
+		Strings        []string     `header:"Strings"`
 		Nested         child
 		NestedPtr      *child
 	}
 
 	in := decoder.MapGetter{
-		"string":  {"string"},
-		"strings": {"string", "string"},
-		"number":  {"1"},
-		"bool":    {"true"},
+		"String":  {"string"},
+		"Strings": {"string", "string"},
+		"Number":  {"1"},
+		"Bool":    {"true"},
 	}
 
 	s := "string"
@@ -97,11 +97,11 @@ func TestDecode(t *testing.T) {
 
 func TestDecodeNil(t *testing.T) {
 	type test struct {
-		String string `header:"string"`
+		String string `header:"String"`
 	}
 
 	in := decoder.MapGetter{
-		"string": {"string"},
+		"String": {"string"},
 	}
 
 	expected := &test{
