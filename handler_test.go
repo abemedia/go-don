@@ -158,7 +158,7 @@ func TestHandler(t *testing.T) {
 func TestHandlerRequest(t *testing.T) {
 	type request struct {
 		Path   string `path:"path"`
-		Header string `header:"header"`
+		Header string `header:"Header"`
 		Query  string `query:"query"`
 		JSON   string `json:"json"`
 	}
