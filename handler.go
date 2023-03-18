@@ -30,7 +30,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 		decodeHeader *decoder.HeaderDecoder
 		decodePath   *decoder.ParamsDecoder
 		decodeQuery  *decoder.ArgsDecoder
-		isNil        = makeNilCheck(*new(O)) //nolint:gocritic
+		isNil        = makeNilCheck(*new(O))
 	)
 
 	{

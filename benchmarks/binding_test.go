@@ -14,7 +14,7 @@ import (
 func BenchmarkDon_BindRequest(b *testing.B) {
 	type request struct {
 		Path   string `path:"path"`
-		Header string `header:"header"`
+		Header string `header:"Header"`
 		Query  string `query:"query"`
 	}
 
@@ -34,7 +34,7 @@ func BenchmarkDon_BindRequest(b *testing.B) {
 func BenchmarkGin_BindRequest(b *testing.B) {
 	type request struct {
 		Path   string `uri:"path"`
-		Header string `header:"header"`
+		Header string `header:"Header"`
 		Query  string `form:"query"`
 	}
 
