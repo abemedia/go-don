@@ -7,7 +7,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/google/go-cmp v0.5.9
 	github.com/gorilla/schema v1.2.0
-	github.com/valyala/fasthttp v1.45.0
+	github.com/valyala/fasthttp v1.46.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	gopkg.in/yaml.v3 v3.0.1
 )
