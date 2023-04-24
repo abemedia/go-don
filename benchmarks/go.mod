@@ -9,7 +9,7 @@ replace github.com/abemedia/go-don => ../
 require (
 	github.com/abemedia/go-don v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.0
-	github.com/valyala/fasthttp v1.45.0
+	github.com/valyala/fasthttp v1.46.0
 )
 
 require (
@@ -22,7 +22,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
-	github.com/goccy/go-json v0.10.1 // indirect
+	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
