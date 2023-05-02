@@ -9,7 +9,7 @@ replace github.com/abemedia/go-don => ../
 require (
 	github.com/abemedia/go-don v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.0
-	github.com/valyala/fasthttp v1.46.0
+	github.com/valyala/fasthttp v1.47.0
 )
 
 require (
