@@ -1,6 +1,7 @@
 # Don - Go API Framework
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/abemedia/go-don)](https://pkg.go.dev/github.com/abemedia/go-don)
+[![Codecov](https://codecov.io/gh/abemedia/go-don/branch/master/graph/badge.svg)](https://codecov.io/gh/abemedia/go-don)
 
 Don is a fast & simple API framework written in Go. It features a super-simple API and thanks to
 [fasthttp](https://github.com/valyala/fasthttp) and a custom version of
@@ -294,8 +295,7 @@ Don has extremely fast & efficient binding of request data.
 | BenchmarkDon_BindRequest | 6671070 | 172.1 ns/op |    0 B/op |  0 allocs/op |
 | BenchmarkGin_BindRequest |  313760 |  3581 ns/op | 1201 B/op | 22 allocs/op |
 
-Source:
-[benchmarks/binding_test.go](./benchmarks/binding_test.go)
+Source: [benchmarks/binding_test.go](./benchmarks/binding_test.go)
 
 ### Serving HTTP Requests
 
@@ -306,5 +306,4 @@ Keep in mind that the majority of time here is actually the HTTP roundtrip.
 | BenchmarkDon_HTTP | 66678 | 17452 ns/op |   32 B/op |  2 allocs/op |
 | BenchmarkGin_HTTP | 34054 | 34205 ns/op | 2301 B/op | 20 allocs/op |
 
-Source:
-[benchmarks/http_test.go](./benchmarks/http_test.go)
+Source: [benchmarks/http_test.go](./benchmarks/http_test.go)
