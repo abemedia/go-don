@@ -5,6 +5,10 @@ import "reflect"
 func hasTag(v any, tag string) bool {
 	t := reflect.TypeOf(v)
 
+	if t == nil {
+		return false
+	}
+
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
