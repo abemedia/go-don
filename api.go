@@ -64,34 +64,42 @@ func New(c *Config) *API {
 	}
 }
 
+// Get is a shortcut for router.Handle(http.MethodGet, path, handle).
 func (r *API) Get(path string, handle httprouter.Handle) {
 	r.Handle(http.MethodGet, path, handle)
 }
 
+// Post is a shortcut for router.Handle(http.MethodPost, path, handle).
 func (r *API) Post(path string, handle httprouter.Handle) {
 	r.Handle(http.MethodPost, path, handle)
 }
 
+// Put is a shortcut for router.Handle(http.MethodPut, path, handle).
 func (r *API) Put(path string, handle httprouter.Handle) {
 	r.Handle(http.MethodPut, path, handle)
 }
 
+// Patch is a shortcut for router.Handle(http.MethodPatch, path, handle).
 func (r *API) Patch(path string, handle httprouter.Handle) {
 	r.Handle(http.MethodPatch, path, handle)
 }
 
+// Delete is a shortcut for router.Handle(http.MethodDelete, path, handle).
 func (r *API) Delete(path string, handle httprouter.Handle) {
 	r.Handle(http.MethodDelete, path, handle)
 }
 
+// Handle registers a new request handle with the given path and method.
 func (r *API) Handle(method, path string, handle httprouter.Handle) {
 	r.router.Handle(method, path, handle)
 }
 
+// Handler is an adapter which allows the usage of an http.Handler as a request handle.
 func (r *API) Handler(method, path string, handle http.Handler) {
 	r.router.Handler(method, path, handle)
 }
 
+// HandlerFunc is an adapter which allows the usage of an http.HandlerFunc as a request handle.
 func (r *API) HandleFunc(method, path string, handle http.HandlerFunc) {
 	r.Handler(method, path, handle)
 }
@@ -145,6 +153,7 @@ func (r *API) RequestHandler() fasthttp.RequestHandler {
 	}
 }
 
+// ListenAndServe serves HTTP requests from the given TCP4 addr.
 func (r *API) ListenAndServe(addr string) error {
 	s := &fasthttp.Server{
 		Handler:              r.RequestHandler(),
