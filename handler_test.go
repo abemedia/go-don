@@ -170,7 +170,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid query",
 			want: response{
 				Code:   fasthttp.StatusBadRequest,
-				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
+				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct {
@@ -185,7 +185,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid header",
 			want: response{
 				Code:   fasthttp.StatusBadRequest,
-				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
+				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct {

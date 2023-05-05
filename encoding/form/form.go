@@ -6,10 +6,10 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var dec = decoder.NewDecoder("form")
+var dec = decoder.New("form")
 
 func decodeForm(ctx *fasthttp.RequestCtx, v any) error {
-	return dec.Decode((*decoder.ArgsGetter)(ctx.PostArgs()), v)
+	return dec.Decode((*decoder.Args)(ctx.PostArgs()), v)
 }
 
 func decodeMultipartForm(ctx *fasthttp.RequestCtx, v any) error {
@@ -18,7 +18,7 @@ func decodeMultipartForm(ctx *fasthttp.RequestCtx, v any) error {
 		return err
 	}
 
-	return dec.Decode(decoder.MapGetter(f.Value), v)
+	return dec.Decode(decoder.Map(f.Value), v)
 }
 
 func init() {

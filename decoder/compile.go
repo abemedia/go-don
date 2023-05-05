@@ -2,15 +2,12 @@ package decoder
 
 import (
 	"encoding"
-	"errors"
 	"reflect"
 	"strconv"
 	"unsafe"
 
 	"github.com/abemedia/go-don/internal/byteconv"
 )
-
-var ErrUnsupportedType = errors.New("decoder: unsupported type")
 
 type decoder func(reflect.Value, Getter) error
 
@@ -44,38 +41,36 @@ func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			index := i
-
 			decoders = append(decoders, func(v reflect.Value, m Getter) error {
 				return dec(v.Field(index), m)
 			})
 		case reflect.String:
 			decoders = append(decoders, decodeString(set[string](ptr, i, t), tag))
 		case reflect.Int:
-			decoders = append(decoders, decodeInt(set[int](ptr, i, t), tag))
+			decoders = append(decoders, decodeInt(set[int](ptr, i, t), tag, strconv.IntSize))
 		case reflect.Int8:
-			decoders = append(decoders, decodeInt8(set[int8](ptr, i, t), tag))
+			decoders = append(decoders, decodeInt(set[int8](ptr, i, t), tag, 8))
 		case reflect.Int16:
-			decoders = append(decoders, decodeInt16(set[int16](ptr, i, t), tag))
+			decoders = append(decoders, decodeInt(set[int16](ptr, i, t), tag, 16))
 		case reflect.Int32:
-			decoders = append(decoders, decodeInt32(set[int32](ptr, i, t), tag))
+			decoders = append(decoders, decodeInt(set[int32](ptr, i, t), tag, 32))
 		case reflect.Int64:
-			decoders = append(decoders, decodeInt64(set[int64](ptr, i, t), tag))
+			decoders = append(decoders, decodeInt(set[int64](ptr, i, t), tag, 64))
 		case reflect.Uint:
-			decoders = append(decoders, decodeUint(set[uint](ptr, i, t), tag))
+			decoders = append(decoders, decodeUint(set[uint](ptr, i, t), tag, strconv.IntSize))
 		case reflect.Uint8:
-			decoders = append(decoders, decodeUint8(set[uint8](ptr, i, t), tag))
+			decoders = append(decoders, decodeUint(set[uint8](ptr, i, t), tag, 8))
 		case reflect.Uint16:
-			decoders = append(decoders, decodeUint16(set[uint16](ptr, i, t), tag))
+			decoders = append(decoders, decodeUint(set[uint16](ptr, i, t), tag, 16))
 		case reflect.Uint32:
-			decoders = append(decoders, decodeUint32(set[uint32](ptr, i, t), tag))
+			decoders = append(decoders, decodeUint(set[uint32](ptr, i, t), tag, 32))
 		case reflect.Uint64:
-			decoders = append(decoders, decodeUint64(set[uint64](ptr, i, t), tag))
+			decoders = append(decoders, decodeUint(set[uint64](ptr, i, t), tag, 64))
 		case reflect.Float32:
-			decoders = append(decoders, decodeFloat32(set[float32](ptr, i, t), tag))
+			decoders = append(decoders, decodeFloat(set[float32](ptr, i, t), tag, 32))
 		case reflect.Float64:
-			decoders = append(decoders, decodeFloat64(set[float64](ptr, i, t), tag))
+			decoders = append(decoders, decodeFloat(set[float64](ptr, i, t), tag, 64))
 		case reflect.Bool:
 			decoders = append(decoders, decodeBool(set[bool](ptr, i, t), tag))
 		case reflect.Slice:
@@ -92,7 +87,7 @@ func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	}
 
 	if len(decoders) == 0 {
-		return func(reflect.Value, Getter) error { return nil }, nil
+		return nil, ErrTagNotFound
 	}
 
 	return func(v reflect.Value, d Getter) error {
@@ -100,7 +95,6 @@ func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 			if v.IsNil() {
 				v.Set(reflect.New(typ))
 			}
-
 			v = v.Elem()
 		}
 
@@ -134,7 +128,6 @@ func set[T any](ptr bool, i int, t reflect.Type) func(reflect.Value, T) {
 			if f.IsNil() {
 				f.Set(reflect.New(t))
 			}
-
 			*(*T)(unsafe.Pointer(f.Elem().UnsafeAddr())) = d
 		}
 	}
@@ -151,7 +144,6 @@ func get(ptr bool, i int, t reflect.Type) func(v reflect.Value) reflect.Value {
 			if f.IsNil() {
 				f.Set(reflect.New(t))
 			}
-
 			return f
 		}
 	}
@@ -166,7 +158,6 @@ func decodeTextUnmarshaler(get func(reflect.Value) reflect.Value, k string) deco
 		if s := g.Get(k); s != "" {
 			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(byteconv.Atob(s))
 		}
-
 		return nil
 	}
 }
@@ -176,187 +167,45 @@ func decodeString(set func(reflect.Value, string), k string) decoder {
 		if s := g.Get(k); s != "" {
 			set(v, s)
 		}
-
 		return nil
 	}
 }
 
-func decodeInt(set func(reflect.Value, int), k string) decoder {
+func decodeInt[T int | int8 | int16 | int32 | int64](set func(reflect.Value, T), k string, bits int) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			n, err := strconv.Atoi(s)
+			n, err := strconv.ParseInt(s, 10, bits)
 			if err != nil {
 				return err
 			}
-
-			set(v, n)
+			set(v, T(n))
 		}
-
 		return nil
 	}
 }
 
-func decodeInt8(set func(reflect.Value, int8), k string) decoder {
+func decodeFloat[T float32 | float64](set func(reflect.Value, T), k string, bits int) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseInt(s, 10, 8)
+			f, err := strconv.ParseFloat(s, bits)
 			if err != nil {
 				return err
 			}
-
-			set(v, int8(n))
+			set(v, T(f))
 		}
-
 		return nil
 	}
 }
 
-func decodeInt16(set func(reflect.Value, int16), k string) decoder {
+func decodeUint[T uint | uint8 | uint16 | uint32 | uint64](set func(reflect.Value, T), k string, bits int) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseInt(s, 10, 16)
+			n, err := strconv.ParseUint(s, 10, bits)
 			if err != nil {
 				return err
 			}
-
-			set(v, int16(n))
+			set(v, T(n))
 		}
-
-		return nil
-	}
-}
-
-func decodeInt32(set func(reflect.Value, int32), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseInt(s, 10, 32)
-			if err != nil {
-				return err
-			}
-
-			set(v, int32(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeInt64(set func(reflect.Value, int64), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.Atoi(s)
-			if err != nil {
-				return err
-			}
-
-			set(v, int64(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeFloat32(set func(reflect.Value, float32), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			f, err := strconv.ParseFloat(s, 32)
-			if err != nil {
-				return err
-			}
-
-			set(v, float32(f))
-		}
-
-		return nil
-	}
-}
-
-func decodeFloat64(set func(reflect.Value, float64), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			f, err := strconv.ParseFloat(s, 64)
-			if err != nil {
-				return err
-			}
-
-			set(v, f)
-		}
-
-		return nil
-	}
-}
-
-func decodeUint(set func(reflect.Value, uint), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseUint(s, 10, strconv.IntSize)
-			if err != nil {
-				return err
-			}
-
-			set(v, uint(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeUint8(set func(reflect.Value, uint8), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseUint(s, 10, 8)
-			if err != nil {
-				return err
-			}
-
-			set(v, uint8(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeUint16(set func(reflect.Value, uint16), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseUint(s, 10, 16)
-			if err != nil {
-				return err
-			}
-
-			set(v, uint16(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeUint32(set func(reflect.Value, uint32), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseUint(s, 10, 32)
-			if err != nil {
-				return err
-			}
-
-			set(v, uint32(n))
-		}
-
-		return nil
-	}
-}
-
-func decodeUint64(set func(reflect.Value, uint64), k string) decoder {
-	return func(v reflect.Value, g Getter) error {
-		if s := g.Get(k); s != "" {
-			n, err := strconv.ParseUint(s, 10, 64)
-			if err != nil {
-				return err
-			}
-
-			set(v, n)
-		}
-
 		return nil
 	}
 }
@@ -368,10 +217,8 @@ func decodeBool(set func(reflect.Value, bool), k string) decoder {
 			if err != nil {
 				return err
 			}
-
 			set(v, b)
 		}
-
 		return nil
 	}
 }
@@ -381,7 +228,6 @@ func decodeBytes(set func(reflect.Value, []byte), k string) decoder {
 		if s := g.Get(k); s != "" {
 			set(v, byteconv.Atob(s))
 		}
-
 		return nil
 	}
 }
@@ -391,7 +237,6 @@ func decodeStrings(set func(reflect.Value, []string), k string) decoder {
 		if s := g.Values(k); s != nil {
 			set(v, s)
 		}
-
 		return nil
 	}
 }

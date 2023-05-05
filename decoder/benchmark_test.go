@@ -33,7 +33,7 @@ func BenchmarkDecoder(b *testing.B) {
 		NestedPtr *child
 	}
 
-	in := decoder.MapGetter{
+	in := decoder.Map{
 		"string":  {"string"},
 		"strings": {"string", "string"},
 		"int":     {"1"},
@@ -63,7 +63,7 @@ func BenchmarkDecoder(b *testing.B) {
 	})
 
 	b.Run("DonCached", func(b *testing.B) {
-		dec, err := decoder.NewCachedDecoder(test{}, "schema")
+		dec, err := decoder.NewCached(test{}, "schema")
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -77,7 +77,7 @@ func BenchmarkDecoder(b *testing.B) {
 	})
 
 	b.Run("Don", func(b *testing.B) {
-		dec := decoder.NewDecoder("schema")
+		dec := decoder.New("schema")
 
 		for i := 0; i < b.N; i++ {
 			out := &test{}
