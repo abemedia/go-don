@@ -49,10 +49,10 @@ func encode(ctx *fasthttp.RequestCtx, v any) error {
 			b = strconv.AppendFloat(ctx.Response.Body(), v, 'f', -1, 64)
 		case bool:
 			b = strconv.AppendBool(ctx.Response.Body(), v)
-		case error:
-			b = byteconv.Atob(v.Error())
 		case encoding.TextMarshaler:
 			b, err = v.MarshalText()
+		case error:
+			b = byteconv.Atob(v.Error())
 		case fmt.Stringer:
 			b = append(ctx.Response.Body(), v.String()...)
 		default:

@@ -55,18 +55,16 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 			return
 		}
 
-		req := new(T)
-
 		var (
+			req = new(T)
 			res any
-			e   *HTTPError
 		)
 
 		// Decode the header.
 		if decodeHeader != nil {
 			err = decodeHeader.Decode(&ctx.Request.Header, req)
 			if err != nil {
-				e = Error(err, http.StatusBadRequest)
+				res = Error(err, http.StatusBadRequest)
 				goto Encode
 			}
 		}
@@ -76,7 +74,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 			if q := ctx.URI().QueryArgs(); q.Len() > 0 {
 				err := decodeQuery.Decode(q, req)
 				if err != nil {
-					e = Error(err, http.StatusBadRequest)
+					res = Error(err, http.StatusBadRequest)
 					goto Encode
 				}
 			}
@@ -86,7 +84,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 		if decodePath != nil && len(p) != 0 {
 			err := decodePath.Decode(p, req)
 			if err != nil {
-				e = Error(err, http.StatusBadRequest)
+				res = Error(ErrNotFound, 0)
 				goto Encode
 			}
 		}
@@ -95,27 +93,23 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 		if ctx.Request.Header.ContentLength() > 0 {
 			dec, err := getDecoder(getEncoding(ctx.Request.Header.ContentType()))
 			if err != nil {
-				res = err
+				res = Error(err, 0)
 				goto Encode
 			}
 
 			if err := dec(ctx, req); err != nil {
-				e = Error(err, http.StatusBadRequest)
+				res = Error(err, getStatusCode(err, http.StatusBadRequest))
 				goto Encode
 			}
 		}
 
 		res, err = handle(ctx, *req)
 		if err != nil {
-			e = Error(err, 0)
+			res = Error(err, 0)
 		}
 
 	Encode:
 		ctx.SetContentType(contentType + "; charset=utf-8")
-
-		if e != nil {
-			res = e
-		}
 
 		if h, ok := res.(Headerer); ok {
 			for k, v := range h.Header() {
@@ -139,13 +133,12 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 }
 
 func handleError(ctx *fasthttp.RequestCtx, err error) {
-	if statusCoder, ok := err.(StatusCoder); ok { //nolint:errorlint
-		if sc := statusCoder.StatusCode(); sc < http.StatusInternalServerError {
-			ctx.Error(err.Error()+"\n", sc)
-			return
-		}
+	code := getStatusCode(err, http.StatusInternalServerError)
+	if code < http.StatusInternalServerError {
+		ctx.Error(err.Error()+"\n", code)
+		return
 	}
-	ctx.Error(fasthttp.StatusMessage(http.StatusInternalServerError)+"\n", http.StatusInternalServerError)
+	ctx.Error(fasthttp.StatusMessage(code)+"\n", code)
 	ctx.Logger().Printf("%v", err)
 }
 
@@ -156,6 +149,13 @@ func getEncoding(b []byte) string {
 	}
 
 	return byteconv.Btoa(bytes.TrimSpace(b))
+}
+
+func getStatusCode(i any, fallback int) int {
+	if sc, ok := i.(StatusCoder); ok {
+		return sc.StatusCode()
+	}
+	return fallback
 }
 
 const (
