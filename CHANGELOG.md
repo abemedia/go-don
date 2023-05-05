@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2](https://github.com/abemedia/go-don/compare/v0.1.1...v0.1.2) (2023-05-05)
+
+
+### Features
+
+* improve error handling ([#85](https://github.com/abemedia/go-don/issues/85)) ([3f976fc](https://github.com/abemedia/go-don/commit/3f976fca67e518b9c786c4af32c46586fd5cdc06))
+
+
+### Bug Fixes
+
+* panic on interface request ([#82](https://github.com/abemedia/go-don/issues/82)) ([8e83bd6](https://github.com/abemedia/go-don/commit/8e83bd692db5569b36426b112d4d243cc106968a))
+
 ## [0.1.1](https://github.com/abemedia/go-don/compare/v0.1.0...v0.1.1) (2023-01-14)
 
 
