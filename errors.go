@@ -34,16 +34,16 @@ func (e *HTTPError) Error() string {
 }
 
 func (e *HTTPError) StatusCode() int {
+	if e.code != 0 {
+		return e.code
+	}
+
 	var sc StatusCoder
 	if errors.As(e.err, &sc) {
 		return sc.StatusCode()
 	}
 
-	if e.code == 0 {
-		return http.StatusInternalServerError
-	}
-
-	return e.code
+	return http.StatusInternalServerError
 }
 
 func (e *HTTPError) MarshalText() ([]byte, error) {
@@ -117,34 +117,3 @@ func (e StatusError) Error() string {
 func (e StatusError) StatusCode() int {
 	return int(e)
 }
-
-func (e StatusError) MarshalText() ([]byte, error) {
-	return byteconv.Atob(e.Error()), nil
-}
-
-func (e StatusError) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-
-	buf.WriteString(`{"message":`)
-	buf.WriteString(strconv.Quote(e.Error()))
-	buf.WriteRune('}')
-
-	return buf.Bytes(), nil
-}
-
-func (e StatusError) MarshalXML(enc *xml.Encoder, _ xml.StartElement) error {
-	start := xml.StartElement{Name: xml.Name{Local: "message"}}
-	return enc.EncodeElement(e.Error(), start)
-}
-
-func (e StatusError) MarshalYAML() (any, error) {
-	return map[string]string{"message": e.Error()}, nil
-}
-
-var (
-	_ error                  = (*StatusError)(nil)
-	_ encoding.TextMarshaler = (*StatusError)(nil)
-	_ json.Marshaler         = (*StatusError)(nil)
-	_ xml.Marshaler          = (*StatusError)(nil)
-	_ yaml.Marshaler         = (*StatusError)(nil)
-)
