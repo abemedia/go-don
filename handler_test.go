@@ -2,6 +2,9 @@ package don_test
 
 import (
 	"context"
+	"errors"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/abemedia/go-don"
@@ -13,7 +16,49 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func TestHandler(t *testing.T) {
+func TestHandlerRequest(t *testing.T) {
+	type request struct {
+		Path   string `path:"path"`
+		Header string `header:"Header"`
+		Query  string `query:"query"`
+		JSON   string `json:"json"`
+	}
+
+	var got request
+
+	want := request{
+		Path:   "path",
+		Header: "header",
+		Query:  "query",
+		JSON:   "json",
+	}
+
+	api := don.New(&don.Config{DefaultEncoding: "application/json"})
+
+	api.Post("/:path", don.H(func(ctx context.Context, req request) (any, error) {
+		got = req
+		return nil, nil
+	}))
+
+	api.RequestHandler()(httptest.NewRequest(
+		fasthttp.MethodPost,
+		"/path?query=query",
+		`{"json":"json"}`,
+		map[string]string{"header": "header"},
+	))
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestHandlerResponse(t *testing.T) {
+	type request struct {
+		url    string
+		body   string
+		header map[string]string
+	}
+
 	type response struct {
 		Code   int
 		Body   string
@@ -21,16 +66,16 @@ func TestHandler(t *testing.T) {
 	}
 
 	tests := []struct {
-		message  string
-		expected response
-		config   *don.Config
-		handler  httprouter.Handle
-		body     string
-		header   map[string]string
+		message string
+		want    response
+		config  *don.Config
+		route   string
+		handler httprouter.Handle
+		request request
 	}{
 		{
 			message: "should return no content",
-			expected: response{
+			want: response{
 				Code: fasthttp.StatusNoContent,
 				Body: "",
 				Header: map[string]string{
@@ -38,14 +83,13 @@ func TestHandler(t *testing.T) {
 					"Content-Type":   "text/plain; charset=utf-8",
 				},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
 			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
 		},
 		{
 			message: "should return null",
-			expected: response{
+			want: response{
 				Code: fasthttp.StatusOK,
 				Body: "null\n",
 				Header: map[string]string{
@@ -59,138 +103,162 @@ func TestHandler(t *testing.T) {
 			}),
 		},
 		{
-			message: "should JSON encode map",
-			expected: response{
-				Code:   fasthttp.StatusOK,
-				Body:   `{"foo":"bar"}` + "\n",
-				Header: map[string]string{"Content-Type": "application/json; charset=utf-8"},
+			message: "should set response headers",
+			want: response{
+				Code: fasthttp.StatusOK,
+				Header: map[string]string{
+					"Content-Type": "text/plain; charset=utf-8",
+					"Foo":          "bar",
+				},
 			},
-			config: &don.Config{DefaultEncoding: "application/json"},
-			handler: don.H(func(ctx context.Context, req don.Empty) (map[string]string, error) {
-				return map[string]string{"foo": "bar"}, nil
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+				return &headerer{}, nil
 			}),
 		},
 		{
 			message: "should return error on unprocessable request",
-			expected: response{
+			want: response{
 				Code:   fasthttp.StatusUnsupportedMediaType,
 				Body:   "Unsupported Media Type\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
 			handler: don.H(func(ctx context.Context, req struct{ Hello string }) (any, error) {
 				return nil, nil
 			}),
-			body: `{"foo":"bar"}`,
+			request: request{body: `{"foo":"bar"}`},
 		},
 		{
 			message: "should return error on unacceptable",
-			expected: response{
+			want: response{
 				Code:   fasthttp.StatusNotAcceptable,
 				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
 			handler: don.H(func(ctx context.Context, req don.Empty) ([]string, error) {
 				return []string{"foo", "bar"}, nil
 			}),
-			header: map[string]string{"Accept": "text/plain; charset=utf-8"},
+			request: request{header: map[string]string{"Accept": "text/plain; charset=utf-8"}},
 		},
 		{
 			message: "should return error on unsupported accept",
-			expected: response{
+			want: response{
 				Code:   fasthttp.StatusNotAcceptable,
 				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
 			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
-			header: map[string]string{"Accept": "application/msword"},
+			request: request{header: map[string]string{"Accept": "application/msword"}},
 		},
 		{
 			message: "should return error on unsupported content type",
-			expected: response{
+			want: response{
 				Code:   fasthttp.StatusUnsupportedMediaType,
 				Body:   "Unsupported Media Type\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
 			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
 				return nil, nil
 			}),
-			body:   `foo`,
-			header: map[string]string{"Content-Type": "application/msword"},
+			request: request{
+				body:   `foo`,
+				header: map[string]string{"Content-Type": "application/msword"},
+			},
 		},
 		{
-			message: "should read text request",
-			expected: response{
-				Code:   fasthttp.StatusOK,
-				Body:   "foo\n",
+			message: "should return error on invalid query",
+			want: response{
+				Code:   fasthttp.StatusBadRequest,
+				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			config: &don.Config{DefaultEncoding: "text/plain"},
-			handler: don.H(func(ctx context.Context, req string) (string, error) {
+			handler: don.H(func(ctx context.Context, req struct {
+				Test int `query:"test"`
+			},
+			) (any, error) {
 				return req, nil
 			}),
-			body: `foo`,
+			request: request{url: "/?test=foo"},
+		},
+		{
+			message: "should return error on invalid header",
+			want: response{
+				Code:   fasthttp.StatusBadRequest,
+				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
+				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
+			},
+			handler: don.H(func(ctx context.Context, req struct {
+				Test int `header:"Test"`
+			},
+			) (any, error) {
+				return req, nil
+			}),
+			request: request{header: map[string]string{"Test": "foo"}},
+		},
+		{
+			message: "should return error on invalid path element",
+			want: response{
+				Code:   fasthttp.StatusNotFound,
+				Body:   "Not Found\n",
+				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
+			},
+			handler: don.H(func(ctx context.Context, req struct {
+				Test int `path:"test"`
+			},
+			) (any, error) {
+				return req, nil
+			}),
+			route:   "/:test",
+			request: request{url: "/foo"},
+		},
+		{
+			message: "should return error on invalid body",
+			want: response{
+				Code:   fasthttp.StatusBadRequest,
+				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
+				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
+			},
+			handler: don.H(func(ctx context.Context, req int) (any, error) {
+				return req, nil
+			}),
+			request: request{body: "foo"},
+		},
+		{
+			message: "should return internal server error",
+			want: response{
+				Code:   fasthttp.StatusInternalServerError,
+				Body:   "test\n",
+				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
+			},
+			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+				return nil, errors.New("test")
+			}),
 		},
 	}
 
 	for _, test := range tests {
-		// Pass config to handler.
-		api := don.New(test.config)
-		api.Get("/", test.handler)
+		ctx := httptest.NewRequest(fasthttp.MethodPost, test.request.url, test.request.body, test.request.header)
 
-		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", test.body, test.header)
+		api := don.New(test.config)
+		api.Post("/"+strings.TrimPrefix(test.route, "/"), test.handler)
 		api.RequestHandler()(ctx)
 
 		res := response{ctx.Response.StatusCode(), string(ctx.Response.Body()), map[string]string{}}
 		ctx.Response.Header.VisitAll(func(key, value []byte) { res.Header[string(key)] = string(value) })
 
-		if diff := cmp.Diff(test.expected, res); diff != "" {
+		if diff := cmp.Diff(test.want, res); diff != "" {
 			t.Errorf("%s:\n%s", test.message, diff)
 		}
 	}
 }
 
-func TestHandlerRequest(t *testing.T) {
-	type request struct {
-		Path   string `path:"path"`
-		Header string `header:"Header"`
-		Query  string `query:"query"`
-		JSON   string `json:"json"`
-	}
+type headerer struct{}
 
-	api := don.New(&don.Config{
-		DefaultEncoding: "application/json",
-	})
+func (h *headerer) String() string {
+	return ""
+}
 
-	api.Post("/:path", don.H(func(ctx context.Context, req request) (any, error) {
-		if req.Path != "path" {
-			t.Error("no path")
-		}
-		if req.Header != "header" {
-			t.Error("no header")
-		}
-		if req.Query != "query" {
-			t.Error("no query")
-		}
-		if req.JSON != "json" {
-			t.Error("no JSON", req)
-		}
-		return nil, nil
-	}))
-
-	h := api.RequestHandler()
-
-	ctx := httptest.NewRequest(
-		fasthttp.MethodPost,
-		"/path?query=query",
-		`{"json":"json"}`,
-		map[string]string{"header": "header"},
-	)
-
-	h(ctx)
+func (h *headerer) Header() http.Header {
+	return http.Header{"Foo": []string{"bar"}}
 }
