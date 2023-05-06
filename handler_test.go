@@ -262,3 +262,23 @@ func (h *headerer) String() string {
 func (h *headerer) Header() http.Header {
 	return http.Header{"Foo": []string{"bar"}}
 }
+
+func BenchmarkHandler(b *testing.B) {
+	type request struct {
+		Path   string `path:"path"`
+		Header string `header:"Header"`
+		Query  string `query:"query"`
+	}
+
+	api := don.New(nil)
+	api.Post("/:path", don.H(func(ctx context.Context, req request) (any, error) {
+		return nil, nil
+	}))
+
+	h := api.RequestHandler()
+	ctx := httptest.NewRequest("POST", "/path?query=query", "", map[string]string{"header": "header"})
+
+	for i := 0; i < b.N; i++ {
+		h(ctx)
+	}
+}
