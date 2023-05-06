@@ -1,0 +1,72 @@
+name: Benchmark
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Install benchstat
+        run: GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
+
+      - name: Run benchmark
+        run: go test -bench=. -count=10 -benchmem ./... | tee bench-new.txt
+
+      - name: Run benchmark for base code
+        run: |
+          git fetch origin master ${{ github.event.pull_request.base.sha }}
+          HEAD=$(git rev-parse HEAD)
+          git reset --hard ${{ github.event.pull_request.base.sha }}
+          go test -bench=. -count=10 -benchmem ./... | tee bench-master.txt
+          benchstat bench-master.txt
+          git reset --hard $HEAD
+
+      - name: Benchmark stats
+        id: bench
+        run: |
+          OUTPUT=$(benchstat bench-master.txt bench-new.txt)
+          echo "${OUTPUT}"
+          echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
+          OUTPUT=$(benchstat bench-new.txt)
+          echo "${OUTPUT}"
+          echo "result<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment benchmark result
+        continue-on-error: true
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: bench
+          message: |
+            ### Benchmark Result
+            <details><summary>Benchmark diff with base branch</summary>
+
+            ```
+            ${{ steps.bench.outputs.diff }}
+            ```
+            </details>
+
+            <details><summary>Benchmark result</summary>
+
+            ```
+            ${{ steps.bench.outputs.result }}
+            ```
+            </details>
