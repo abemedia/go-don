@@ -18,6 +18,7 @@ type Router interface {
 	Get(path string, handle httprouter.Handle)
 	Post(path string, handle httprouter.Handle)
 	Put(path string, handle httprouter.Handle)
+	Patch(path string, handle httprouter.Handle)
 	Delete(path string, handle httprouter.Handle)
 	Handle(method, path string, handle httprouter.Handle)
 	Handler(method, path string, handle http.Handler)

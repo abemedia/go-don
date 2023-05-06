@@ -6,11 +6,18 @@ import (
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
+	"github.com/abemedia/go-don/internal/test"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
 
 func TestGroup(t *testing.T) {
+	api := don.New(nil)
+	group := api.Group("/group")
+	test.Router(t, group, api.RequestHandler(), "/group")
+}
+
+func TestGroup_Use(t *testing.T) {
 	mwCalled := false
 
 	api := don.New(nil)
