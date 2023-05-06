@@ -10,6 +10,11 @@ import (
 )
 
 func TestAdapters(t *testing.T) {
+	t.Run("Map", func(t *testing.T) {
+		in := map[string][]string{"string": {"string"}}
+		testAdapter(t, decoder.Map(in))
+	})
+
 	t.Run("Args", func(t *testing.T) {
 		in := &fasthttp.Args{}
 		in.Add("string", "string")
@@ -32,6 +37,8 @@ func testAdapter(t *testing.T, in decoder.Getter) {
 	t.Helper()
 
 	type item struct {
+		Zero    string   `field:"empty"`
+		Nil     []string `field:"empty"`
 		String  string   `field:"string"`
 		Strings []string `field:"string"`
 	}
