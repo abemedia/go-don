@@ -55,7 +55,7 @@ issues:
         - funlen
         - goerr113
         - gosec
-    - path: (.+)_test.go
+    - path: ((.+)_test.go|internal/test/(.+))
       linters: [govet]
       text: '^fieldalignment:'
     - linters: [govet]
