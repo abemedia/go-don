@@ -5,7 +5,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/abemedia/go-don/decoder"
 	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
@@ -25,26 +24,9 @@ type Headerer interface {
 type Handle[T, O any] func(ctx context.Context, request T) (O, error)
 
 // H wraps your handler function with the Go generics magic.
-func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cyclop
-	var (
-		decodeHeader *decoder.HeaderDecoder
-		decodePath   *decoder.ParamsDecoder
-		decodeQuery  *decoder.ArgsDecoder
-		isNil        = makeNilCheck(*new(O))
-	)
-
-	{
-		var t T
-		if hasTag(t, headerTag) {
-			decodeHeader, _ = decoder.NewHeaderDecoder(t, headerTag)
-		}
-		if hasTag(t, queryTag) {
-			decodeQuery, _ = decoder.NewArgsDecoder(t, queryTag)
-		}
-		if hasTag(t, pathTag) {
-			decodePath, _ = decoder.NewParamsDecoder(t, pathTag)
-		}
-	}
+func H[T, O any](handle Handle[T, O]) httprouter.Handle {
+	decodeRequest := newRequestDecoder(*new(T))
+	isNil := makeNilCheck(*new(O))
 
 	return func(ctx *fasthttp.RequestCtx, p httprouter.Params) {
 		contentType := getEncoding(ctx.Request.Header.Peek(fasthttp.HeaderAccept))
@@ -60,55 +42,15 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle { //nolint:gocognit,cycl
 			res any
 		)
 
-		// Decode the header.
-		if decodeHeader != nil {
-			err = decodeHeader.Decode(&ctx.Request.Header, req)
-			if err != nil {
-				res = Error(err, http.StatusBadRequest)
-				goto Encode
-			}
-		}
-
-		// Decode the URL query.
-		if decodeQuery != nil {
-			if q := ctx.URI().QueryArgs(); q.Len() > 0 {
-				err := decodeQuery.Decode(q, req)
-				if err != nil {
-					res = Error(err, http.StatusBadRequest)
-					goto Encode
-				}
-			}
-		}
-
-		// Decode the path params.
-		if decodePath != nil && len(p) != 0 {
-			err := decodePath.Decode(p, req)
-			if err != nil {
-				res = Error(ErrNotFound, 0)
-				goto Encode
-			}
-		}
-
-		// Decode the body.
-		if ctx.Request.Header.ContentLength() > 0 {
-			dec, err := getDecoder(getEncoding(ctx.Request.Header.ContentType()))
+		if err = decodeRequest(req, ctx, p); err != nil {
+			res = Error(err, getStatusCode(err, http.StatusBadRequest))
+		} else {
+			res, err = handle(ctx, *req)
 			if err != nil {
 				res = Error(err, 0)
-				goto Encode
-			}
-
-			if err := dec(ctx, req); err != nil {
-				res = Error(err, getStatusCode(err, http.StatusBadRequest))
-				goto Encode
 			}
 		}
 
-		res, err = handle(ctx, *req)
-		if err != nil {
-			res = Error(err, 0)
-		}
-
-	Encode:
 		ctx.SetContentType(contentType + "; charset=utf-8")
 
 		if h, ok := res.(Headerer); ok {
@@ -157,9 +99,3 @@ func getStatusCode(i any, fallback int) int {
 	}
 	return fallback
 }
-
-const (
-	headerTag = "header"
-	pathTag   = "path"
-	queryTag  = "query"
-)

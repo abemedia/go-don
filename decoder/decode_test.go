@@ -16,38 +16,38 @@ func (h *unmarshaler) UnmarshalText(b []byte) error {
 
 func TestDecode(t *testing.T) {
 	type child struct {
-		String string `header:"String"`
+		String string `field:"string"`
 	}
 
 	type test struct {
-		Unmarshaler    unmarshaler  `header:"String"`
-		UnmarshalerPtr *unmarshaler `header:"String"`
-		String         string       `header:"String"`
-		StringPtr      *string      `header:"String"`
-		Int            int          `header:"Number"`
-		Int8           int8         `header:"Number"`
-		Int16          int16        `header:"Number"`
-		Int32          int32        `header:"Number"`
-		Int64          int64        `header:"Number"`
-		Uint           uint         `header:"Number"`
-		Uint8          uint8        `header:"Number"`
-		Uint16         uint16       `header:"Number"`
-		Uint32         uint32       `header:"Number"`
-		Uint64         uint64       `header:"Number"`
-		Float32        float32      `header:"Number"`
-		Float64        float64      `header:"Number"`
-		Bool           bool         `header:"Bool"`
-		Bytes          []byte       `header:"String"`
-		Strings        []string     `header:"Strings"`
+		Unmarshaler    unmarshaler  `field:"string"`
+		UnmarshalerPtr *unmarshaler `field:"string"`
+		String         string       `field:"string"`
+		StringPtr      *string      `field:"string"`
+		Int            int          `field:"number"`
+		Int8           int8         `field:"number"`
+		Int16          int16        `field:"number"`
+		Int32          int32        `field:"number"`
+		Int64          int64        `field:"number"`
+		Uint           uint         `field:"number"`
+		Uint8          uint8        `field:"number"`
+		Uint16         uint16       `field:"number"`
+		Uint32         uint32       `field:"number"`
+		Uint64         uint64       `field:"number"`
+		Float32        float32      `field:"number"`
+		Float64        float64      `field:"number"`
+		Bool           bool         `field:"bool"`
+		Bytes          []byte       `field:"string"`
+		Strings        []string     `field:"strings"`
 		Nested         child
 		NestedPtr      *child
 	}
 
-	in := decoder.MapGetter{
-		"String":  {"string"},
-		"Strings": {"string", "string"},
-		"Number":  {"1"},
-		"Bool":    {"true"},
+	in := decoder.Map{
+		"string":  {"string"},
+		"strings": {"string", "string"},
+		"number":  {"1"},
+		"bool":    {"true"},
 	}
 
 	s := "string"
@@ -80,12 +80,33 @@ func TestDecode(t *testing.T) {
 		},
 	}
 
-	dec, err := decoder.NewCachedDecoder(test{}, "header")
+	dec := decoder.New("field")
+
+	actual := &test{}
+	if err := dec.Decode(in, actual); err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(expected, actual); diff != "" {
+		t.Errorf(diff)
+	}
+}
+
+func TestCached(t *testing.T) {
+	type test struct {
+		String string `field:"string"`
+	}
+
+	in := decoder.Map{"string": {"string"}}
+	expected := &test{String: "string"}
+
+	dec, err := decoder.NewCached(test{}, "field")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	actual := &test{}
+
 	if err = dec.Decode(in, actual); err != nil {
 		t.Fatal(err)
 	}
@@ -95,25 +116,20 @@ func TestDecode(t *testing.T) {
 	}
 }
 
-func TestDecodeNil(t *testing.T) {
+func TestCachedNil(t *testing.T) {
 	type test struct {
-		String string `header:"String"`
+		String string `field:"string"`
 	}
 
-	in := decoder.MapGetter{
-		"String": {"string"},
-	}
+	in := decoder.Map{"string": {"string"}}
+	expected := &test{String: "string"}
 
-	expected := &test{
-		String: "string",
-	}
-
-	var actual *test
-
-	dec, err := decoder.NewCachedDecoder(actual, "header")
+	dec, err := decoder.NewCached(&test{}, "field")
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	var actual *test
 
 	if err = dec.Decode(in, &actual); err != nil {
 		t.Fatal(err)
