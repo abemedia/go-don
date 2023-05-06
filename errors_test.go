@@ -1,11 +1,9 @@
 package don_test
 
 import (
-	"context"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"net/http"
 	"testing"
 
 	"github.com/abemedia/go-don"
@@ -13,102 +11,81 @@ import (
 	_ "github.com/abemedia/go-don/encoding/text"
 	_ "github.com/abemedia/go-don/encoding/xml"
 	_ "github.com/abemedia/go-don/encoding/yaml"
-	"github.com/abemedia/go-don/internal/byteconv"
-	"github.com/abemedia/go-don/pkg/httptest"
+	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
+	"github.com/valyala/fasthttp"
+	"gopkg.in/yaml.v3"
 )
 
-func TestError(t *testing.T) {
-	tests := []struct {
-		err  error
-		mime string
-		body string
-		code int
-	}{
-		{
-			err:  don.ErrBadRequest,
-			mime: "text/plain; charset=utf-8",
-			body: "Bad Request\n",
-			code: http.StatusBadRequest,
-		},
-		{
-			err:  don.Error(errors.New("test"), http.StatusBadRequest),
-			mime: "text/plain; charset=utf-8",
-			body: "test\n",
-			code: http.StatusBadRequest,
-		},
-		{
-			err:  errors.New("test"),
-			mime: "text/plain; charset=utf-8",
-			body: "test\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  errors.New("test"),
-			mime: "application/json; charset=utf-8",
-			body: `{"message":"test"}` + "\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  errors.New("test"),
-			mime: "application/x-yaml; charset=utf-8",
-			body: "message: test\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  errors.New("test"),
-			mime: "application/xml; charset=utf-8",
-			body: "<message>test</message>",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  &testError{},
-			mime: "text/plain; charset=utf-8",
-			body: "test\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  &testError{},
-			mime: "application/json; charset=utf-8",
-			body: `{"custom":"test"}` + "\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  &testError{},
-			mime: "application/x-yaml; charset=utf-8",
-			body: "custom: test\n",
-			code: http.StatusInternalServerError,
-		},
-		{
-			err:  &testError{},
-			mime: "application/xml; charset=utf-8",
-			body: "<custom>test</custom>",
-			code: http.StatusInternalServerError,
-		},
+func TestError_Is(t *testing.T) {
+	if !errors.Is(don.Error(errTest, 0), errTest) {
+		t.Error("should match wrapped error")
 	}
-
-	for _, tc := range tests {
-		ctx := httptest.NewRequest("", "/", "", map[string]string{"Accept": tc.mime})
-
-		api := don.New(nil)
-		api.Get("/", don.H(func(ctx context.Context, req don.Empty) (any, error) { return nil, tc.err }))
-		api.RequestHandler()(ctx)
-
-		type response struct {
-			Code   int
-			Body   string
-			Header map[string]string
-		}
-
-		res := response{ctx.Response.StatusCode(), string(ctx.Response.Body()), map[string]string{}}
-		ctx.Response.Header.VisitAll(func(key, value []byte) { res.Header[string(key)] = string(value) })
-
-		want := response{tc.code, tc.body, map[string]string{"Content-Type": tc.mime}}
-		if diff := cmp.Diff(want, res); diff != "" {
-			t.Error(diff)
-		}
+	if !errors.Is(don.Error(errTest, fasthttp.StatusBadRequest), don.ErrBadRequest) {
+		t.Error("should match status error")
 	}
 }
+
+func TestError_Unwrap(t *testing.T) {
+	if errors.Unwrap(don.Error(errTest, 0)) != errTest {
+		t.Error("should unwrap wrapped error")
+	}
+}
+
+func TestError_StatusCode(t *testing.T) {
+	if don.Error(don.ErrBadRequest, 0).StatusCode() != fasthttp.StatusBadRequest {
+		t.Error("should respect wrapped error's status code")
+	}
+	if don.Error(don.ErrBadRequest, fasthttp.StatusConflict).StatusCode() != fasthttp.StatusConflict {
+		t.Error("should ignore wrapped error's status code if explicitly set")
+	}
+}
+
+func TestError_MarshalText(t *testing.T) {
+	b, _ := don.Error(errTest, 0).MarshalText()
+	if diff := cmp.Diff("test", string(b)); diff != "" {
+		t.Error(diff)
+	}
+	b, _ = don.Error(&testError{}, 0).MarshalText()
+	if diff := cmp.Diff("custom", string(b)); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestError_MarshalJSON(t *testing.T) {
+	b, _ := json.Marshal(don.Error(errTest, 0))
+	if diff := cmp.Diff(`{"message":"test"}`, string(b)); diff != "" {
+		t.Error(diff)
+	}
+	b, _ = json.Marshal(don.Error(&testError{}, 0))
+	if diff := cmp.Diff(`{"custom":"test"}`, string(b)); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestError_MarshalXML(t *testing.T) {
+	b, _ := xml.Marshal(don.Error(errTest, 0))
+	if diff := cmp.Diff("<message>test</message>", string(b)); diff != "" {
+		t.Error(diff)
+	}
+	b, _ = xml.Marshal(don.Error(&testError{}, 0))
+	if diff := cmp.Diff("<custom>test</custom>", string(b)); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestError_MarshalYAML(t *testing.T) {
+	b, _ := yaml.Marshal(don.Error(errTest, 0))
+	if diff := cmp.Diff("message: test\n", string(b)); diff != "" {
+		t.Error(diff)
+	}
+	b, _ = yaml.Marshal(don.Error(&testError{}, 0))
+	if diff := cmp.Diff("custom: test\n", string(b)); diff != "" {
+		t.Error(diff)
+	}
+}
+
+var errTest = errors.New("test")
 
 type testError struct{}
 
@@ -117,7 +94,7 @@ func (e *testError) Error() string {
 }
 
 func (e *testError) MarshalText() ([]byte, error) {
-	return byteconv.Atob(e.Error()), nil
+	return []byte("custom"), nil
 }
 
 func (e *testError) MarshalJSON() ([]byte, error) {

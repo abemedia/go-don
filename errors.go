@@ -6,7 +6,6 @@ import (
 	"encoding"
 	"encoding/xml"
 	"errors"
-	"net/http"
 	"strconv"
 
 	"github.com/abemedia/go-don/internal/byteconv"
@@ -33,6 +32,14 @@ func (e *HTTPError) Error() string {
 	return e.err.Error()
 }
 
+func (e *HTTPError) Is(err error) bool {
+	return errors.Is(e.err, err) || errors.Is(StatusError(e.code), err)
+}
+
+func (e *HTTPError) Unwrap() error {
+	return e.err
+}
+
 func (e *HTTPError) StatusCode() int {
 	if e.code != 0 {
 		return e.code
@@ -43,7 +50,7 @@ func (e *HTTPError) StatusCode() int {
 		return sc.StatusCode()
 	}
 
-	return http.StatusInternalServerError
+	return fasthttp.StatusInternalServerError
 }
 
 func (e *HTTPError) MarshalText() ([]byte, error) {

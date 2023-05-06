@@ -51,6 +51,7 @@ issues:
     - path: (.+)_test.go
       linters:
         - errcheck
+        - errorlint
         - funlen
         - goerr113
         - gosec
