@@ -2,14 +2,19 @@ package don
 
 import (
 	"bytes"
+	"net"
 	"net/http"
 
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
 
+// Empty is the type used when an API handler contains either no request or no
+// response.
 type Empty struct{}
 
+// DefaultEncoding contains the mime type of the default encoding to fall
+// back on if no `Accept` or `Content-Type` header was provided.
 var DefaultEncoding = "text/plain"
 
 type Middleware func(fasthttp.RequestHandler) fasthttp.RequestHandler
@@ -38,6 +43,8 @@ type API struct {
 }
 
 type Config struct {
+	// DefaultEncoding contains the mime type of the default encoding to fall
+	// back on if no `Accept` or `Content-Type` header was provided.
 	DefaultEncoding string
 
 	// DisableNoContent controls whether a nil or zero value response should
@@ -55,10 +62,8 @@ func New(c *Config) *API {
 		c.DefaultEncoding = DefaultEncoding
 	}
 
-	r := httprouter.New()
-
 	return &API{
-		router:           r,
+		router:           httprouter.New(),
 		config:           c,
 		NotFound:         E(ErrNotFound),
 		MethodNotAllowed: E(ErrMethodNotAllowed),
@@ -102,7 +107,7 @@ func (r *API) Handler(method, path string, handle http.Handler) {
 
 // HandlerFunc is an adapter which allows the usage of an http.HandlerFunc as a request handle.
 func (r *API) HandleFunc(method, path string, handle http.HandlerFunc) {
-	r.Handler(method, path, handle)
+	r.router.HandlerFunc(method, path, handle)
 }
 
 func (r *API) Group(path string) Router {
@@ -123,8 +128,6 @@ func (r *API) RequestHandler() fasthttp.RequestHandler {
 	for _, mw := range r.mw {
 		h = mw(h)
 	}
-
-	anyEncoding := []byte("*/*")
 
 	return func(ctx *fasthttp.RequestCtx) {
 		ct := ctx.Request.Header.ContentType()
@@ -156,11 +159,20 @@ func (r *API) RequestHandler() fasthttp.RequestHandler {
 
 // ListenAndServe serves HTTP requests from the given TCP4 addr.
 func (r *API) ListenAndServe(addr string) error {
-	s := &fasthttp.Server{
+	return newServer(r).ListenAndServe(addr)
+}
+
+// Serve serves incoming connections from the given listener.
+func (r *API) Serve(ln net.Listener) error {
+	return newServer(r).Serve(ln)
+}
+
+func newServer(r *API) *fasthttp.Server {
+	return &fasthttp.Server{
 		Handler:              r.RequestHandler(),
 		StreamRequestBody:    true,
 		NoDefaultContentType: true,
 	}
-
-	return s.ListenAndServe(addr)
 }
+
+var anyEncoding = []byte("*/*")
