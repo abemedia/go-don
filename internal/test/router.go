@@ -1,6 +1,7 @@
 package test
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 
@@ -26,14 +27,23 @@ func Router(t *testing.T, r don.Router, handler fasthttp.RequestHandler, basePat
 		{"Handle", fasthttp.MethodGet, func(path string, handle httprouter.Handle) {
 			r.Handle(fasthttp.MethodGet, path, handle)
 		}},
+		{"Handler", fasthttp.MethodGet, func(path string, handle httprouter.Handle) {
+			r.Handler(fasthttp.MethodGet, path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("Handler"))
+			}))
+		}},
+		{"HandleFunc", fasthttp.MethodGet, func(path string, handle httprouter.Handle) {
+			r.HandleFunc(fasthttp.MethodGet, path, func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("HandleFunc"))
+			})
+		}},
 	}
 
 	for _, test := range tests {
 		path := "/" + strings.ToLower(test.desc)
 
-		var ok bool
 		test.fn(path, func(ctx *fasthttp.RequestCtx, p httprouter.Params) {
-			ok = true
+			_, _ = ctx.WriteString(test.desc)
 		})
 
 		ctx := httptest.NewRequest(test.method, basePath+path, "", nil)
@@ -43,7 +53,7 @@ func Router(t *testing.T, r don.Router, handler fasthttp.RequestHandler, basePat
 			t.Errorf("%s request should return success status: %s", test.desc, fasthttp.StatusMessage(code))
 		}
 
-		if !ok {
+		if string(ctx.Response.Body()) != test.desc {
 			t.Errorf("%s request should reach handler", test.desc)
 		}
 	}
