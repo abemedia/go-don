@@ -34,7 +34,7 @@ func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...
 	}
 
 	for _, alias := range aliases {
-		decoderAliases[alias] = contentType
+		decoders[alias] = decoders[contentType]
 	}
 }
 
@@ -42,15 +42,7 @@ func getDecoder(mime string) (RequestParser, error) {
 	if enc := decoders[mime]; enc != nil {
 		return enc, nil
 	}
-
-	if name := decoderAliases[mime]; name != "" {
-		return decoders[name], nil
-	}
-
 	return nil, ErrUnsupportedMediaType
 }
 
-var (
-	decoders       = map[string]RequestParser{}
-	decoderAliases = map[string]string{}
-)
+var decoders = map[string]RequestParser{}

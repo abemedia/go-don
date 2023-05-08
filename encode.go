@@ -25,9 +25,8 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 			if err != nil {
 				return err
 			}
-
-			_, err = ctx.Write(b)
-			return err
+			ctx.Response.SetBodyRaw(b)
+			return nil
 		}
 
 	case ContextMarshaler:
@@ -36,9 +35,8 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 			if err != nil {
 				return err
 			}
-
-			_, err = ctx.Write(b)
-			return err
+			ctx.Response.SetBodyRaw(b)
+			return nil
 		}
 
 	case ResponseEncoder:
@@ -46,7 +44,7 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 	}
 
 	for _, alias := range aliases {
-		encoderAliases[alias] = contentType
+		encoders[alias] = encoders[contentType]
 	}
 }
 
@@ -54,15 +52,7 @@ func getEncoder(mime string) (ResponseEncoder, error) {
 	if enc := encoders[mime]; enc != nil {
 		return enc, nil
 	}
-
-	if name := encoderAliases[mime]; name != "" {
-		return encoders[name], nil
-	}
-
 	return nil, ErrNotAcceptable
 }
 
-var (
-	encoders       = map[string]ResponseEncoder{}
-	encoderAliases = map[string]string{}
-)
+var encoders = map[string]ResponseEncoder{}
