@@ -1,6 +1,7 @@
 package decoder_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/abemedia/go-don/decoder"
@@ -80,62 +81,83 @@ func TestDecode(t *testing.T) {
 		},
 	}
 
-	dec := decoder.New("field")
+	t.Run("Decoder", func(t *testing.T) {
+		dec := decoder.New("field")
+		actual := &test{}
+		if err := dec.Decode(in, actual); err != nil {
+			t.Fatal(err)
+		}
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Errorf(diff)
+		}
+	})
 
-	actual := &test{}
-	if err := dec.Decode(in, actual); err != nil {
-		t.Fatal(err)
-	}
+	t.Run("CachedDecoder", func(t *testing.T) {
+		dec, err := decoder.NewCached(test{}, "field")
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	if diff := cmp.Diff(expected, actual); diff != "" {
-		t.Errorf(diff)
-	}
+		actual := &test{}
+		if err := dec.Decode(in, actual); err != nil {
+			t.Fatal(err)
+		}
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Errorf(diff)
+		}
+
+		actual = &test{}
+		val := reflect.ValueOf(actual).Elem()
+		if err = dec.DecodeValue(in, val); err != nil {
+			t.Fatal(err)
+		}
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Errorf(diff)
+		}
+	})
+
+	t.Run("CachedDecoder_NilPointer", func(t *testing.T) {
+		dec, err := decoder.NewCached(&test{}, "field")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var actual *test
+		if err := dec.Decode(in, &actual); err != nil {
+			t.Fatal(err)
+		}
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Errorf(diff)
+		}
+	})
 }
 
-func TestCached(t *testing.T) {
-	type test struct {
-		String string `field:"string"`
+func TestDecodeError(t *testing.T) {
+	type noTag struct {
+		Test string `json:"test"`
 	}
-
-	in := decoder.Map{"string": {"string"}}
-	expected := &test{String: "string"}
-
-	dec, err := decoder.NewCached(test{}, "field")
-	if err != nil {
-		t.Fatal(err)
+	type unsupportedType struct {
+		Test chan string `field:"test"`
 	}
+	s := ""
+	tests := []any{"", &s, 1, noTag{}, &unsupportedType{}}
 
-	actual := &test{}
+	t.Run("Decoder", func(t *testing.T) {
+		for _, test := range tests {
+			dec := decoder.New("field")
+			err := dec.Decode(nil, test)
+			if err == nil {
+				t.Errorf("should return error for %T", test)
+			}
+		}
+	})
 
-	if err = dec.Decode(in, actual); err != nil {
-		t.Fatal(err)
-	}
-
-	if diff := cmp.Diff(expected, actual); diff != "" {
-		t.Errorf(diff)
-	}
-}
-
-func TestCachedNil(t *testing.T) {
-	type test struct {
-		String string `field:"string"`
-	}
-
-	in := decoder.Map{"string": {"string"}}
-	expected := &test{String: "string"}
-
-	dec, err := decoder.NewCached(&test{}, "field")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var actual *test
-
-	if err = dec.Decode(in, &actual); err != nil {
-		t.Fatal(err)
-	}
-
-	if diff := cmp.Diff(expected, actual); diff != "" {
-		t.Errorf(diff)
-	}
+	t.Run("CachedDecoder", func(t *testing.T) {
+		for _, test := range tests {
+			_, err := decoder.NewCached(test, "field")
+			if err == nil {
+				t.Errorf("should return error for %T", test)
+			}
+		}
+	})
 }

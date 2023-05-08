@@ -26,7 +26,12 @@ func New(tag string) *Decoder {
 }
 
 func (d *Decoder) Decode(data Getter, v any) error {
-	val := reflect.ValueOf(v).Elem()
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Pointer {
+		return ErrUnsupportedType
+	}
+
+	val = val.Elem()
 	if val.Kind() != reflect.Struct {
 		return ErrUnsupportedType
 	}
@@ -37,8 +42,11 @@ func (d *Decoder) Decode(data Getter, v any) error {
 	if !ok {
 		var err error
 		dec, err = compile(t, d.tag, t.Kind() == reflect.Ptr)
-		if err != nil && err != ErrTagNotFound { //nolint:errorlint,goerr113
-			return err
+		if err != nil {
+			if err != ErrTagNotFound { //nolint:errorlint,goerr113
+				return err
+			}
+			dec = noopDecoder
 		}
 
 		d.cache.Store(t, dec)

@@ -9,7 +9,9 @@ import (
 	"github.com/abemedia/go-don/internal/byteconv"
 )
 
-type decoder func(reflect.Value, Getter) error
+type decoder = func(reflect.Value, Getter) error
+
+func noopDecoder(reflect.Value, Getter) error { return nil }
 
 var unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 
