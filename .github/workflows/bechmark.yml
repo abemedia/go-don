@@ -45,9 +45,6 @@ jobs:
           OUTPUT=$(benchstat bench-master.txt bench-new.txt)
           echo "${OUTPUT}"
           echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
-          OUTPUT=$(benchstat bench-new.txt)
-          echo "${OUTPUT}"
-          echo "result<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Comment benchmark result
         continue-on-error: true
@@ -61,12 +58,5 @@ jobs:
 
             ```
             ${{ steps.bench.outputs.diff }}
-            ```
-            </details>
-
-            <details><summary>Benchmark result</summary>
-
-            ```
-            ${{ steps.bench.outputs.result }}
             ```
             </details>
