@@ -1,4 +1,4 @@
-package decoder_test
+package benchmarks_test
 
 import (
 	"testing"
@@ -33,7 +33,7 @@ func BenchmarkDecoder(b *testing.B) {
 		NestedPtr *child
 	}
 
-	in := decoder.Map{
+	in := map[string][]string{
 		"string":  {"string"},
 		"strings": {"string", "string"},
 		"int":     {"1"},
@@ -70,7 +70,7 @@ func BenchmarkDecoder(b *testing.B) {
 
 		for i := 0; i < b.N; i++ {
 			out := &test{}
-			if err := dec.Decode(in, out); err != nil {
+			if err := dec.Decode(decoder.Map(in), out); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -81,7 +81,7 @@ func BenchmarkDecoder(b *testing.B) {
 
 		for i := 0; i < b.N; i++ {
 			out := &test{}
-			if err := dec.Decode(in, out); err != nil {
+			if err := dec.Decode(decoder.Map(in), out); err != nil {
 				b.Fatal(err)
 			}
 		}
