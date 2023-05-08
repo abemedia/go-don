@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.3](https://github.com/abemedia/go-don/compare/v0.1.2...v0.1.3) (2023-05-08)
+
+
+### Features
+
+* api serve ([#98](https://github.com/abemedia/go-don/issues/98)) ([602b24c](https://github.com/abemedia/go-don/commit/602b24c5220bee9955d30ec38e7fbc8b41aa2e10))
+* implement errors interfaces & improve tests ([#91](https://github.com/abemedia/go-don/issues/91)) ([0a282f0](https://github.com/abemedia/go-don/commit/0a282f0fc2fbe289a89fd9cc0ba94939108fb205))
+
+
+### Bug Fixes
+
+* decoder panics on tag not found ([#100](https://github.com/abemedia/go-don/issues/100)) ([3a73c35](https://github.com/abemedia/go-don/commit/3a73c35dd996e1035360733d4b60d52b88c3243b))
+
+
+### Performance Improvements
+
+* improve encoding performance ([#104](https://github.com/abemedia/go-don/issues/104)) ([9dbebfa](https://github.com/abemedia/go-don/commit/9dbebfa81db3277efd964d6d8fa9f1755ef9683a))
+
 ## [0.1.2](https://github.com/abemedia/go-don/compare/v0.1.1...v0.1.2) (2023-05-05)
 
 
