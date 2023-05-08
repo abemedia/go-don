@@ -139,8 +139,13 @@ func TestDecodeError(t *testing.T) {
 	type unsupportedType struct {
 		Test chan string `field:"test"`
 	}
-	s := ""
-	tests := []any{"", &s, 1, noTag{}, &unsupportedType{}}
+	type nestedUnsupportedType struct {
+		Test  string `field:"test"`
+		Child unsupportedType
+	}
+	var s string
+
+	tests := []any{"", &s, 1, noTag{}, &unsupportedType{}, &nestedUnsupportedType{}}
 
 	t.Run("Decoder", func(t *testing.T) {
 		for _, test := range tests {

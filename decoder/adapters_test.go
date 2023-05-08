@@ -13,6 +13,14 @@ func TestAdapters(t *testing.T) {
 	t.Run("Map", func(t *testing.T) {
 		in := map[string][]string{"string": {"string"}}
 		testAdapter(t, decoder.Map(in))
+
+		var m decoder.Map
+		if m.Get("test") != "" {
+			t.Error("should return empty string")
+		}
+		if m.Values("test") != nil {
+			t.Error("should return nil")
+		}
 	})
 
 	t.Run("Args", func(t *testing.T) {
