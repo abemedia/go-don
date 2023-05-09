@@ -11,22 +11,31 @@ import (
 type requestDecoder[V any] func(v *V, ctx *fasthttp.RequestCtx, p httprouter.Params) error
 
 func newRequestDecoder[V any](v V) requestDecoder[V] {
+	path, _ := decoder.NewCached(v, "path")
 	query, _ := decoder.NewCached(v, "query")
-	params, _ := decoder.NewCached(v, "path")
 	header, _ := decoder.NewCached(v, "header")
 
-	if query == nil && params == nil && header == nil {
+	if path == nil && query == nil && header == nil {
 		return decodeBody[V]()
 	}
 
-	return decodeRequest(query, header, params)
+	return decodeRequest(path, query, header)
 }
 
-func decodeRequest[V any](query, header, params *decoder.CachedDecoder[V]) requestDecoder[V] {
-	dec := decodeBody[V]()
-
+func decodeRequest[V any](path, query, header *decoder.CachedDecoder[V]) requestDecoder[V] {
+	body := decodeBody[V]()
 	return func(v *V, ctx *fasthttp.RequestCtx, p httprouter.Params) error {
+		if err := body(v, ctx, nil); err != nil {
+			return err
+		}
+
 		val := reflect.ValueOf(v).Elem()
+
+		if path != nil && len(p) > 0 {
+			if err := path.DecodeValue((decoder.Params)(p), val); err != nil {
+				return ErrNotFound
+			}
+		}
 
 		if query != nil {
 			if q := ctx.Request.URI().QueryArgs(); q.Len() > 0 {
@@ -36,25 +45,19 @@ func decodeRequest[V any](query, header, params *decoder.CachedDecoder[V]) reque
 			}
 		}
 
-		if params != nil && len(p) > 0 {
-			if err := params.DecodeValue((decoder.Params)(p), val); err != nil {
-				return ErrNotFound
-			}
-		}
-
 		if header != nil {
 			if err := header.DecodeValue((*decoder.Header)(&ctx.Request.Header), val); err != nil {
 				return err
 			}
 		}
 
-		return dec(v, ctx, p)
+		return nil
 	}
 }
 
 func decodeBody[V any]() requestDecoder[V] {
-	return func(v *V, ctx *fasthttp.RequestCtx, p httprouter.Params) error {
-		if ctx.Request.Header.ContentLength() == 0 {
+	return func(v *V, ctx *fasthttp.RequestCtx, _ httprouter.Params) error {
+		if ctx.Request.Header.ContentLength() == 0 || ctx.IsGet() || ctx.IsHead() {
 			return nil
 		}
 
