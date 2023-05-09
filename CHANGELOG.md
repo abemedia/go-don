@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/abemedia/go-don/compare/v0.1.3...v0.1.4) (2023-05-09)
+
+
+### Bug Fixes
+
+* error parsing GET request ([#108](https://github.com/abemedia/go-don/issues/108)) ([8298a2c](https://github.com/abemedia/go-don/commit/8298a2c7a8d46858420fccbbe39909db71838b38))
+
 ## [0.1.3](https://github.com/abemedia/go-don/compare/v0.1.2...v0.1.3) (2023-05-08)
 
 
