@@ -6,6 +6,9 @@ import (
 )
 
 func init() {
-	encoding.RegisterDecoder(msgpack.Unmarshal, "application/x-msgpack")
-	encoding.RegisterEncoder(msgpack.Marshal, "application/x-msgpack")
+	mediaType := "application/msgpack"
+	aliases := []string{"application/x-msgpack", "application/vnd.msgpack"}
+
+	encoding.RegisterDecoder(msgpack.Unmarshal, mediaType, aliases...)
+	encoding.RegisterEncoder(msgpack.Marshal, mediaType, aliases...)
 }

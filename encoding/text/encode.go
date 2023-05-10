@@ -1,12 +1,11 @@
 package text
 
 import (
-	stdencoding "encoding"
+	"encoding"
 	"fmt"
 	"strconv"
 
 	"github.com/abemedia/go-don"
-	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/valyala/fasthttp"
 )
@@ -50,7 +49,7 @@ func encode(ctx *fasthttp.RequestCtx, v any) error {
 			b = strconv.AppendFloat(ctx.Response.Body(), v, 'f', -1, 64)
 		case bool:
 			b = strconv.AppendBool(ctx.Response.Body(), v)
-		case stdencoding.TextMarshaler:
+		case encoding.TextMarshaler:
 			b, err = v.MarshalText()
 		case error:
 			b = byteconv.Atob(v.Error())
@@ -66,8 +65,4 @@ func encode(ctx *fasthttp.RequestCtx, v any) error {
 	}
 
 	return err
-}
-
-func init() {
-	encoding.RegisterEncoder(encode, "text/plain")
 }

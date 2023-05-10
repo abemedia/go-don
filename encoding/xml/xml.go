@@ -16,6 +16,9 @@ func encodeXML(ctx *fasthttp.RequestCtx, v any) error {
 }
 
 func init() {
-	encoding.RegisterDecoder(decodeXML, "application/xml", "text/xml")
-	encoding.RegisterEncoder(encodeXML, "application/xml", "text/xml")
+	mediaType := "application/xml"
+	alias := "text/xml"
+
+	encoding.RegisterDecoder(decodeXML, mediaType, alias)
+	encoding.RegisterEncoder(encodeXML, mediaType, alias)
 }

@@ -15,6 +15,9 @@ func encodeYAML(ctx *fasthttp.RequestCtx, v any) error {
 }
 
 func init() {
-	encoding.RegisterEncoder(encodeYAML, "application/x-yaml", "text/x-yaml")
-	encoding.RegisterDecoder(decodeYAML, "application/x-yaml", "text/x-yaml")
+	mediaType := "application/yaml"
+	aliases := []string{"text/yaml", "application/x-yaml", "text/x-yaml", "text/vnd.yaml"}
+
+	encoding.RegisterDecoder(decodeYAML, mediaType, aliases...)
+	encoding.RegisterEncoder(encodeYAML, mediaType, aliases...)
 }
