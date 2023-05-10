@@ -17,7 +17,6 @@ func decodeMultipartForm(ctx *fasthttp.RequestCtx, v any) error {
 	if err != nil {
 		return err
 	}
-
 	return dec.Decode(decoder.Map(f.Value), v)
 }
 
