@@ -3,7 +3,7 @@ package xml
 import (
 	"encoding/xml"
 
-	"github.com/abemedia/go-don"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/valyala/fasthttp"
 )
 
@@ -16,6 +16,6 @@ func encodeXML(ctx *fasthttp.RequestCtx, v any) error {
 }
 
 func init() {
-	don.RegisterDecoder("application/xml", decodeXML, "text/xml")
-	don.RegisterEncoder("application/xml", encodeXML, "text/xml")
+	encoding.RegisterDecoder(decodeXML, "application/xml", "text/xml")
+	encoding.RegisterEncoder(encodeXML, "application/xml", "text/xml")
 }

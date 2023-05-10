@@ -1,4 +1,4 @@
-package don
+package encoding
 
 import (
 	"context"
@@ -16,33 +16,31 @@ type DecoderConstraint interface {
 	Unmarshaler | ContextUnmarshaler | RequestParser
 }
 
-// RegisterDecoder registers a request decoder.
-func RegisterDecoder[T DecoderConstraint](contentType string, dec T, aliases ...string) {
+// RegisterDecoder registers a request decoder for a given media type.
+func RegisterDecoder[T DecoderConstraint](dec T, mime string, aliases ...string) {
 	switch d := any(dec).(type) {
 	case Unmarshaler:
-		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
+		decoders[mime] = func(ctx *fasthttp.RequestCtx, v any) error {
 			return d(ctx.Request.Body(), v)
 		}
 
 	case ContextUnmarshaler:
-		decoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
+		decoders[mime] = func(ctx *fasthttp.RequestCtx, v any) error {
 			return d(ctx, ctx.Request.Body(), v)
 		}
 
 	case RequestParser:
-		decoders[contentType] = d
+		decoders[mime] = d
 	}
 
 	for _, alias := range aliases {
-		decoders[alias] = decoders[contentType]
+		decoders[alias] = decoders[mime]
 	}
 }
 
-func getDecoder(mime string) (RequestParser, error) {
-	if enc := decoders[mime]; enc != nil {
-		return enc, nil
-	}
-	return nil, ErrUnsupportedMediaType
+// GetDecoder returns the request decoder for a given media type.
+func GetDecoder(mime string) RequestParser {
+	return decoders[mime]
 }
 
 var decoders = map[string]RequestParser{}

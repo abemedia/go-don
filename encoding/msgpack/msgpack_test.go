@@ -11,7 +11,7 @@ func TestMsgpack(t *testing.T) {
 		Foo string `msgpack:"foo"`
 	}
 
-	test.Encoding(t, test.EncodingTest[item]{
+	test.Encoding(t, test.EncodingOptions[item]{
 		Mime:   "application/x-msgpack",
 		Raw:    "\x81\xa3foo\xa3bar",
 		Parsed: item{Foo: "bar"},

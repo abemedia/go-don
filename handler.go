@@ -5,6 +5,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
@@ -29,10 +30,10 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 	isNil := makeNilCheck(*new(O))
 
 	return func(ctx *fasthttp.RequestCtx, p httprouter.Params) {
-		contentType := getEncoding(ctx.Request.Header.Peek(fasthttp.HeaderAccept))
+		contentType := getMediaType(ctx.Request.Header.Peek(fasthttp.HeaderAccept))
 
-		enc, err := getEncoder(contentType)
-		if err != nil {
+		enc := encoding.GetEncoder(contentType)
+		if enc == nil {
 			handleError(ctx, ErrNotAcceptable)
 			return
 		}
@@ -42,7 +43,8 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 			res any
 		)
 
-		if err = decodeRequest(req, ctx, p); err != nil {
+		err := decodeRequest(req, ctx, p)
+		if err != nil {
 			res = Error(err, getStatusCode(err, http.StatusBadRequest))
 		} else {
 			res, err = handle(ctx, *req)
@@ -84,7 +86,7 @@ func handleError(ctx *fasthttp.RequestCtx, err error) {
 	ctx.Logger().Printf("%v", err)
 }
 
-func getEncoding(b []byte) string {
+func getMediaType(b []byte) string {
 	index := bytes.IndexRune(b, ';')
 	if index > 0 {
 		b = b[:index]

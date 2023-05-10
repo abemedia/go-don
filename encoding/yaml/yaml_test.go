@@ -11,7 +11,7 @@ func TestYAML(t *testing.T) {
 		Foo string `yaml:"foo"`
 	}
 
-	test.Encoding(t, test.EncodingTest[item]{
+	test.Encoding(t, test.EncodingOptions[item]{
 		Mime:   "application/x-yaml",
 		Raw:    "foo: bar\n",
 		Parsed: item{Foo: "bar"},

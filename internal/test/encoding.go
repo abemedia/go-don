@@ -11,36 +11,36 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-type EncodingTest[T any] struct {
+type EncodingOptions[T any] struct {
 	Mime   string
 	Parsed T
 	Raw    string
 }
 
-func Encoding[T any](t *testing.T, test EncodingTest[T]) {
+func Encoding[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 	t.Run("Encode", func(t *testing.T) {
 		t.Helper()
-		Encode(t, test)
+		Encode(t, opt)
 	})
 	t.Run("Decode", func(t *testing.T) {
 		t.Helper()
-		Decode(t, test)
+		Decode(t, opt)
 	})
 }
 
-func Encode[T any](t *testing.T, test EncodingTest[T]) {
+func Encode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
 	api := don.New(nil)
 	api.Post("/", don.H(func(ctx context.Context, req don.Empty) (T, error) {
-		return test.Parsed, nil
+		return opt.Parsed, nil
 	}))
 
-	ctx := httptest.NewRequest(http.MethodPost, "/", "", map[string]string{"Accept": test.Mime})
+	ctx := httptest.NewRequest(http.MethodPost, "/", "", map[string]string{"Accept": opt.Mime})
 	api.RequestHandler()(ctx)
 
-	if diff := cmp.Diff(test.Raw, string(ctx.Response.Body())); diff != "" {
+	if diff := cmp.Diff(opt.Raw, string(ctx.Response.Body())); diff != "" {
 		t.Fatal(diff)
 	}
 
@@ -49,7 +49,7 @@ func Encode[T any](t *testing.T, test EncodingTest[T]) {
 	}
 }
 
-func Decode[T any](t *testing.T, test EncodingTest[T]) {
+func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
 	var got T
@@ -60,10 +60,10 @@ func Decode[T any](t *testing.T, test EncodingTest[T]) {
 		return don.Empty{}, nil
 	}))
 
-	ctx := httptest.NewRequest(http.MethodPost, "/", test.Raw, map[string]string{"Content-Type": test.Mime})
+	ctx := httptest.NewRequest(http.MethodPost, "/", opt.Raw, map[string]string{"Content-Type": opt.Mime})
 	api.RequestHandler()(ctx)
 
-	if diff := cmp.Diff(test.Parsed, got); diff != "" {
+	if diff := cmp.Diff(opt.Parsed, got); diff != "" {
 		t.Fatal(diff)
 	}
 

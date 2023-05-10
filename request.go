@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/abemedia/go-don/decoder"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
@@ -61,9 +62,9 @@ func decodeBody[V any]() requestDecoder[V] {
 			return nil
 		}
 
-		dec, err := getDecoder(getEncoding(ctx.Request.Header.ContentType()))
-		if err != nil {
-			return err
+		dec := encoding.GetDecoder(getMediaType(ctx.Request.Header.ContentType()))
+		if dec == nil {
+			return ErrUnsupportedMediaType
 		}
 
 		return dec(ctx, v)

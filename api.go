@@ -13,8 +13,8 @@ import (
 // response.
 type Empty struct{}
 
-// DefaultEncoding contains the mime type of the default encoding to fall
-// back on if no `Accept` or `Content-Type` header was provided.
+// DefaultEncoding contains the media type of the default encoding to fall back
+// on if no `Accept` or `Content-Type` header was provided.
 var DefaultEncoding = "text/plain"
 
 type Middleware func(fasthttp.RequestHandler) fasthttp.RequestHandler

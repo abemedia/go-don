@@ -1,8 +1,8 @@
 package form
 
 import (
-	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/decoder"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/valyala/fasthttp"
 )
 
@@ -22,6 +22,6 @@ func decodeMultipartForm(ctx *fasthttp.RequestCtx, v any) error {
 }
 
 func init() {
-	don.RegisterDecoder("application/x-www-form-urlencoded", decodeForm)
-	don.RegisterDecoder("multipart/form-data", decodeMultipartForm)
+	encoding.RegisterDecoder(decodeForm, "application/x-www-form-urlencoded")
+	encoding.RegisterDecoder(decodeMultipartForm, "multipart/form-data")
 }

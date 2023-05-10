@@ -11,7 +11,7 @@ func TestJSON(t *testing.T) {
 		Foo string `json:"foo"`
 	}
 
-	test.Encoding(t, test.EncodingTest[item]{
+	test.Encoding(t, test.EncodingOptions[item]{
 		Mime:   "application/json",
 		Raw:    `{"foo":"bar"}` + "\n",
 		Parsed: item{Foo: "bar"},

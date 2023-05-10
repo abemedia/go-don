@@ -1,11 +1,11 @@
-package don_test
+package encoding_test
 
 import (
 	"context"
 	"io"
 	"testing"
 
-	"github.com/abemedia/go-don"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/valyala/fasthttp"
 )
@@ -43,27 +43,27 @@ func TestRegisterEncoder(t *testing.T) {
 	})
 }
 
-func testRegisterEncoder[T don.EncoderConstraint](t *testing.T, dec T, contentType, alias string) {
+func testRegisterEncoder[T encoding.EncoderConstraint](t *testing.T, dec T, contentType, alias string) {
 	t.Helper()
 
-	don.RegisterEncoder(contentType, dec, alias)
+	encoding.RegisterEncoder(dec, contentType, alias)
 
 	for _, v := range []string{contentType, alias} {
-		encode, err := don.GetEncoder(v)
-		if err != nil {
-			t.Error(err)
+		encode := encoding.GetEncoder(v)
+		if encode == nil {
+			t.Error("encoder not found")
 			continue
 		}
 
 		req := httptest.NewRequest("", "", v, nil)
 
-		if err = encode(req, []byte(v)); err != nil {
+		if err := encode(req, []byte(v)); err != nil {
 			t.Error(err)
 		} else if string(req.Response.Body()) != v {
 			t.Error("should encode response")
 		}
 
-		if err = encode(req, []byte{}); err == nil {
+		if err := encode(req, []byte{}); err == nil {
 			t.Error("should return error")
 		}
 	}
