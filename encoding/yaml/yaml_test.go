@@ -11,7 +11,7 @@ type item struct {
 }
 
 var opt = test.EncodingOptions[item]{
-	Mime:   "application/x-yaml",
+	Mime:   "application/yaml",
 	Raw:    "foo: bar\n",
 	Parsed: item{Foo: "bar"},
 }

@@ -6,6 +6,8 @@ import (
 )
 
 func init() {
-	encoding.RegisterDecoder(json.Unmarshal, "application/json")
-	encoding.RegisterEncoder(json.Marshal, "application/json")
+	mediaType := "application/json"
+
+	encoding.RegisterDecoder(json.Unmarshal, mediaType)
+	encoding.RegisterEncoder(json.Marshal, mediaType)
 }

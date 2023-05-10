@@ -2,13 +2,12 @@ package text
 
 import (
 	"bytes"
-	stdencoding "encoding"
+	"encoding"
 	"reflect"
 	"strconv"
 	"sync"
 
 	"github.com/abemedia/go-don"
-	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/internal/byteconv"
 	"github.com/valyala/fasthttp"
 )
@@ -103,7 +102,7 @@ func newUnmarshaler(typ reflect.Type) (func([]byte, reflect.Value) error, error)
 			if isPtr && v.IsNil() {
 				v.Set(reflect.New(typ))
 			}
-			return v.Interface().(stdencoding.TextUnmarshaler).UnmarshalText(b) //nolint:forcetypeassert
+			return v.Interface().(encoding.TextUnmarshaler).UnmarshalText(b) //nolint:forcetypeassert
 		}, nil
 	}
 
@@ -127,9 +126,5 @@ func newUnmarshaler(typ reflect.Type) (func([]byte, reflect.Value) error, error)
 //nolint:gochecknoglobals
 var (
 	unmarshalers    sync.Map
-	unmarshalerType = reflect.TypeOf((*stdencoding.TextUnmarshaler)(nil)).Elem()
+	unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
-
-func init() {
-	encoding.RegisterDecoder(decode, "text/plain")
-}
