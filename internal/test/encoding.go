@@ -2,10 +2,13 @@ package test
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/abemedia/go-don"
+	"github.com/abemedia/go-don/encoding"
 	_ "github.com/abemedia/go-don/encoding/text" // default encoding
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/google/go-cmp/cmp"
@@ -69,5 +72,44 @@ func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
 
 	if ctx.Response.StatusCode() != http.StatusNoContent {
 		t.Fatalf("expected success status: %v", &ctx.Response)
+	}
+}
+
+func BenchmarkEncoding[T any](b *testing.B, opt EncodingOptions[T]) {
+	b.Run("Encode", func(b *testing.B) {
+		BenchmarkEncode(b, opt)
+	})
+	b.Run("Decode", func(b *testing.B) {
+		BenchmarkDecode(b, opt)
+	})
+}
+
+func BenchmarkEncode[T any](b *testing.B, opt EncodingOptions[T]) {
+	enc := encoding.GetEncoder(opt.Mime)
+	if enc == nil {
+		b.Fatal("encoder not found")
+	}
+
+	ctx := httptest.NewRequest("POST", "/", "", nil)
+
+	for i := 0; i < b.N; i++ {
+		ctx.Response.ResetBody()
+		enc(ctx, opt.Parsed) //nolint:errcheck
+	}
+}
+
+func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
+	dec := encoding.GetDecoder(opt.Mime)
+	if dec == nil {
+		b.Fatal("decoder not found")
+	}
+
+	rd := strings.NewReader(opt.Raw)
+	ctx := httptest.NewRequest("POST", "/", "", nil)
+	ctx.Request.SetBodyStream(rd, len(opt.Raw))
+
+	for i := 0; i < b.N; i++ {
+		rd.Seek(0, io.SeekStart) //nolint:errcheck
+		dec(ctx, new(T))         //nolint:errcheck
 	}
 }

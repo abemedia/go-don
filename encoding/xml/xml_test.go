@@ -6,14 +6,20 @@ import (
 	"github.com/abemedia/go-don/internal/test"
 )
 
-func TestXML(t *testing.T) {
-	type item struct {
-		Foo string `xml:"foo"`
-	}
+type item struct {
+	Foo string `xml:"foo"`
+}
 
-	test.Encoding(t, test.EncodingOptions[item]{
-		Mime:   "application/xml",
-		Raw:    "<item><foo>bar</foo></item>",
-		Parsed: item{Foo: "bar"},
-	})
+var opt = test.EncodingOptions[item]{
+	Mime:   "application/xml",
+	Raw:    "<item><foo>bar</foo></item>",
+	Parsed: item{Foo: "bar"},
+}
+
+func TestXML(t *testing.T) {
+	test.Encoding(t, opt)
+}
+
+func BenchmarkXML(b *testing.B) {
+	test.BenchmarkEncoding(b, opt)
 }
