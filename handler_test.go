@@ -91,7 +91,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return null",
 			want: response{
 				Code: fasthttp.StatusOK,
-				Body: "null\n",
+				Body: "null",
 				Header: map[string]string{
 					"Content-Length": "0",
 					"Content-Type":   "application/json; charset=utf-8",
