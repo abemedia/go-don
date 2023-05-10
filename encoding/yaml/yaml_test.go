@@ -6,14 +6,20 @@ import (
 	"github.com/abemedia/go-don/internal/test"
 )
 
-func TestYAML(t *testing.T) {
-	type item struct {
-		Foo string `yaml:"foo"`
-	}
+type item struct {
+	Foo string `yaml:"foo"`
+}
 
-	test.Encoding(t, test.EncodingOptions[item]{
-		Mime:   "application/x-yaml",
-		Raw:    "foo: bar\n",
-		Parsed: item{Foo: "bar"},
-	})
+var opt = test.EncodingOptions[item]{
+	Mime:   "application/x-yaml",
+	Raw:    "foo: bar\n",
+	Parsed: item{Foo: "bar"},
+}
+
+func TestYAML(t *testing.T) {
+	test.Encoding(t, opt)
+}
+
+func BenchmarkYAML(b *testing.B) {
+	test.BenchmarkEncoding(b, opt)
 }

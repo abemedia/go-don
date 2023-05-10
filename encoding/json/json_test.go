@@ -6,14 +6,20 @@ import (
 	"github.com/abemedia/go-don/internal/test"
 )
 
-func TestJSON(t *testing.T) {
-	type item struct {
-		Foo string `json:"foo"`
-	}
+type item struct {
+	Foo string `json:"foo"`
+}
 
-	test.Encoding(t, test.EncodingOptions[item]{
-		Mime:   "application/json",
-		Raw:    `{"foo":"bar"}` + "\n",
-		Parsed: item{Foo: "bar"},
-	})
+var opt = test.EncodingOptions[item]{
+	Mime:   "application/json",
+	Raw:    `{"foo":"bar"}` + "\n",
+	Parsed: item{Foo: "bar"},
+}
+
+func TestJSON(t *testing.T) {
+	test.Encoding(t, opt)
+}
+
+func BenchmarkJSON(b *testing.B) {
+	test.BenchmarkEncoding(b, opt)
 }
