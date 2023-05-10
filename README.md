@@ -164,6 +164,13 @@ MIME: `application/x-msgpack`
 Parses MessagePack requests & encodes responses as MessagePack. Use the `msgpack` tag in your
 request & response structs.
 
+#### TOML
+
+MIME: `application/toml`
+
+Parses TOML requests & encodes responses as TOML. Use the `toml` tag in your request & response
+structs.
+
 ### Adding custom encoding
 
 Adding your own is easy. See [encoding/json/json.go](./encoding/json/json.go).
