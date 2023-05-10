@@ -1,4 +1,4 @@
-package don_test
+package encoding_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/abemedia/go-don"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/valyala/fasthttp"
 )
@@ -44,29 +44,29 @@ func TestRegisterDecoder(t *testing.T) {
 	})
 }
 
-func testRegisterDecoder[T don.DecoderConstraint](t *testing.T, dec T, contentType, alias string) {
+func testRegisterDecoder[T encoding.DecoderConstraint](t *testing.T, dec T, contentType, alias string) {
 	t.Helper()
 
-	don.RegisterDecoder(contentType, dec, alias)
+	encoding.RegisterDecoder(dec, contentType, alias)
 
 	for _, v := range []string{contentType, alias} {
-		decode, err := don.GetDecoder(v)
-		if err != nil {
-			t.Error(err)
+		decode := encoding.GetDecoder(v)
+		if decode == nil {
+			t.Error("decoder not found")
 			continue
 		}
 
 		req := httptest.NewRequest("", "", v, nil)
 
 		var b []byte
-		if err = decode(req, &b); err != nil {
+		if err := decode(req, &b); err != nil {
 			t.Error(err)
 		} else if string(b) != v {
 			t.Error("should decode request")
 		}
 
 		req.Request.SetBody(nil)
-		if err = decode(req, &b); err == nil {
+		if err := decode(req, &b); err == nil {
 			t.Error("should return error")
 		}
 	}

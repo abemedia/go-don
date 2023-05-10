@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"github.com/abemedia/go-don"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/valyala/fasthttp"
 	"gopkg.in/yaml.v3"
 )
@@ -15,6 +15,6 @@ func encodeYAML(ctx *fasthttp.RequestCtx, v any) error {
 }
 
 func init() {
-	don.RegisterEncoder("application/x-yaml", encodeYAML, "text/x-yaml")
-	don.RegisterDecoder("application/x-yaml", decodeYAML, "text/x-yaml")
+	encoding.RegisterEncoder(encodeYAML, "application/x-yaml", "text/x-yaml")
+	encoding.RegisterDecoder(decodeYAML, "application/x-yaml", "text/x-yaml")
 }

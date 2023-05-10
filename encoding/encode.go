@@ -1,4 +1,4 @@
-package don
+package encoding
 
 import (
 	"context"
@@ -16,11 +16,11 @@ type EncoderConstraint interface {
 	Marshaler | ContextMarshaler | ResponseEncoder
 }
 
-// RegisterEncoder registers a response encoder.
-func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...string) {
+// RegisterEncoder registers a response encoder on a given media type.
+func RegisterEncoder[T EncoderConstraint](enc T, mime string, aliases ...string) {
 	switch e := any(enc).(type) {
 	case Marshaler:
-		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
+		encoders[mime] = func(ctx *fasthttp.RequestCtx, v any) error {
 			b, err := e(v)
 			if err != nil {
 				return err
@@ -30,7 +30,7 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 		}
 
 	case ContextMarshaler:
-		encoders[contentType] = func(ctx *fasthttp.RequestCtx, v any) error {
+		encoders[mime] = func(ctx *fasthttp.RequestCtx, v any) error {
 			b, err := e(ctx, v)
 			if err != nil {
 				return err
@@ -40,19 +40,17 @@ func RegisterEncoder[T EncoderConstraint](contentType string, enc T, aliases ...
 		}
 
 	case ResponseEncoder:
-		encoders[contentType] = e
+		encoders[mime] = e
 	}
 
 	for _, alias := range aliases {
-		encoders[alias] = encoders[contentType]
+		encoders[alias] = encoders[mime]
 	}
 }
 
-func getEncoder(mime string) (ResponseEncoder, error) {
-	if enc := encoders[mime]; enc != nil {
-		return enc, nil
-	}
-	return nil, ErrNotAcceptable
+// GetEncoder returns the response encoder for a given media type.
+func GetEncoder(mime string) ResponseEncoder {
+	return encoders[mime]
 }
 
 var encoders = map[string]ResponseEncoder{}

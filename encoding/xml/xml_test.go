@@ -11,7 +11,7 @@ func TestXML(t *testing.T) {
 		Foo string `xml:"foo"`
 	}
 
-	test.Encoding(t, test.EncodingTest[item]{
+	test.Encoding(t, test.EncodingOptions[item]{
 		Mime:   "application/xml",
 		Raw:    "<item><foo>bar</foo></item>",
 		Parsed: item{Foo: "bar"},

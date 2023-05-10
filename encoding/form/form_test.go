@@ -12,7 +12,7 @@ func TestForm(t *testing.T) {
 	}
 
 	t.Run("URLEncoded", func(t *testing.T) {
-		test.Decode(t, test.EncodingTest[item]{
+		test.Decode(t, test.EncodingOptions[item]{
 			Mime:   "application/x-www-form-urlencoded",
 			Raw:    "foo=bar",
 			Parsed: item{Foo: "bar"},
@@ -20,7 +20,7 @@ func TestForm(t *testing.T) {
 	})
 
 	t.Run("Multipart", func(t *testing.T) {
-		test.Decode(t, test.EncodingTest[item]{
+		test.Decode(t, test.EncodingOptions[item]{
 			Mime:   `multipart/form-data;boundary="boundary"`,
 			Raw:    "--boundary\nContent-Disposition: form-data; name=\"foo\"\n\nbar\n--boundary\n",
 			Parsed: item{Foo: "bar"},
