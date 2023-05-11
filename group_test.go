@@ -14,7 +14,10 @@ import (
 func TestGroup(t *testing.T) {
 	api := don.New(nil)
 	group := api.Group("/group")
+
 	test.Router(t, group, api.RequestHandler(), "/group")
+	test.Router(t, group.Group("/sub"), api.RequestHandler(), "/group/sub")
+	test.Router(t, group.Group("sub"), api.RequestHandler(), "/groupsub")
 }
 
 func TestGroup_Use(t *testing.T) {
