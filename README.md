@@ -8,8 +8,8 @@ Don is a fast & simple API framework written in Go. It features a super-simple A
 [httprouter](https://github.com/abemedia/httprouter) it's blazing fast and has a low memory
 footprint.
 
-As Don uses the new Go generics it requires Go 1.18 to work. Also, it's still in beta and the API
-may yet have breaking changes, so it's not recommended for production use yet.
+As Don uses Go generics it requires Go 1.18 to work.  
+Minor version updates should be considered breaking changes.
 
 ## Contents
 
@@ -131,7 +131,7 @@ structs.
 
 #### YAML
 
-MIME: `application/x-yaml`, `text/x-yaml`
+MIME: `application/yaml`, `text/yaml`, `application/x-yaml`, `text/x-yaml`, `text/vnd.yaml`
 
 Parses YAML requests & encodes responses as YAML. Use the `yaml` tag in your request & response
 structs.
@@ -159,7 +159,7 @@ If the request is a struct and the `Content-Type` header is set to `text/plain` 
 
 #### MessagePack
 
-MIME: `application/x-msgpack`
+MIME: `application/msgpack`, `application/x-msgpack`, `application/vnd.msgpack`
 
 Parses MessagePack requests & encodes responses as MessagePack. Use the `msgpack` tag in your
 request & response structs.
@@ -173,7 +173,7 @@ structs.
 
 #### Protocol Buffers
 
-MIME: `application/protobuf`
+MIME: `application/protobuf`, `application/x-protobuf`
 
 Parses protobuf requests & encodes responses as protobuf. Use pointer types generated with `protoc`
 as your request & response structs.
