@@ -171,6 +171,13 @@ MIME: `application/toml`
 Parses TOML requests & encodes responses as TOML. Use the `toml` tag in your request & response
 structs.
 
+#### Protocol Buffers
+
+MIME: `application/protobuf`
+
+Parses protobuf requests & encodes responses as protobuf. Use pointer types generated with `protoc`
+as your request & response structs.
+
 ### Adding custom encoding
 
 Adding your own is easy. See [encoding/json/json.go](./encoding/json/json.go).
