@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+option go_package = "github.com/abemedia/go-don/encoding/protobuf/testdata";
+
+message Item { string foo = 1; }
