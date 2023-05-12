@@ -20,6 +20,7 @@ tasks:
     desc: Download Go modules
     cmds:
       - go mod tidy
+      - cd benchmarks && go mod tidy
 
   lint:
     desc: Runs golangci-lint
