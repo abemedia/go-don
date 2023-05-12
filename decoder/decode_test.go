@@ -1,7 +1,9 @@
 package decoder_test
 
 import (
+	"errors"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/abemedia/go-don/decoder"
@@ -42,6 +44,7 @@ func TestDecode(t *testing.T) {
 		Strings        []string     `field:"strings"`
 		Nested         child
 		NestedPtr      *child
+		unexported     string `field:"string"` //nolint:unused
 	}
 
 	in := decoder.Map{
@@ -81,13 +84,15 @@ func TestDecode(t *testing.T) {
 		},
 	}
 
+	exportAll := cmp.Exporter(func(t reflect.Type) bool { return true })
+
 	t.Run("Decoder", func(t *testing.T) {
 		dec := decoder.New("field")
 		actual := &test{}
 		if err := dec.Decode(in, actual); err != nil {
 			t.Fatal(err)
 		}
-		if diff := cmp.Diff(expected, actual); diff != "" {
+		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
 			t.Errorf(diff)
 		}
 	})
@@ -102,7 +107,7 @@ func TestDecode(t *testing.T) {
 		if err := dec.Decode(in, actual); err != nil {
 			t.Fatal(err)
 		}
-		if diff := cmp.Diff(expected, actual); diff != "" {
+		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
 			t.Errorf(diff)
 		}
 
@@ -111,7 +116,7 @@ func TestDecode(t *testing.T) {
 		if err = dec.DecodeValue(in, val); err != nil {
 			t.Fatal(err)
 		}
-		if diff := cmp.Diff(expected, actual); diff != "" {
+		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
 			t.Errorf(diff)
 		}
 	})
@@ -126,42 +131,106 @@ func TestDecode(t *testing.T) {
 		if err := dec.Decode(in, &actual); err != nil {
 			t.Fatal(err)
 		}
-		if diff := cmp.Diff(expected, actual); diff != "" {
+		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
 			t.Errorf(diff)
 		}
 	})
 }
 
 func TestDecodeError(t *testing.T) {
-	type noTag struct {
-		Test string `json:"test"`
-	}
-	type unsupportedType struct {
-		Test chan string `field:"test"`
-	}
-	type nestedUnsupportedType struct {
-		Test  string `field:"test"`
-		Child unsupportedType
-	}
-	var s string
+	data := decoder.Map{"test": {"test"}}
 
-	tests := []any{"", &s, 1, noTag{}, &unsupportedType{}, &nestedUnsupportedType{}}
+	tests := []struct {
+		target any
+		error  error
+	}{
+		{
+			target: "",
+			error:  decoder.ErrUnsupportedType,
+		},
+		{
+			target: new(string),
+			error:  decoder.ErrUnsupportedType,
+		},
+		{
+			target: new(int),
+			error:  decoder.ErrUnsupportedType,
+		},
+		{
+			target: &struct {
+				Test string `json:"test"`
+			}{},
+			error: decoder.ErrTagNotFound,
+		},
+		{
+			target: &struct {
+				Test chan string `field:"test"`
+			}{},
+			error: decoder.ErrUnsupportedType,
+		},
+		{
+			target: &struct {
+				Test  string `field:"test"`
+				Child struct {
+					Test chan string `field:"test"`
+				}
+			}{},
+			error: decoder.ErrUnsupportedType,
+		},
+		{
+			target: &struct {
+				Test int `field:"test"`
+			}{},
+			error: strconv.ErrSyntax,
+		},
+		{
+			target: &struct {
+				Test uint `field:"test"`
+			}{},
+			error: strconv.ErrSyntax,
+		},
+		{
+			target: &struct {
+				Test float64 `field:"test"`
+			}{},
+			error: strconv.ErrSyntax,
+		},
+		{
+			target: &struct {
+				Test bool `field:"test"`
+			}{},
+			error: strconv.ErrSyntax,
+		},
+	}
 
 	t.Run("Decoder", func(t *testing.T) {
 		for _, test := range tests {
 			dec := decoder.New("field")
-			err := dec.Decode(nil, test)
-			if err == nil {
-				t.Errorf("should return error for %T", test)
+			err := dec.Decode(data, test.target)
+			if errors.Is(test.error, decoder.ErrTagNotFound) {
+				if err != nil {
+					t.Errorf("should silently ignore error %q for %T", test.error, test.target)
+				}
+			} else {
+				if !errors.Is(err, test.error) {
+					t.Errorf("should return %q for %T: %q", test.error, test.target, err)
+				}
 			}
 		}
 	})
 
 	t.Run("CachedDecoder", func(t *testing.T) {
 		for _, test := range tests {
-			_, err := decoder.NewCached(test, "field")
-			if err == nil {
-				t.Errorf("should return error for %T", test)
+			dec, err := decoder.NewCached(test.target, "field")
+			if err != nil {
+				if !errors.Is(err, test.error) {
+					t.Errorf("should return %q for %T: %q", test.error, test.target, err)
+				}
+				continue
+			}
+			err = dec.Decode(data, &test.target)
+			if !errors.Is(err, test.error) {
+				t.Errorf("should return %q for %T: %q", test.error, test.target, err)
 			}
 		}
 	})
