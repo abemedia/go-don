@@ -10,7 +10,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-//nolint:cyclop
+//nolint:cyclop,funlen
 func encode(ctx *fasthttp.RequestCtx, v any) error {
 	var (
 		b   []byte

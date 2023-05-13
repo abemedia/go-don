@@ -27,7 +27,7 @@ func TestError_Is(t *testing.T) {
 }
 
 func TestError_Unwrap(t *testing.T) {
-	if errors.Unwrap(don.Error(errTest, 0)) != errTest {
+	if errors.Unwrap(don.Error(errTest, 0)) != errTest { //nolint:errorlint
 		t.Error("should unwrap wrapped error")
 	}
 }

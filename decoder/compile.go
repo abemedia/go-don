@@ -15,7 +15,7 @@ func noopDecoder(reflect.Value, Getter) error { return nil }
 
 var unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 
-//nolint:cyclop
+//nolint:cyclop,funlen
 func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	decoders := []decoder{}
 
@@ -158,7 +158,7 @@ func get(ptr bool, i int, t reflect.Type) func(v reflect.Value) reflect.Value {
 func decodeTextUnmarshaler(get func(reflect.Value) reflect.Value, k string) decoder {
 	return func(v reflect.Value, g Getter) error {
 		if s := g.Get(k); s != "" {
-			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(byteconv.Atob(s))
+			return get(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(byteconv.Atob(s)) //nolint:forcetypeassert
 		}
 		return nil
 	}

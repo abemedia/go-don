@@ -3,16 +3,13 @@ linters:
   disable:
     - deadcode # deprecated
     - exhaustive
-    - exhaustivestruct
+    - exhaustivestruct # deprecated
     - exhaustruct
-    - forcetypeassert
-    - funlen
     - gochecknoinits
     - gochecknoglobals
     - godox
     - golint # deprecated
     - gomnd
-    - ifshort # false positives - deprecated
     - interfacer # deprecated
     - ireturn
     - maligned # deprecated
@@ -21,7 +18,6 @@ linters:
     - paralleltest
     - scopelint # deprecated
     - structcheck # deprecated
-    - testpackage
     - varnamelen
     - varcheck # deprecated
     - wrapcheck
@@ -43,7 +39,6 @@ linters-settings:
   govet:
     enable-all: true
   nolintlint:
-    allow-leading-space: false
     require-specific: true
 
 issues:
@@ -51,9 +46,9 @@ issues:
     - path: (.+)_test.go
       linters:
         - cyclop
-        - errcheck
-        - errorlint
+        - forcetypeassert
         - funlen
+        - goconst
         - goerr113
         - gosec
     - path: ((.+)_test.go|internal/test/(.+))

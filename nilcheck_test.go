@@ -1,7 +1,9 @@
-package don
+package don_test
 
 import (
 	"testing"
+
+	"github.com/abemedia/go-don"
 )
 
 func TestNilCheck(t *testing.T) {
@@ -25,8 +27,8 @@ func TestNilCheck(t *testing.T) {
 		},
 		{
 			message:  "nil struct",
-			typ:      (*Empty)(nil),
-			data:     (*Empty)(nil),
+			typ:      (*don.Empty)(nil),
+			data:     (*don.Empty)(nil),
 			expected: true,
 		},
 		{
@@ -37,8 +39,8 @@ func TestNilCheck(t *testing.T) {
 		},
 		{
 			message:  "don.Empty",
-			typ:      Empty{},
-			data:     Empty{},
+			typ:      don.Empty{},
+			data:     don.Empty{},
 			expected: true,
 		},
 		{
@@ -101,7 +103,7 @@ func TestNilCheck(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		isNil := makeNilCheck(test.typ)
+		isNil := don.MakeNilCheck(test.typ)
 		if isNil(test.data) != test.expected {
 			t.Errorf("%s should be %t", test.message, test.expected)
 		}

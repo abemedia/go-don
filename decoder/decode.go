@@ -52,7 +52,7 @@ func (d *Decoder) Decode(data Getter, v any) error {
 		d.cache.Store(t, dec)
 	}
 
-	return dec.(decoder)(val, data)
+	return dec.(decoder)(val, data) //nolint:forcetypeassert
 }
 
 type CachedDecoder[V any] struct {
