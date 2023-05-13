@@ -8,15 +8,13 @@ import (
 )
 
 func TestBtoa(t *testing.T) {
-	b := []byte("test")
-	if string(b) != byteconv.Btoa(b) {
+	if byteconv.Btoa([]byte("test")) != "test" {
 		t.Error("should be equal")
 	}
 }
 
 func TestAtob(t *testing.T) {
-	s := "test"
-	if !bytes.Equal([]byte(s), byteconv.Atob(s)) {
+	if !bytes.Equal(byteconv.Atob("test"), []byte("test")) {
 		t.Error("should be equal")
 	}
 }

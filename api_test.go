@@ -36,7 +36,7 @@ func testAPI(t *testing.T, serve func(api *don.API, ln net.Listener) error) {
 
 	api := don.New(nil)
 	api.Get("/", func(ctx *fasthttp.RequestCtx, _ httprouter.Params) {
-		ctx.WriteString("OK")
+		ctx.WriteString("OK") //nolint:errcheck
 	})
 
 	ln, err := net.Listen("tcp", ":0")

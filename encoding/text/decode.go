@@ -81,7 +81,7 @@ func unmarshal(b []byte, v any) error {
 	val := reflect.ValueOf(v)
 	typ := val.Type()
 	if dec, ok := unmarshalers.Load(typ); ok {
-		return dec.(func([]byte, reflect.Value) error)(b, val)
+		return dec.(func([]byte, reflect.Value) error)(b, val) //nolint:forcetypeassert
 	}
 	dec, err := newUnmarshaler(typ)
 	if err != nil {
@@ -123,7 +123,6 @@ func newUnmarshaler(typ reflect.Type) (func([]byte, reflect.Value) error, error)
 	return nil, don.ErrUnsupportedMediaType
 }
 
-//nolint:gochecknoglobals
 var (
 	unmarshalers    sync.Map
 	unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
