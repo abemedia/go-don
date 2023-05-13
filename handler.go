@@ -41,9 +41,10 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 		var (
 			req = new(T)
 			res any
+			err error
 		)
 
-		err := decodeRequest(req, ctx, p)
+		err = decodeRequest(req, ctx, p)
 		if err != nil {
 			res = Error(err, getStatusCode(err, http.StatusBadRequest))
 		} else {
@@ -65,7 +66,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 			ctx.SetStatusCode(sc.StatusCode())
 		}
 
-		if isNil(res) {
+		if err == nil && isNil(res) {
 			res = nil
 			ctx.Response.Header.SetContentLength(-3)
 		}
