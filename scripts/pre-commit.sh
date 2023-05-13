@@ -3,16 +3,23 @@
 diff="$(git diff)"
 
 if [ -n "$diff" ]; then
-  git stash --keep-index --include-untracked && git stash drop
+  git stash --keep-index --include-untracked --quiet && git stash drop --quiet
 fi
 
-task mod lint test
-exitCode=$?
+exitCode=0
 
-git add .
+go mod tidy || exitCode=$?
+golangci-lint run || exitCode=$?
+go test ./... || exitCode=$?
+
+if [ $exitCode -eq 0 ]; then
+  git add .
+else
+  git stash --keep-index --include-untracked --quiet && git stash drop --quiet
+fi
 
 if [ -n "$diff" ]; then
-  echo "$diff" | git apply
+  echo "$diff" | git apply > /dev/null
 fi
 
 exit $exitCode
