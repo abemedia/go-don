@@ -15,6 +15,9 @@ func makeNilCheck(zero any) func(v any) bool {
 	if _, ok := zero.(Empty); ok {
 		return func(v any) bool { return true }
 	}
+	if _, ok := zero.(*Empty); ok {
+		return func(v any) bool { return true }
+	}
 
 	switch reflect.TypeOf(zero).Kind() {
 	case reflect.String, reflect.Ptr:
@@ -26,7 +29,7 @@ func makeNilCheck(zero any) func(v any) bool {
 			return (*emptyInterface)(unsafe.Pointer(&v)).ptr == nil
 		}
 	case reflect.Slice:
-		// Return true for and nil slice.
+		// Return true for nil slice.
 		return func(v any) bool {
 			header := (*reflect.SliceHeader)((*emptyInterface)(unsafe.Pointer(&v)).ptr)
 			return header.Data == 0
