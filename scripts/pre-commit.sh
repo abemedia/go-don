@@ -1,10 +1,6 @@
 #!/bin/bash
 
-diff="$(git diff)"
-
-if [ -n "$diff" ]; then
-  git stash --keep-index --include-untracked --quiet && git stash drop --quiet
-fi
+git stash --keep-index --include-untracked --quiet
 
 exitCode=0
 
@@ -18,8 +14,6 @@ else
   git stash --keep-index --include-untracked --quiet && git stash drop --quiet
 fi
 
-if [ -n "$diff" ]; then
-  echo "$diff" | git apply > /dev/null
-fi
+git stash pop --quiet
 
 exit $exitCode
