@@ -270,15 +270,21 @@ func BenchmarkHandler(b *testing.B) {
 		Query  string `query:"query"`
 	}
 
-	api := don.New(nil)
-	api.Post("/:path", don.H(func(ctx context.Context, req request) (any, error) {
-		return nil, nil
-	}))
+	header := map[string]string{"Header": "header", "Accept": "text/plain"}
+	ctx := httptest.NewRequest("POST", "/path?query=query", "", header)
+	p := httprouter.Params{{Key: "path", Value: "path"}}
 
-	h := api.RequestHandler()
-	ctx := httptest.NewRequest("POST", "/path?query=query", "", map[string]string{"header": "header"})
+	b.Run("Request", func(b *testing.B) {
+		h := don.H(func(ctx context.Context, req request) (any, error) { return nil, nil })
+		for i := 0; i < b.N; i++ {
+			h(ctx, p)
+		}
+	})
 
-	for i := 0; i < b.N; i++ {
-		h(ctx)
-	}
+	b.Run("RequestPointer", func(b *testing.B) {
+		h := don.H(func(ctx context.Context, req *request) (any, error) { return nil, nil })
+		for i := 0; i < b.N; i++ {
+			h(ctx, p)
+		}
+	})
 }
