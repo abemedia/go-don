@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.2.0](https://github.com/abemedia/go-don/compare/v0.1.4...v0.2.0) (2023-05-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove Empty type (use any instead) ([#135](https://github.com/abemedia/go-don/issues/135))
+* move encoding logic to sub-package ([#111](https://github.com/abemedia/go-don/issues/111))
+
+### Features
+
+* **encoding:** support more media type aliases ([#115](https://github.com/abemedia/go-don/issues/115)) ([d88115c](https://github.com/abemedia/go-don/commit/d88115c058e6d81c9fd0ec1d27d55bd44b4cf8e6))
+* **encoding:** support protocol buffers ([#117](https://github.com/abemedia/go-don/issues/117)) ([ace6006](https://github.com/abemedia/go-don/commit/ace600620fbe9c67e56ecfb1b7394536cc1da0a4))
+* **encoding:** support toml ([#114](https://github.com/abemedia/go-don/issues/114)) ([e95b4ae](https://github.com/abemedia/go-don/commit/e95b4aed2a43c5bd87dbf3bb4591faf0d0fd3c97))
+
+
+### Bug Fixes
+
+* no content issues on error or pointer to Empty ([#125](https://github.com/abemedia/go-don/issues/125)) ([fa50d36](https://github.com/abemedia/go-don/commit/fa50d363e872d51baeed84cb516d6d4a45fc345b))
+
+
+### Performance Improvements
+
+* **encoding/protobuf:** cache reflection results ([#138](https://github.com/abemedia/go-don/issues/138)) ([99e0cea](https://github.com/abemedia/go-don/commit/99e0cea46d5e42e91dda63bfdd365835161a9a03))
+* **encoding:** improve encoding performance ([#113](https://github.com/abemedia/go-don/issues/113)) ([a541544](https://github.com/abemedia/go-don/commit/a541544614d07121266a2ebf1eebfd75b9d7541d))
+* reuse requests to reduce allocs ([#127](https://github.com/abemedia/go-don/issues/127)) ([827209b](https://github.com/abemedia/go-don/commit/827209bca6cfa7a91c414f6bced4a10308d9573f))
+
+
+### Code Refactoring
+
+* move encoding logic to sub-package ([#111](https://github.com/abemedia/go-don/issues/111)) ([8f50031](https://github.com/abemedia/go-don/commit/8f50031717f53348d31619b96411dcbf60e1e6fc))
+* remove Empty type (use any instead) ([#135](https://github.com/abemedia/go-don/issues/135)) ([72848e8](https://github.com/abemedia/go-don/commit/72848e8389c67f4443a1f99fc1e4a8610c831b65))
+
 ## [0.1.4](https://github.com/abemedia/go-don/compare/v0.1.3...v0.1.4) (2023-05-09)
 
 
