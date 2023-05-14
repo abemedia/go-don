@@ -5,15 +5,17 @@ import (
 	"unsafe"
 )
 
-func makeNilCheck(zero any) func(v any) bool {
-	// Return true for nil interfaces.
-	if zero == any(nil) {
+func newNilCheck(zero any) func(v any) bool {
+	typ := reflect.TypeOf(zero)
+
+	// Return true for nil interface.
+	if typ == nil {
 		return func(v any) bool { return v == nil }
 	}
 
-	switch reflect.TypeOf(zero).Kind() {
-	case reflect.String, reflect.Ptr:
-		// Return true for empty strings and nil pointer.
+	switch typ.Kind() {
+	case reflect.String, reflect.Ptr, reflect.Interface:
+		// Return true for empty string and nil pointer.
 		return func(v any) bool { return v == zero }
 	case reflect.Map:
 		// Return true for and nil map.
@@ -23,8 +25,7 @@ func makeNilCheck(zero any) func(v any) bool {
 	case reflect.Slice:
 		// Return true for nil slice.
 		return func(v any) bool {
-			header := (*reflect.SliceHeader)((*emptyInterface)(unsafe.Pointer(&v)).ptr)
-			return header.Data == 0
+			return (*reflect.SliceHeader)((*emptyInterface)(unsafe.Pointer(&v)).ptr).Data == 0
 		}
 	default:
 		// Return false for all others.

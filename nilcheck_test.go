@@ -97,7 +97,7 @@ func TestNilCheck(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		isNil := don.MakeNilCheck(test.typ)
+		isNil := don.NewNilCheck(test.typ)
 		if isNil(test.data) != test.expected {
 			t.Errorf("%s should be %t", test.message, test.expected)
 		}

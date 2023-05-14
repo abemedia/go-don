@@ -28,7 +28,7 @@ type Handle[T, O any] func(ctx context.Context, request T) (O, error)
 func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 	pool := newRequestPool(*new(T))
 	decodeRequest := newRequestDecoder(*new(T))
-	isNil := makeNilCheck(*new(O))
+	isNil := newNilCheck(*new(O))
 
 	return func(ctx *fasthttp.RequestCtx, p httprouter.Params) {
 		contentType := getMediaType(ctx.Request.Header.Peek(fasthttp.HeaderAccept))
