@@ -28,11 +28,15 @@ jobs:
         run: GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
 
       - name: Enable encoding benchmarks on changes
-        run: |
-          echo "BENCHMARK_ENCODING=$(git diff master HEAD --name-only -- encoding/)" >> $GITHUB_ENV
+        id: encoding-changed
+        uses: tj-actions/changed-files@v35
+        with:
+          files: encoding/**
 
       - name: Run benchmark
         run: go test -bench=. -count=10 -benchmem ./... | tee bench-new.txt
+        env:
+          BENCHMARK_ENCODING: steps.encoding-changed.outputs.any_changed
 
       - name: Run benchmark for base code
         run: |
@@ -42,6 +46,8 @@ jobs:
           go test -bench=. -count=10 -benchmem ./... | tee bench-master.txt
           benchstat bench-master.txt
           git reset --hard $HEAD
+        env:
+          BENCHMARK_ENCODING: steps.encoding-changed.outputs.any_changed
 
       - name: Benchmark stats
         id: bench
