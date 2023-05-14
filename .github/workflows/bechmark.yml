@@ -27,6 +27,10 @@ jobs:
       - name: Install benchstat
         run: GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
 
+      - name: Enable encoding benchmarks on changes
+        run: |
+          echo "BENCHMARK_ENCODING=$(git diff master HEAD --name-only -- encoding/)" >> $GITHUB_ENV
+
       - name: Run benchmark
         run: go test -bench=. -count=10 -benchmem ./... | tee bench-new.txt
 

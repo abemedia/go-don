@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -98,6 +99,10 @@ func BenchmarkEncoding[T any](b *testing.B, opt EncodingOptions[T]) {
 }
 
 func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
+	if os.Getenv("BENCHMARK_ENCODING") == "" {
+		b.SkipNow()
+	}
+
 	dec := encoding.GetDecoder(opt.Mime)
 	if dec == nil {
 		b.Fatal("decoder not found")
@@ -114,6 +119,10 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 }
 
 func BenchmarkEncode[T any](b *testing.B, opt EncodingOptions[T]) {
+	if os.Getenv("BENCHMARK_ENCODING") == "" {
+		b.SkipNow()
+	}
+
 	enc := encoding.GetEncoder(opt.Mime)
 	if enc == nil {
 		b.Fatal("encoder not found")
