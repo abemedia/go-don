@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -99,7 +100,7 @@ func BenchmarkEncoding[T any](b *testing.B, opt EncodingOptions[T]) {
 }
 
 func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
-	if os.Getenv("BENCHMARK_ENCODING") == "" {
+	if ok, _ := strconv.ParseBool(os.Getenv("BENCHMARK_ENCODING")); !ok {
 		b.SkipNow()
 	}
 
@@ -119,7 +120,7 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 }
 
 func BenchmarkEncode[T any](b *testing.B, opt EncodingOptions[T]) {
-	if os.Getenv("BENCHMARK_ENCODING") == "" {
+	if ok, _ := strconv.ParseBool(os.Getenv("BENCHMARK_ENCODING")); !ok {
 		b.SkipNow()
 	}
 
