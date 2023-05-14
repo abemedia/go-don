@@ -2,22 +2,31 @@ package protobuf
 
 import (
 	"reflect"
+	"sync"
 
 	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/encoding"
 	"google.golang.org/protobuf/proto"
 )
 
-var messageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
+var (
+	messageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
+	cache       sync.Map
+)
 
 func unmarshal(b []byte, v any) error {
-	// TODO: Cache reflect results to improve performance.
-	elem := reflect.ValueOf(v).Elem()
-	if elem.Type().Implements(messageType) {
-		v = elem.Interface()
+	typ := reflect.TypeOf(v)
+	fn, ok := cache.Load(typ)
+	if !ok {
+		if typ.Elem().Implements(messageType) {
+			fn = func(v any) any { return reflect.ValueOf(v).Elem().Interface() }
+		} else {
+			fn = func(v any) any { return v }
+		}
+		cache.Store(typ, fn)
 	}
 
-	m, ok := v.(proto.Message)
+	m, ok := fn.(func(v any) any)(v).(proto.Message)
 	if !ok {
 		return don.ErrUnsupportedMediaType
 	}
