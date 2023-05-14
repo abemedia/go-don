@@ -13,11 +13,11 @@ import (
 )
 
 // Returns 204 - No Content
-func Empty(context.Context, *don.Empty) (interface{}, error) {
+func Empty(context.Context, any) (any, error) {
 	return nil, nil
 }
 
-func Ping(context.Context, *don.Empty) (string, error) {
+func Ping(context.Context, any) (string, error) {
 	return "pong", nil
 }
 

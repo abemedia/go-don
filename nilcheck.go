@@ -11,14 +11,6 @@ func makeNilCheck(zero any) func(v any) bool {
 		return func(v any) bool { return v == nil }
 	}
 
-	// Return true for don.Empty.
-	if _, ok := zero.(Empty); ok {
-		return func(v any) bool { return true }
-	}
-	if _, ok := zero.(*Empty); ok {
-		return func(v any) bool { return true }
-	}
-
 	switch reflect.TypeOf(zero).Kind() {
 	case reflect.String, reflect.Ptr:
 		// Return true for empty strings and nil pointer.

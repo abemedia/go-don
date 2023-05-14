@@ -15,7 +15,7 @@ import (
 )
 
 func E(err error) fasthttp.RequestHandler {
-	h := H(func(context.Context, Empty) (*Empty, error) { return nil, err })
+	h := H(func(context.Context, any) (any, error) { return nil, err })
 	return func(ctx *fasthttp.RequestCtx) { h(ctx, nil) }
 }
 

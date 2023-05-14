@@ -15,7 +15,7 @@ import (
 
 func BenchmarkDon_HTTP(b *testing.B) {
 	api := don.New(nil)
-	api.Get("/:path", don.H(func(ctx context.Context, req don.Empty) (string, error) {
+	api.Get("/:path", don.H(func(ctx context.Context, req any) (string, error) {
 		return "foo", nil
 	}))
 
