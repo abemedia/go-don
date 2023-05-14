@@ -9,10 +9,6 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-// Empty is the type used when an API handler contains either no request or no
-// response.
-type Empty struct{}
-
 // DefaultEncoding contains the media type of the default encoding to fall back
 // on if no `Accept` or `Content-Type` header was provided.
 var DefaultEncoding = "text/plain"

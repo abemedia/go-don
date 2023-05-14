@@ -83,7 +83,7 @@ func TestHandlerResponse(t *testing.T) {
 					"Content-Type":   "text/plain; charset=utf-8",
 				},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return nil, nil
 			}),
 		},
@@ -98,7 +98,7 @@ func TestHandlerResponse(t *testing.T) {
 				},
 			},
 			config: &don.Config{DefaultEncoding: "application/json", DisableNoContent: true},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return nil, nil
 			}),
 		},
@@ -111,7 +111,7 @@ func TestHandlerResponse(t *testing.T) {
 					"Foo":          "bar",
 				},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return &headerer{}, nil
 			}),
 		},
@@ -134,7 +134,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) ([]string, error) {
+			handler: don.H(func(ctx context.Context, req any) ([]string, error) {
 				return []string{"foo", "bar"}, nil
 			}),
 			request: request{header: map[string]string{"Accept": "text/plain; charset=utf-8"}},
@@ -146,7 +146,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body:   "Not Acceptable\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return nil, nil
 			}),
 			request: request{header: map[string]string{"Accept": "application/msword"}},
@@ -158,7 +158,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body:   "Unsupported Media Type\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return nil, nil
 			}),
 			request: request{
@@ -231,7 +231,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body:   "test\n",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
-			handler: don.H(func(ctx context.Context, req don.Empty) (any, error) {
+			handler: don.H(func(ctx context.Context, req any) (any, error) {
 				return nil, errors.New("test")
 			}),
 		},

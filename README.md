@@ -63,7 +63,7 @@ func Greet(ctx context.Context, req GreetRequest) (*GreetResponse, error) {
   return res, nil
 }
 
-func Pong(context.Context, don.Empty) (string, error) {
+func Pong(context.Context, any) (string, error) {
   return "pong", nil
 }
 

@@ -27,8 +27,8 @@ func TestNilCheck(t *testing.T) {
 		},
 		{
 			message:  "nil struct",
-			typ:      (*don.Empty)(nil),
-			data:     (*don.Empty)(nil),
+			typ:      (*struct{})(nil),
+			data:     (*struct{})(nil),
 			expected: true,
 		},
 		{
@@ -36,12 +36,6 @@ func TestNilCheck(t *testing.T) {
 			typ:      struct{}{},
 			data:     struct{}{},
 			expected: false,
-		},
-		{
-			message:  "don.Empty",
-			typ:      don.Empty{},
-			data:     don.Empty{},
-			expected: true,
 		},
 		{
 			message:  "nil map",
