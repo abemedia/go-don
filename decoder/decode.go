@@ -60,7 +60,12 @@ type CachedDecoder[V any] struct {
 }
 
 func NewCached[V any](v V, tag string) (*CachedDecoder[V], error) {
-	t, k, ptr := typeKind(reflect.TypeOf(v))
+	t := reflect.TypeOf(v)
+	if t == nil {
+		return nil, ErrUnsupportedType
+	}
+
+	t, k, ptr := typeKind(t)
 	if k != reflect.Struct {
 		return nil, ErrUnsupportedType
 	}

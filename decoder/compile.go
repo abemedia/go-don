@@ -76,8 +76,7 @@ func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 		case reflect.Bool:
 			decoders = append(decoders, decodeBool(set[bool](ptr, i, t), tag))
 		case reflect.Slice:
-			_, sk, _ := typeKind(t.Elem())
-			switch sk {
+			switch t.Elem().Kind() {
 			case reflect.String:
 				decoders = append(decoders, decodeStrings(set[[]string](ptr, i, t), tag))
 			case reflect.Uint8:

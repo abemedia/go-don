@@ -13,8 +13,7 @@ var messageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
 func unmarshal(b []byte, v any) error {
 	// TODO: Cache reflect results to improve performance.
 	elem := reflect.ValueOf(v).Elem()
-	if elem.Type().Implements(messageType) && elem.IsNil() {
-		elem.Set(reflect.New(elem.Type().Elem()))
+	if elem.Type().Implements(messageType) {
 		v = elem.Interface()
 	}
 

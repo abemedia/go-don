@@ -39,18 +39,18 @@ func Encoding[T any](t *testing.T, opt EncodingOptions[T]) {
 func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
-	var got T
+	var diff string
 
 	api := don.New(nil)
-	api.Post("/", don.H(func(ctx context.Context, req T) (don.Empty, error) {
-		got = req
-		return don.Empty{}, nil
+	api.Post("/", don.H(func(ctx context.Context, req T) (any, error) {
+		diff = cmp.Diff(opt.Parsed, req, ignoreUnexported[T]())
+		return nil, nil
 	}))
 
 	ctx := httptest.NewRequest(http.MethodPost, "/", opt.Raw, map[string]string{"Content-Type": opt.Mime})
 	api.RequestHandler()(ctx)
 
-	if diff := cmp.Diff(opt.Parsed, got, ignoreUnexported[T]()); diff != "" {
+	if diff != "" {
 		t.Error(diff)
 	}
 
@@ -63,7 +63,7 @@ func Encode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
 	api := don.New(nil)
-	api.Post("/", don.H(func(ctx context.Context, req don.Empty) (T, error) {
+	api.Post("/", don.H(func(ctx context.Context, req any) (T, error) {
 		return opt.Parsed, nil
 	}))
 
@@ -113,9 +113,14 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 	ctx := httptest.NewRequest("POST", "/", "", nil)
 	ctx.Request.SetBodyStream(rd, len(opt.Raw))
 
+	v := new(T)
+	if val := reflect.ValueOf(v).Elem(); val.Kind() == reflect.Pointer {
+		val.Set(reflect.New(val.Type().Elem()))
+	}
+
 	for i := 0; i < b.N; i++ {
 		rd.Seek(0, io.SeekStart) //nolint:errcheck
-		dec(ctx, new(T))         //nolint:errcheck
+		dec(ctx, v)              //nolint:errcheck
 	}
 }
 
