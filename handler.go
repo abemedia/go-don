@@ -26,6 +26,7 @@ type Handle[T, O any] func(ctx context.Context, request T) (O, error)
 
 // H wraps your handler function with the Go generics magic.
 func H[T, O any](handle Handle[T, O]) httprouter.Handle {
+	pool := newRequestPool(*new(T))
 	decodeRequest := newRequestDecoder(*new(T))
 	isNil := makeNilCheck(*new(O))
 
@@ -38,13 +39,10 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 			return
 		}
 
-		var (
-			req = new(T)
-			res any
-			err error
-		)
+		var res any
 
-		err = decodeRequest(req, ctx, p)
+		req := pool.Get()
+		err := decodeRequest(req, ctx, p)
 		if err != nil {
 			res = Error(err, getStatusCode(err, http.StatusBadRequest))
 		} else {
@@ -53,6 +51,7 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 				res = Error(err, 0)
 			}
 		}
+		pool.Put(req)
 
 		ctx.SetContentType(contentType + "; charset=utf-8")
 

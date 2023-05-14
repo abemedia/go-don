@@ -145,6 +145,10 @@ func TestDecodeError(t *testing.T) {
 		error  error
 	}{
 		{
+			target: nil,
+			error:  decoder.ErrUnsupportedType,
+		},
+		{
 			target: "",
 			error:  decoder.ErrUnsupportedType,
 		},
