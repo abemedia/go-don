@@ -9,3 +9,7 @@ vendor/
 
 # Taskfile checksums directory
 .task/
+
+# Go workspace
+go.work
+go.work.sum
