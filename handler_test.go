@@ -119,7 +119,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on unprocessable request",
 			want: response{
 				Code:   fasthttp.StatusUnsupportedMediaType,
-				Body:   "Unsupported Media Type\n",
+				Body:   "Unsupported Media Type",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct{ Hello string }) (any, error) {
@@ -131,7 +131,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on unacceptable",
 			want: response{
 				Code:   fasthttp.StatusNotAcceptable,
-				Body:   "Not Acceptable\n",
+				Body:   "Not Acceptable",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req any) ([]string, error) {
@@ -143,7 +143,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on unsupported accept",
 			want: response{
 				Code:   fasthttp.StatusNotAcceptable,
-				Body:   "Not Acceptable\n",
+				Body:   "Not Acceptable",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req any) (any, error) {
@@ -155,7 +155,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on unsupported content type",
 			want: response{
 				Code:   fasthttp.StatusUnsupportedMediaType,
-				Body:   "Unsupported Media Type\n",
+				Body:   "Unsupported Media Type",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req any) (any, error) {
@@ -170,7 +170,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid query",
 			want: response{
 				Code:   fasthttp.StatusBadRequest,
-				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax\n",
+				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct {
@@ -185,7 +185,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid header",
 			want: response{
 				Code:   fasthttp.StatusBadRequest,
-				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax\n",
+				Body:   "strconv.ParseInt: parsing \"foo\": invalid syntax",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct {
@@ -200,7 +200,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid path element",
 			want: response{
 				Code:   fasthttp.StatusNotFound,
-				Body:   "Not Found\n",
+				Body:   "Not Found",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req struct {
@@ -216,7 +216,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return error on invalid body",
 			want: response{
 				Code:   fasthttp.StatusBadRequest,
-				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax\n",
+				Body:   "strconv.Atoi: parsing \"foo\": invalid syntax",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req int) (any, error) {
@@ -228,7 +228,7 @@ func TestHandlerResponse(t *testing.T) {
 			message: "should return internal server error",
 			want: response{
 				Code:   fasthttp.StatusInternalServerError,
-				Body:   "test\n",
+				Body:   "test",
 				Header: map[string]string{"Content-Type": "text/plain; charset=utf-8"},
 			},
 			handler: don.H(func(ctx context.Context, req any) (any, error) {

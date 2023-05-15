@@ -79,10 +79,10 @@ func H[T, O any](handle Handle[T, O]) httprouter.Handle {
 func handleError(ctx *fasthttp.RequestCtx, err error) {
 	code := getStatusCode(err, http.StatusInternalServerError)
 	if code < http.StatusInternalServerError {
-		ctx.Error(err.Error()+"\n", code)
+		ctx.Error(err.Error(), code)
 		return
 	}
-	ctx.Error(fasthttp.StatusMessage(code)+"\n", code)
+	ctx.Error(fasthttp.StatusMessage(code), code)
 	ctx.Logger().Printf("%v", err)
 }
 

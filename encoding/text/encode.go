@@ -54,15 +54,19 @@ func encode(ctx *fasthttp.RequestCtx, v any) error {
 		case error:
 			b = byteconv.Atob(v.Error())
 		case fmt.Stringer:
-			b = append(ctx.Response.Body(), v.String()...)
+			b = byteconv.Atob(v.String())
 		default:
 			return don.ErrNotAcceptable
 		}
 	}
 
-	if len(b) > 0 {
-		ctx.Response.SetBodyRaw(append(b, '\n'))
+	if err != nil {
+		return err
 	}
 
-	return err
+	if len(b) > 0 {
+		ctx.Response.SetBodyRaw(b)
+	}
+
+	return nil
 }

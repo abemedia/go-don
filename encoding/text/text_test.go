@@ -8,7 +8,7 @@ import (
 
 var opt = test.EncodingOptions[string]{
 	Mime:   "text/plain",
-	Raw:    "foo\n",
+	Raw:    "foo",
 	Parsed: "foo",
 }
 
