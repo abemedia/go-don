@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/abemedia/go-don/encoding/text"
+	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/valyala/fasthttp"
@@ -35,9 +35,14 @@ func TestDecode(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		dec := encoding.GetDecoder("text/plain")
+		if dec == nil {
+			t.Fatal("decoder not found")
+		}
+
 		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", test.in, nil)
 		v := reflect.New(reflect.TypeOf(test.want)).Interface()
-		if err := text.Decode(ctx, v); err != nil {
+		if err := dec(ctx, v); err != nil {
 			t.Error(err)
 		} else {
 			if diff := cmp.Diff(test.want, reflect.ValueOf(v).Elem().Interface()); diff != "" {
