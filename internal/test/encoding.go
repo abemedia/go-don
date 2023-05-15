@@ -4,9 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -92,17 +90,17 @@ func ignoreUnexported[T any]() cmp.Option {
 
 func BenchmarkEncoding[T any](b *testing.B, opt EncodingOptions[T]) {
 	b.Run("Decode", func(b *testing.B) {
+		b.Helper()
 		BenchmarkDecode(b, opt)
 	})
 	b.Run("Encode", func(b *testing.B) {
+		b.Helper()
 		BenchmarkEncode(b, opt)
 	})
 }
 
 func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
-	if ok, _ := strconv.ParseBool(os.Getenv("BENCHMARK_ENCODING")); !ok {
-		b.SkipNow()
-	}
+	b.Helper()
 
 	dec := encoding.GetDecoder(opt.Mime)
 	if dec == nil {
@@ -125,9 +123,7 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 }
 
 func BenchmarkEncode[T any](b *testing.B, opt EncodingOptions[T]) {
-	if ok, _ := strconv.ParseBool(os.Getenv("BENCHMARK_ENCODING")); !ok {
-		b.SkipNow()
-	}
+	b.Helper()
 
 	enc := encoding.GetEncoder(opt.Mime)
 	if enc == nil {
