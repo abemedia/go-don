@@ -10,12 +10,13 @@ import (
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
 	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
 )
 
 func BenchmarkDon_HTTP(b *testing.B) {
 	api := don.New(nil)
-	api.Get("/:path", don.H(func(ctx context.Context, req any) (string, error) {
+	api.Get("/path", don.H(func(ctx context.Context, req any) (string, error) {
 		return "foo", nil
 	}))
 
@@ -33,14 +34,38 @@ func BenchmarkDon_HTTP(b *testing.B) {
 		fasthttp.Get(nil, url)
 	}
 
-	srv.Shutdown()
+	_ = srv.Shutdown()
+}
+
+func BenchmarkFiber_HTTP(b *testing.B) {
+	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
+	app.Get("/path", func(c *fiber.Ctx) error {
+		return c.SendString("foo")
+	})
+
+	ln, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	go app.Listener(ln)
+
+	url := fmt.Sprintf("http://%s/path", ln.Addr())
+
+	for i := 0; i < b.N; i++ {
+		fasthttp.Get(nil, url)
+	}
+
+	_ = app.Shutdown()
 }
 
 func BenchmarkGin_HTTP(b *testing.B) {
 	gin.SetMode("release")
 
 	router := gin.New()
-	router.GET("/:path", func(c *gin.Context) {
+	router.GET("/path", func(c *gin.Context) {
 		c.String(200, "foo")
 	})
 
@@ -58,5 +83,5 @@ func BenchmarkGin_HTTP(b *testing.B) {
 		fasthttp.Get(nil, url)
 	}
 
-	srv.Shutdown(context.Background())
+	_ = srv.Shutdown(context.Background())
 }
