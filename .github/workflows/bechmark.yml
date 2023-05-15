@@ -12,9 +12,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  benchmark:
-    name: Benchmark
+  packages:
+    name: Changed packages
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Find packages with changes
+        id: packages
+        uses: tj-actions/changed-files@v35
+        with:
+          files: '**/*.go'
+          dir_names: true
+          json: true
+
+      - name: Set output
+        id: set-matrix
+        run: |
+          echo "matrix={\"package\":${{ steps.packages.outputs.all_changed_and_modified_files }}}" >> $GITHUB_OUTPUT
+
+  benchmark:
+    name: Benchmark ${{ matrix.package }}
+    needs: packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.packages.outputs.matrix) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,49 +51,65 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install benchstat
-        run: GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
-
-      - name: Enable encoding benchmarks on changes
-        id: encoding-changed
-        uses: tj-actions/changed-files@v35
-        with:
-          files: encoding/**
-
       - name: Run benchmark
-        run: go test -bench=. -count=10 -benchmem ./... | tee bench-new.txt
-        env:
-          BENCHMARK_ENCODING: ${{ steps.encoding-changed.outputs.any_changed }}
+        run: go test -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee after
 
       - name: Run benchmark for base code
         run: |
-          git fetch origin master ${{ github.event.pull_request.base.sha }}
-          HEAD=$(git rev-parse HEAD)
-          git reset --hard ${{ github.event.pull_request.base.sha }}
-          go test -bench=. -count=10 -benchmem ./... | tee bench-master.txt
-          benchstat bench-master.txt
-          git reset --hard $HEAD
-        env:
-          BENCHMARK_ENCODING: ${{ steps.encoding-changed.outputs.any_changed }}
+          git fetch --quiet origin master ${{ github.event.pull_request.base.sha }}
+          git reset --quiet --hard ${{ github.event.pull_request.base.sha }}
+          go test -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee before
 
-      - name: Benchmark stats
+      - name: Compare benchmarks
         id: bench
         run: |
-          OUTPUT=$(benchstat bench-master.txt bench-new.txt)
+          GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
+          OUTPUT=$(benchstat before after)
           echo "${OUTPUT}"
           echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Comment benchmark result
-        continue-on-error: true
+      - name: Save benchmark results
+        uses: cloudposse/github-action-matrix-outputs-write@0.4.1
+        if: steps.bench.outputs.diff != ''
+        with:
+          matrix-step-name: ${{ github.job }}
+          matrix-key: ${{ matrix.package }}
+          outputs: ${{ toJSON(steps.bench.outputs) }}
+
+  comment:
+    name: Comment
+    needs: benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load benchmark results
+        uses: cloudposse/github-action-matrix-outputs-read@0.1.1
+        id: read
+        with:
+          matrix-step-name: benchmark
+
+      - name: Generate comment text
+        uses: actions/github-script@v6
+        if: steps.read.outputs.result != '{}'
+        id: parse
+        with:
+          result-encoding: string
+          script: |
+            const result = ${{ steps.read.outputs.result }}
+            return Object.keys(result.diff).sort().map((key) => `
+            <details><summary><code>${key}</code></summary>
+
+            ` + "```" + `
+            ${result.diff[key]}
+            ` + "```" + `
+            </details>
+            `).join('')
+
+      - name: Create comment
+        if: steps.parse.outputs.result != ''
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          header: bench
+          header: benchmarks
           message: |
-            ### Benchmark Result
-            <details><summary>Benchmark diff with base branch</summary>
-
-            ```
-            ${{ steps.bench.outputs.diff }}
-            ```
-            </details>
+            ### Benchmark Results
+            ${{ steps.parse.outputs.result }}
