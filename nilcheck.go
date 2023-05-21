@@ -1,9 +1,6 @@
 package don
 
-import (
-	"reflect"
-	"unsafe"
-)
+import "reflect"
 
 func newNilCheck(zero any) func(v any) bool {
 	typ := reflect.TypeOf(zero)
@@ -19,22 +16,12 @@ func newNilCheck(zero any) func(v any) bool {
 		return func(v any) bool { return v == zero }
 	case reflect.Map:
 		// Return true for and nil map.
-		return func(v any) bool {
-			return (*emptyInterface)(unsafe.Pointer(&v)).ptr == nil
-		}
+		return func(v any) bool { return dataOf(v) == nil }
 	case reflect.Slice:
 		// Return true for nil slice.
-		return func(v any) bool {
-			return (*reflect.SliceHeader)((*emptyInterface)(unsafe.Pointer(&v)).ptr).Data == 0
-		}
+		return func(v any) bool { return (*reflect.SliceHeader)(dataOf(v)).Data == 0 }
 	default:
 		// Return false for all others.
 		return func(v any) bool { return false }
 	}
-}
-
-// emptyInterface is the header for an interface{} value.
-type emptyInterface struct {
-	typ unsafe.Pointer
-	ptr unsafe.Pointer
 }

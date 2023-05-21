@@ -10,12 +10,6 @@ type pool[T any] interface {
 	Put(*T)
 }
 
-type resetter interface {
-	Reset()
-}
-
-var resetterType = reflect.TypeOf((*resetter)(nil)).Elem()
-
 type requestPool[T any] struct {
 	pool  sync.Pool
 	reset func(*T)
@@ -37,21 +31,17 @@ func newRequestPool[T any](zero T) pool[T] {
 			*v = zero
 		}
 	} else {
+		rtype := dataOf(typ)
 		elem := typ.Elem()
+		elemrtype := dataOf(elem)
+		zero := dataOf(reflect.New(elem).Elem().Interface())
+
 		p.pool.New = func() any {
-			v := reflect.New(elem).Interface().(T) //nolint:forcetypeassert
+			v := packEface(rtype, unsafe_New(elemrtype)).(T) //nolint:forcetypeassert
 			return &v
 		}
-
-		if typ.Implements(resetterType) {
-			p.reset = func(v *T) {
-				any(*v).(resetter).Reset() //nolint:forcetypeassert
-			}
-		} else {
-			zeroValue := reflect.New(elem).Elem()
-			p.reset = func(v *T) {
-				reflect.ValueOf(v).Elem().Elem().Set(zeroValue)
-			}
+		p.reset = func(v *T) {
+			typedmemmove(elemrtype, dataOf(*v), zero)
 		}
 	}
 
