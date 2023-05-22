@@ -113,6 +113,7 @@ const (
 	ErrNotFound             = StatusError(fasthttp.StatusNotFound)
 	ErrMethodNotAllowed     = StatusError(fasthttp.StatusMethodNotAllowed)
 	ErrNotAcceptable        = StatusError(fasthttp.StatusNotAcceptable)
+	ErrConflict             = StatusError(fasthttp.StatusConflict)
 	ErrUnsupportedMediaType = StatusError(fasthttp.StatusUnsupportedMediaType)
 	ErrInternalServerError  = StatusError(fasthttp.StatusInternalServerError)
 )

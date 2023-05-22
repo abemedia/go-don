@@ -140,7 +140,7 @@ func (r *API) RequestHandler() fasthttp.RequestHandler {
 
 		// Content-Length of -3 means handler returned nil.
 		if ctx.Response.Header.ContentLength() == -3 {
-			ctx.Response.Header.SetContentLength(0)
+			ctx.Response.Header.Del(fasthttp.HeaderTransferEncoding)
 
 			if !r.config.DisableNoContent {
 				ctx.Response.SetBody(nil)
@@ -165,9 +165,10 @@ func (r *API) Serve(ln net.Listener) error {
 
 func newServer(r *API) *fasthttp.Server {
 	return &fasthttp.Server{
-		Handler:              r.RequestHandler(),
-		StreamRequestBody:    true,
-		NoDefaultContentType: true,
+		Handler:               r.RequestHandler(),
+		StreamRequestBody:     true,
+		NoDefaultContentType:  true,
+		NoDefaultServerHeader: true,
 	}
 }
 

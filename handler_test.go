@@ -79,8 +79,7 @@ func TestHandlerResponse(t *testing.T) {
 				Code: fasthttp.StatusNoContent,
 				Body: "",
 				Header: map[string]string{
-					"Content-Length": "0",
-					"Content-Type":   "text/plain; charset=utf-8",
+					"Content-Type": "text/plain; charset=utf-8",
 				},
 			},
 			handler: don.H(func(ctx context.Context, req any) (any, error) {
@@ -93,8 +92,7 @@ func TestHandlerResponse(t *testing.T) {
 				Code: fasthttp.StatusOK,
 				Body: "null",
 				Header: map[string]string{
-					"Content-Length": "0",
-					"Content-Type":   "application/json; charset=utf-8",
+					"Content-Type": "application/json; charset=utf-8",
 				},
 			},
 			config: &don.Config{DefaultEncoding: "application/json", DisableNoContent: true},
