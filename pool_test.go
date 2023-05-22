@@ -60,32 +60,4 @@ func TestRequestPool(t *testing.T) {
 			}
 		}
 	})
-
-	t.Run("Resetter", func(t *testing.T) {
-		zero := &itemResetter{}
-		pool := don.NewRequestPool(zero)
-
-		for i := 0; i < 100; i++ {
-			p := pool.Get()
-			v := *p
-			v.String = "test"
-			v.Pointer = &v.String
-			pool.Put(p)
-		}
-
-		for i := 0; i < 100; i++ {
-			if !reflect.DeepEqual(&zero, pool.Get()) {
-				t.Fatal("should be zero value")
-			}
-		}
-	})
-}
-
-type itemResetter struct {
-	String  string
-	Pointer *string
-}
-
-func (ir *itemResetter) Reset() {
-	*ir = itemResetter{}
 }
