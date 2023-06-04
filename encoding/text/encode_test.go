@@ -2,8 +2,10 @@ package text_test
 
 import (
 	"errors"
+	"io"
 	"testing"
 
+	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/google/go-cmp/cmp"
@@ -31,18 +33,18 @@ func TestEncode(t *testing.T) {
 		{float64(5.1), "5.1"},
 		{true, "true"},
 		{errors.New("test"), "test"},
-		{marshaler{}, "test"},
-		{&marshaler{}, "test"},
+		{marshaler{s: "test"}, "test"},
+		{&marshaler{s: "test"}, "test"},
 		{stringer{}, "test"},
 		{&stringer{}, "test"},
 	}
 
-	for _, test := range tests {
-		enc := encoding.GetEncoder("text/plain")
-		if enc == nil {
-			t.Fatal("encoder not found")
-		}
+	enc := encoding.GetEncoder("text/plain")
+	if enc == nil {
+		t.Fatal("encoder not found")
+	}
 
+	for _, test := range tests {
 		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", "", nil)
 		if err := enc(ctx, test.in); err != nil {
 			t.Error(err)
@@ -54,10 +56,40 @@ func TestEncode(t *testing.T) {
 	}
 }
 
-type marshaler struct{}
+func TestEncodeError(t *testing.T) {
+	tests := []struct {
+		in   any
+		want error
+	}{
+		{&struct{}{}, don.ErrNotAcceptable},
+		{marshaler{err: io.EOF}, io.EOF},
+	}
+
+	enc := encoding.GetEncoder("text/plain")
+	if enc == nil {
+		t.Fatal("encoder not found")
+	}
+
+	for _, test := range tests {
+		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", "", nil)
+		if err := enc(ctx, test.in); err == nil {
+			t.Error("should return error")
+		} else if !errors.Is(err, test.want) {
+			t.Errorf("should return error %q, got %q", test.want, err)
+		}
+	}
+}
+
+type marshaler struct {
+	s   string
+	err error
+}
 
 func (m marshaler) MarshalText() ([]byte, error) {
-	return []byte("test"), nil
+	if m.err != nil {
+		return nil, m.err
+	}
+	return []byte(m.s), nil
 }
 
 type stringer struct{}
