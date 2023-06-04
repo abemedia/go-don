@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.1](https://github.com/abemedia/go-don/compare/v0.2.0...v0.2.1) (2023-06-04)
+
+
+### Bug Fixes
+
+* content-length is 0 when responding with nil value ([#148](https://github.com/abemedia/go-don/issues/148)) ([9cf40b2](https://github.com/abemedia/go-don/commit/9cf40b2c8a36468d072c3b17cebb2dc745c0e520))
+
+
+### Performance Improvements
+
+* **encoding/text:** reduce allocs ([#142](https://github.com/abemedia/go-don/issues/142)) ([5759715](https://github.com/abemedia/go-don/commit/575971580296f0acaa929c6e849bbe707e580165))
+* improve pool performance for pointer types ([#147](https://github.com/abemedia/go-don/issues/147)) ([d9464de](https://github.com/abemedia/go-don/commit/d9464deb560eac1500b51f45c5cfe64822efed63))
+
 ## [0.2.0](https://github.com/abemedia/go-don/compare/v0.1.4...v0.2.0) (2023-05-14)
 
 
