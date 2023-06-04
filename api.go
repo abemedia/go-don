@@ -106,10 +106,12 @@ func (r *API) HandleFunc(method, path string, handle http.HandlerFunc) {
 	r.router.HandlerFunc(method, path, handle)
 }
 
+// Group creates a new sub-router with a common prefix.
 func (r *API) Group(path string) Router {
 	return &group{prefix: path, r: r}
 }
 
+// Use registers a middleware.
 func (r *API) Use(mw ...Middleware) {
 	r.mw = append(r.mw, mw...)
 }
