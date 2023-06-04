@@ -96,9 +96,6 @@ func newUnmarshaler(typ reflect.Type) (func([]byte, reflect.Value) error, error)
 		isPtr := typ.Kind() == reflect.Pointer
 		typ = typ.Elem()
 		return func(b []byte, v reflect.Value) error {
-			if len(b) == 0 {
-				return nil
-			}
 			if isPtr && v.IsNil() {
 				v.Set(reflect.New(typ))
 			}
