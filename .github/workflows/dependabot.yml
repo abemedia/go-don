@@ -5,8 +5,7 @@ on:
     branches: [master]
 
 permissions:
-  contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   merge:
@@ -24,7 +23,7 @@ jobs:
         if: steps.dependabot.outputs.update-type == 'version-update:semver-patch'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
