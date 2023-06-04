@@ -2,6 +2,7 @@
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/abemedia/go-don)](https://pkg.go.dev/github.com/abemedia/go-don)
 [![Codecov](https://codecov.io/gh/abemedia/go-don/branch/master/graph/badge.svg)](https://codecov.io/gh/abemedia/go-don)
+[![Go Report Card](https://goreportcard.com/badge/github.com/abemedia/go-don)](https://goreportcard.com/report/github.com/abemedia/go-don)
 
 Don is a fast & simple API framework written in Go. It features a super-simple API and thanks to
 [fasthttp](https://github.com/valyala/fasthttp) and a custom version of

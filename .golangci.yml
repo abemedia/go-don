@@ -2,6 +2,7 @@ linters:
   enable-all: true
   disable:
     - deadcode # deprecated
+    - depguard
     - exhaustive
     - exhaustivestruct # deprecated
     - exhaustruct
@@ -13,6 +14,7 @@ linters:
     - interfacer # deprecated
     - ireturn
     - maligned # deprecated
+    - nilnil
     - nosnakecase # deprecated
     - nlreturn
     - paralleltest
@@ -24,12 +26,15 @@ linters:
     - wsl
 
 linters-settings:
-  depguard:
-    list-type: denylist
-    include-go-root: true
-    packages:
-      - encoding/json
-      - github.com/pkg/errors
+  gomodguard:
+    blocked:
+      modules:
+        - encoding/json:
+            recommendations:
+              - github.com/goccy/go-json
+        - github.com/pkg/errors:
+            recommendations:
+              - errors
   gofmt:
     rewrite-rules:
       - pattern: interface{}
