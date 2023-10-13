@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/abemedia/httprouter v0.0.0-20230505023925-232e0e5a4b1b
 	github.com/goccy/go-json v0.10.2
-	github.com/google/go-cmp v0.5.9
+	github.com/google/go-cmp v0.6.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/valyala/fasthttp v1.50.0
 	github.com/vmihailenco/msgpack/v5 v5.4.0
