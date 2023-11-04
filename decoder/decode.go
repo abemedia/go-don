@@ -12,8 +12,8 @@ var (
 )
 
 type Getter interface {
-	Get(string) string
-	Values(string) []string
+	Get(key string) string
+	Values(key string) []string
 }
 
 type Decoder struct {

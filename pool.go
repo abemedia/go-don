@@ -7,7 +7,7 @@ import (
 
 type pool[T any] interface {
 	Get() *T
-	Put(*T)
+	Put(x *T)
 }
 
 type requestPool[T any] struct {
