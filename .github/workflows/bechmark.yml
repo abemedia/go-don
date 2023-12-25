@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Find packages with changes
         id: packages
-        uses: tj-actions/changed-files@v40
+        uses: tj-actions/changed-files@v41
         with:
           files: '**/*.go'
           dir_names: true
