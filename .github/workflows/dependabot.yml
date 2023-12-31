@@ -12,6 +12,7 @@ jobs:
   merge:
     name: Merge
     runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
     steps:
       - uses: fastify/github-action-merge-dependabot@v3
         with:
