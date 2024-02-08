@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Load benchmark results
-        uses: cloudposse/github-action-matrix-outputs-read@0.1.1
+        uses: cloudposse/github-action-matrix-outputs-read@0.1.2
         id: read
         with:
           matrix-step-name: benchmark
