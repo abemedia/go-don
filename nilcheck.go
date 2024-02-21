@@ -22,6 +22,6 @@ func newNilCheck(zero any) func(v any) bool {
 		return func(v any) bool { return (*reflect.SliceHeader)(dataOf(v)).Data == 0 }
 	default:
 		// Return false for all others.
-		return func(v any) bool { return false }
+		return func(any) bool { return false }
 	}
 }
