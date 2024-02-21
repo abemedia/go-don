@@ -47,6 +47,9 @@ linters-settings:
     require-specific: true
 
 issues:
+  include:
+    - EXC0013
+    - EXC0014
   exclude-rules:
     - path: (.+)_test.go
       linters:
