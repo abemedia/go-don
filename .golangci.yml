@@ -59,5 +59,8 @@ issues:
     - path: ((.+)_test.go|internal/test/(.+))
       linters: [govet]
       text: '^fieldalignment:'
+    - path: ((.+)_test.go|internal/test/(.+))
+      linters: [revive]
+      text: '^unused-parameter:'
     - linters: [govet]
       text: '^shadow: declaration of "err" shadows declaration'
