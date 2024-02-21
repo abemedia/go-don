@@ -1,3 +1,4 @@
+// Package don provides a fast and efficient API framework.
 package don
 
 import (
@@ -101,7 +102,7 @@ func (r *API) Handler(method, path string, handle http.Handler) {
 	r.router.Handler(method, path, handle)
 }
 
-// HandlerFunc is an adapter which allows the usage of an http.HandlerFunc as a request handle.
+// HandleFunc is an adapter which allows the usage of an http.HandlerFunc as a request handle.
 func (r *API) HandleFunc(method, path string, handle http.HandlerFunc) {
 	r.router.HandlerFunc(method, path, handle)
 }

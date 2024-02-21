@@ -1,3 +1,4 @@
+// Package msgpack provides encoding and decoding of MessagePack data.
 package msgpack
 
 import (

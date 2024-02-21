@@ -1,3 +1,4 @@
+// Package yaml provides encoding and decoding of YAML data.
 package yaml
 
 import (

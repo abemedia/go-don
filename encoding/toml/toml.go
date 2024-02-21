@@ -1,3 +1,4 @@
+// Package toml provides encoding and decoding of TOML data.
 package toml
 
 import (

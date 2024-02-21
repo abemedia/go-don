@@ -1,3 +1,4 @@
+// Package form provides decoding of form data.
 package form
 
 import (

@@ -1,3 +1,4 @@
+// Package httptest provides utilities for testing fasthttp handlers.
 package httptest
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// NewRequest returns a new [fasthttp.RequestCtx] with the given method, url, body and header.
 func NewRequest(method, url, body string, header map[string]string) *fasthttp.RequestCtx {
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.SetMethod(method)

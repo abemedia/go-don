@@ -1,3 +1,4 @@
+// Package text provides encoding and decoding of plain text data.
 package text
 
 import (

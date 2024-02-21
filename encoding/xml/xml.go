@@ -1,3 +1,4 @@
+// Package xml provides encoding and decoding of XML data.
 package xml
 
 import (
