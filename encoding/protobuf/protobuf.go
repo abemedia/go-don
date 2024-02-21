@@ -1,3 +1,4 @@
+// Package protobuf provides encoding and decoding of Protocol Buffers data.
 package protobuf
 
 import (
