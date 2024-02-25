@@ -2,6 +2,7 @@ package encoding
 
 import (
 	"context"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 )
@@ -50,7 +51,13 @@ func RegisterEncoder[T EncoderConstraint](enc T, mime string, aliases ...string)
 
 // GetEncoder returns the response encoder for a given media type.
 func GetEncoder(mime string) ResponseEncoder {
-	return encoders[mime]
+	mimeParts := strings.Split(mime, ",")
+	for _, part := range mimeParts {
+		if enc, ok := encoders[part]; ok {
+			return enc
+		}
+	}
+	return nil
 }
 
 var encoders = map[string]ResponseEncoder{}
