@@ -64,7 +64,7 @@ jobs:
           echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Save benchmark results
-        uses: cloudposse/github-action-matrix-outputs-write@0.5.0
+        uses: cloudposse/github-action-matrix-outputs-write@1.0.0
         if: steps.bench.outputs.diff != ''
         with:
           matrix-step-name: ${{ github.job }}
