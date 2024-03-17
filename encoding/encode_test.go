@@ -68,3 +68,21 @@ func testRegisterEncoder[T encoding.EncoderConstraint](t *testing.T, dec T, cont
 		}
 	}
 }
+
+func TestGetEncoderMultipleContentTypes(t *testing.T) {
+	encFn := func(ctx *fasthttp.RequestCtx, v any) error {
+		return nil
+	}
+
+	encoding.RegisterEncoder(encFn, "application/xml")
+
+	enc := encoding.GetEncoder("text/html,application/xhtml+xml,application/xml")
+	if enc == nil {
+		t.Fatal("encoder not found")
+	}
+
+	enc = encoding.GetEncoder("application/xhtml+xml")
+	if enc != nil {
+		t.Fatal("encoder should not be found")
+	}
+}
