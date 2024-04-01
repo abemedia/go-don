@@ -12,7 +12,7 @@ type item struct {
 
 var opt = testutil.EncodingOptions[item]{
 	Mime:   "application/json",
-	Raw:    `{"foo":"bar"}`,
+	Raw:    `{"foo":"bar"}` + "\n",
 	Parsed: item{Foo: "bar"},
 }
 
