@@ -10,10 +10,11 @@ linters:
     - gochecknoglobals
     - godox
     - golint # deprecated
-    - gomnd
+    - gomnd # deprecated
     - interfacer # deprecated
     - ireturn
     - maligned # deprecated
+    - mnd
     - nilnil
     - nosnakecase # deprecated
     - nlreturn
@@ -54,10 +55,10 @@ issues:
     - path: (.+)_test.go
       linters:
         - cyclop
+        - err113
         - forcetypeassert
         - funlen
         - goconst
-        - goerr113
         - gosec
     - path: ((.+)_test.go|internal/test/(.+))
       linters: [govet]
