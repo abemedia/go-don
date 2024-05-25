@@ -10,7 +10,7 @@ require (
 	github.com/abemedia/go-don v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gorilla/schema v1.3.0
-	github.com/valyala/fasthttp v1.53.0
+	github.com/valyala/fasthttp v1.54.0
 )
 
 require (
