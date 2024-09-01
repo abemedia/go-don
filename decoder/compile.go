@@ -129,12 +129,12 @@ func set[T any](ptr bool, i int, t reflect.Type) func(reflect.Value, T) {
 			if f.IsNil() {
 				f.Set(reflect.New(t))
 			}
-			*(*T)(unsafe.Pointer(f.Elem().UnsafeAddr())) = d
+			*(*T)(unsafe.Pointer(f.Elem().UnsafeAddr())) = d //nolint:gosec // false positive
 		}
 	}
 
 	return func(v reflect.Value, d T) {
-		*(*T)(unsafe.Pointer(v.Field(i).UnsafeAddr())) = d
+		*(*T)(unsafe.Pointer(v.Field(i).UnsafeAddr())) = d //nolint:gosec // false positive
 	}
 }
 
