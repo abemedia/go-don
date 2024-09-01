@@ -67,6 +67,6 @@ func testAdapter(t *testing.T, in decoder.Getter) {
 	}
 
 	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf(diff)
+		t.Error(diff)
 	}
 }

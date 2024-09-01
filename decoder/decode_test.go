@@ -93,7 +93,7 @@ func TestDecode(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
-			t.Errorf(diff)
+			t.Error(diff)
 		}
 	})
 
@@ -108,7 +108,7 @@ func TestDecode(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
-			t.Errorf(diff)
+			t.Error(diff)
 		}
 
 		actual = &test{}
@@ -117,7 +117,7 @@ func TestDecode(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
-			t.Errorf(diff)
+			t.Error(diff)
 		}
 	})
 
@@ -132,7 +132,7 @@ func TestDecode(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(expected, actual, exportAll); diff != "" {
-			t.Errorf(diff)
+			t.Error(diff)
 		}
 	})
 }
