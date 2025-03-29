@@ -21,7 +21,7 @@ func TestAPI(t *testing.T) {
 
 	t.Run("ListenAndServe", func(t *testing.T) {
 		testAPI(t, func(api *don.API, ln net.Listener) error {
-			ln.Close()
+			ln.Close() //nolint:errcheck
 			return api.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", ln.Addr().(*net.TCPAddr).Port))
 		})
 	})
