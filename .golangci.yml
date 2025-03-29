@@ -1,70 +1,68 @@
+version: '2'
 linters:
-  enable-all: true
+  default: all
   disable:
-    - deadcode # deprecated
     - depguard
     - exhaustive
-    - exhaustivestruct # deprecated
     - exhaustruct
-    - gochecknoinits
     - gochecknoglobals
+    - gochecknoinits
     - godox
-    - golint # deprecated
-    - gomnd # deprecated
-    - interfacer # deprecated
     - ireturn
-    - maligned # deprecated
     - mnd
     - nilnil
-    - nosnakecase # deprecated
     - nlreturn
     - paralleltest
-    - scopelint # deprecated
-    - structcheck # deprecated
     - varnamelen
-    - varcheck # deprecated
     - wrapcheck
     - wsl
+  settings:
+    gomodguard:
+      blocked:
+        modules:
+          - encoding/json:
+              recommendations: [github.com/goccy/go-json]
+          - github.com/pkg/errors:
+              recommendations: [errors]
+    govet:
+      enable-all: true
+    nolintlint:
+      require-specific: true
+  exclusions:
+    generated: lax
+    presets:
+      - common-false-positives
+      - legacy
+    rules:
+      - linters:
+          - cyclop
+          - err113
+          - forcetypeassert
+          - funlen
+          - goconst
+          - gosec
+        path: (.+)_test.go
+      - linters: [govet]
+        path: ((.+)_test.go|internal/test/(.+))
+        text: '^fieldalignment:'
+      - linters: [govet]
+        text: '^shadow: declaration of "err" shadows declaration'
+      - linters: [revive]
+        path: ((.+)_test.go|internal/test/(.+))
+        text: '^unused-parameter:'
+      - linters: [revive]
+        text: '^(exported|package-comments): .*$'
 
-linters-settings:
-  gomodguard:
-    blocked:
-      modules:
-        - encoding/json:
-            recommendations:
-              - github.com/goccy/go-json
-        - github.com/pkg/errors:
-            recommendations:
-              - errors
-  gofmt:
-    rewrite-rules:
-      - pattern: interface{}
-        replacement: any
-  gofumpt:
-    extra-rules: true
-  govet:
-    enable-all: true
-  nolintlint:
-    require-specific: true
-
-issues:
-  include:
-    - EXC0013
-    - EXC0014
-  exclude-rules:
-    - path: (.+)_test.go
-      linters:
-        - cyclop
-        - err113
-        - forcetypeassert
-        - funlen
-        - goconst
-        - gosec
-    - path: ((.+)_test.go|internal/test/(.+))
-      linters: [govet]
-      text: '^fieldalignment:'
-    - path: ((.+)_test.go|internal/test/(.+))
-      linters: [revive]
-      text: '^unused-parameter:'
-    - linters: [govet]
-      text: '^shadow: declaration of "err" shadows declaration'
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gofmt:
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+    gofumpt:
+      extra-rules: true

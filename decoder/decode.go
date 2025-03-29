@@ -43,7 +43,7 @@ func (d *Decoder) Decode(data Getter, v any) error {
 		var err error
 		dec, err = compile(t, d.tag, t.Kind() == reflect.Ptr)
 		if err != nil {
-			if err != ErrTagNotFound { //nolint:errorlint,goerr113
+			if err != ErrTagNotFound { //nolint:errorlint,err113
 				return err
 			}
 			dec = noopDecoder

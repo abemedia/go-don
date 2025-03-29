@@ -12,7 +12,7 @@ import (
 	_ "github.com/abemedia/go-don/encoding/yaml"
 )
 
-// Returns 204 - No Content
+// Returns 204 - No Content.
 func Empty(context.Context, any) (any, error) {
 	return nil, nil
 }
@@ -38,11 +38,11 @@ func (gr *GreetResponse) StatusCode() int {
 // Add custom headers to the response.
 func (gr *GreetResponse) Header() http.Header {
 	header := http.Header{}
-	header.Set("foo", "bar")
+	header.Set("Foo", "bar")
 	return header
 }
 
-func Greet(ctx context.Context, req *GreetRequest) (*GreetResponse, error) {
+func Greet(_ context.Context, req *GreetRequest) (*GreetResponse, error) {
 	if req.Name == "" {
 		return nil, don.ErrBadRequest
 	}
