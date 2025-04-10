@@ -47,18 +47,18 @@ jobs:
           go-version-file: go.mod
 
       - name: Run benchmark
-        run: go test -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee after
+        run: go test -run ^$ -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee after
 
       - name: Run benchmark for base code
         run: |
           git fetch --quiet origin master ${{ github.event.pull_request.base.sha }}
           git reset --quiet --hard ${{ github.event.pull_request.base.sha }}
-          go test -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee before
+          go test -run ^$ -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee before
 
       - name: Compare benchmarks
         id: bench
         run: |
-          GO111MODULE=off go get golang.org/x/perf/cmd/benchstat
+          go install golang.org/x/perf/cmd/benchstat@latest
           OUTPUT=$(benchstat before after)
           echo "${OUTPUT}"
           echo "diff<<EOF" >> $GITHUB_OUTPUT && echo "$OUTPUT" >> $GITHUB_OUTPUT && echo "EOF" >> $GITHUB_OUTPUT
