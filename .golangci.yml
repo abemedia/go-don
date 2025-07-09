@@ -12,10 +12,12 @@ linters:
     - mnd
     - nilnil
     - nlreturn
+    - noinlineerr
     - paralleltest
     - varnamelen
     - wrapcheck
     - wsl
+    - wsl_v5
   settings:
     gomodguard:
       blocked:
