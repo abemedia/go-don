@@ -1,5 +1,7 @@
 # Don - Go API Framework
 
+<img align="right" width="150" alt="" src="assets/logo.png">
+
 [![GoDoc](https://pkg.go.dev/badge/github.com/abemedia/go-don)](https://pkg.go.dev/github.com/abemedia/go-don)
 [![Codecov](https://codecov.io/gh/abemedia/go-don/branch/master/graph/badge.svg)](https://codecov.io/gh/abemedia/go-don)
 [![Go Report Card](https://goreportcard.com/badge/github.com/abemedia/go-don)](https://goreportcard.com/report/github.com/abemedia/go-don)
