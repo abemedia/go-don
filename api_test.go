@@ -39,7 +39,7 @@ func testAPI(t *testing.T, serve func(api *don.API, ln net.Listener) error) {
 		ctx.WriteString("OK") //nolint:errcheck
 	})
 
-	ln, err := net.Listen("tcp", ":0")
+	ln, err := net.Listen("tcp", ":0") //nolint:noctx
 	if err != nil {
 		t.Fatal(err)
 	}
