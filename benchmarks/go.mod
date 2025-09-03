@@ -2,13 +2,13 @@
 
 module benchmarks
 
-go 1.18
+go 1.23.0
 
 replace github.com/abemedia/go-don => ../
 
 require (
 	github.com/abemedia/go-don v0.0.0-00010101000000-000000000000
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/gorilla/schema v1.4.1
 	github.com/valyala/fasthttp v1.59.0
 )
