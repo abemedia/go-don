@@ -83,7 +83,7 @@ jobs:
           matrix-step-name: benchmark
 
       - name: Generate comment text
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: steps.read.outputs.result != '{}'
         id: parse
         with:
