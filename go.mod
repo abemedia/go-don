@@ -1,6 +1,6 @@
 module github.com/abemedia/go-don
 
-go 1.18
+go 1.23
 
 require (
 	github.com/abemedia/httprouter v0.0.0-20230505023925-232e0e5a4b1b
@@ -9,7 +9,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/valyala/fasthttp v1.52.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.36.9
 	gopkg.in/yaml.v3 v3.0.1
 )
 
