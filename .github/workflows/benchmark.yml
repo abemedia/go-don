@@ -2,6 +2,8 @@ name: Benchmark
 
 on:
   pull_request:
+    branches: [master]
+    paths: ['**.go']
 
 permissions:
   contents: read
@@ -11,28 +13,42 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  BENCH_COUNT: 10
+
 jobs:
   packages:
     name: Changed packages
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.matrix || '{}' }}
     steps:
       - name: Find packages with changes
         id: packages
         uses: tj-actions/changed-files@v47
         with:
-          files: '**/*.go'
+          files: '**.go'
           dir_names: true
           json: true
 
-      - name: Set output
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Filter packages with benchmarks
         id: set-matrix
         run: |
-          echo "matrix={\"package\":${{ steps.packages.outputs.all_changed_and_modified_files }}}" >> $GITHUB_OUTPUT
+          PACKAGES=${{ steps.packages.outputs.all_changed_and_modified_files }}
+          filtered=()
+          for pkg in $(echo "$PACKAGES" | jq -r '.[]'); do
+            if grep -Rq "func Benchmark" ./$pkg; then
+              filtered+=("\"$pkg\"")
+            fi
+          done
+
+          echo "matrix={\"package\": $(IFS=,; echo "[${filtered[*]}]")}" >> $GITHUB_OUTPUT
 
   benchmark:
-    name: Benchmark ${{ matrix.package }}
+    name: ${{ matrix.package }}
     needs: packages
     runs-on: ubuntu-latest
     strategy:
@@ -47,13 +63,14 @@ jobs:
           go-version-file: go.mod
 
       - name: Run benchmark
-        run: go test -run ^$ -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee after
+        run: |
+          go test -run ^$ -bench=. -count=${{ env.BENCH_COUNT }} -benchmem ./${{ matrix.package }} | tee after
 
       - name: Run benchmark for base code
         run: |
           git fetch --quiet origin master ${{ github.event.pull_request.base.sha }}
           git reset --quiet --hard ${{ github.event.pull_request.base.sha }}
-          go test -run ^$ -bench=. -count=10 -benchmem ./${{ matrix.package }} | tee before
+          go test -run ^$ -bench=. -count=${{ env.BENCH_COUNT }} -benchmem ./${{ matrix.package }} | tee before
 
       - name: Compare benchmarks
         id: bench
