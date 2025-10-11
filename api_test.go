@@ -8,7 +8,7 @@ import (
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
-	"github.com/abemedia/go-don/internal/test"
+	"github.com/abemedia/go-don/internal/testutil"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
@@ -16,7 +16,7 @@ import (
 func TestAPI(t *testing.T) {
 	t.Run("Router", func(t *testing.T) {
 		api := don.New(nil)
-		test.Router(t, api, api.RequestHandler(), "")
+		testutil.TestRouter(t, api, api.RequestHandler(), "")
 	})
 
 	t.Run("ListenAndServe", func(t *testing.T) {

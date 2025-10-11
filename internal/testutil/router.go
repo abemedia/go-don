@@ -1,4 +1,4 @@
-package test
+package testutil
 
 import (
 	"net/http"
@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/abemedia/go-don"
-	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/abemedia/httprouter"
 	"github.com/valyala/fasthttp"
 )
 
-func Router(t *testing.T, r don.Router, handler fasthttp.RequestHandler, basePath string) {
+func TestRouter(t *testing.T, r don.Router, handler fasthttp.RequestHandler, basePath string) {
 	t.Helper()
 
 	tests := []struct {
@@ -46,7 +45,7 @@ func Router(t *testing.T, r don.Router, handler fasthttp.RequestHandler, basePat
 			_, _ = ctx.WriteString(test.desc)
 		})
 
-		ctx := httptest.NewRequest(test.method, basePath+path, "", nil)
+		ctx := NewRequest(test.method, basePath+path, "", nil)
 		handler(ctx)
 
 		if code := ctx.Response.StatusCode(); code != fasthttp.StatusOK {

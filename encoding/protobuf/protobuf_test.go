@@ -7,24 +7,23 @@ import (
 	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/encoding"
 	"github.com/abemedia/go-don/encoding/protobuf/testdata"
-	"github.com/abemedia/go-don/internal/test"
-	"github.com/abemedia/go-don/pkg/httptest"
+	"github.com/abemedia/go-don/internal/testutil"
 )
 
 //go:generate protoc testdata/test.proto --go_out=. --go_opt=paths=source_relative
 
-var opt = test.EncodingOptions[*testdata.Item]{
+var opt = testutil.EncodingOptions[*testdata.Item]{
 	Mime:   "application/protobuf",
 	Raw:    "\n\x03bar",
 	Parsed: &testdata.Item{Foo: "bar"},
 }
 
 func TestProtobuf(t *testing.T) {
-	test.Encoding(t, opt)
+	testutil.TestEncoding(t, opt)
 }
 
 func TestProtobufError(t *testing.T) {
-	ctx := httptest.NewRequest("", "", "", nil)
+	ctx := testutil.NewRequest("", "", "", nil)
 	v := "test"
 
 	t.Run("Decode", func(t *testing.T) {
@@ -45,5 +44,5 @@ func TestProtobufError(t *testing.T) {
 }
 
 func BenchmarkProtobuf(b *testing.B) {
-	test.BenchmarkEncoding(b, opt)
+	testutil.BenchmarkEncoding(b, opt)
 }

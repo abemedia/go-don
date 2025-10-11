@@ -45,12 +45,12 @@ linters:
           - gosec
         path: (.+)_test.go
       - linters: [govet]
-        path: ((.+)_test.go|internal/test/(.+))
+        path: ((.+)_test.go|internal/testutil/(.+))
         text: '^fieldalignment:'
       - linters: [govet]
         text: '^shadow: declaration of "err" shadows declaration'
       - linters: [revive]
-        path: ((.+)_test.go|internal/test/(.+))
+        path: ((.+)_test.go|internal/testutil/(.+))
         text: '^unused-parameter:'
       - linters: [revive]
         text: '^(exported|package-comments): .*$'

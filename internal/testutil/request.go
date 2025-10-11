@@ -1,5 +1,4 @@
-// Package httptest provides utilities for testing fasthttp handlers.
-package httptest
+package testutil
 
 import (
 	"strings"

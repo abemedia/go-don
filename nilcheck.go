@@ -19,7 +19,7 @@ func newNilCheck(zero any) func(v any) bool {
 		return func(v any) bool { return dataOf(v) == nil }
 	case reflect.Slice:
 		// Return true for nil slice.
-		return func(v any) bool { return (*reflect.SliceHeader)(dataOf(v)).Data == 0 }
+		return func(v any) bool { return (*reflect.SliceHeader)(dataOf(v)).Data == 0 } //nolint:staticcheck
 	default:
 		// Return false for all others.
 		return func(any) bool { return false }

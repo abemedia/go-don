@@ -3,23 +3,23 @@ package yaml_test
 import (
 	"testing"
 
-	"github.com/abemedia/go-don/internal/test"
+	"github.com/abemedia/go-don/internal/testutil"
 )
 
 type item struct {
 	Foo string `yaml:"foo"`
 }
 
-var opt = test.EncodingOptions[item]{
+var opt = testutil.EncodingOptions[item]{
 	Mime:   "application/yaml",
 	Raw:    "foo: bar\n",
 	Parsed: item{Foo: "bar"},
 }
 
 func TestYAML(t *testing.T) {
-	test.Encoding(t, opt)
+	testutil.TestEncoding(t, opt)
 }
 
 func BenchmarkYAML(b *testing.B) {
-	test.BenchmarkEncoding(b, opt)
+	testutil.BenchmarkEncoding(b, opt)
 }
