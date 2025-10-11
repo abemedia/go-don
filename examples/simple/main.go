@@ -12,7 +12,7 @@ import (
 	_ "github.com/abemedia/go-don/encoding/yaml"
 )
 
-// Returns 204 - No Content.
+// Empty returns 204 - No Content.
 func Empty(context.Context, any) (any, error) {
 	return nil, nil
 }
@@ -30,12 +30,12 @@ type GreetResponse struct {
 	Greeting string `json:"data"`
 }
 
-// Set a custom HTTP response code.
+// StatusCode sets a custom HTTP response code.
 func (gr *GreetResponse) StatusCode() int {
 	return http.StatusTeapot
 }
 
-// Add custom headers to the response.
+// Header adds custom headers to the response.
 func (gr *GreetResponse) Header() http.Header {
 	header := http.Header{}
 	header.Set("Foo", "bar")
