@@ -51,8 +51,8 @@ func RegisterEncoder[T EncoderConstraint](enc T, mime string, aliases ...string)
 
 // GetEncoder returns the response encoder for a given media type.
 func GetEncoder(mime string) ResponseEncoder {
-	mimeParts := strings.Split(mime, ",")
-	for _, part := range mimeParts {
+	mimeParts := strings.SplitSeq(mime, ",")
+	for part := range mimeParts {
 		if enc, ok := encoders[part]; ok {
 			return enc
 		}
