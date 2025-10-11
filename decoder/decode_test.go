@@ -286,7 +286,7 @@ func BenchmarkDecoder(b *testing.B) {
 
 	dec := decoder.New("schema")
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		out := &test{}
 		if err := dec.Decode(decoder.Map(in), out); err != nil {
 			b.Fatal(err)

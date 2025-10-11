@@ -54,7 +54,7 @@ func BenchmarkDecoder(b *testing.B) {
 	b.Run("Gorilla", func(b *testing.B) {
 		dec := schema.NewDecoder()
 
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			out := &test{}
 			if err := dec.Decode(out, in); err != nil {
 				b.Fatal(err)
@@ -68,7 +68,7 @@ func BenchmarkDecoder(b *testing.B) {
 			b.Fatal(err)
 		}
 
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			out := &test{}
 			if err := dec.Decode(decoder.Map(in), out); err != nil {
 				b.Fatal(err)
@@ -79,7 +79,7 @@ func BenchmarkDecoder(b *testing.B) {
 	b.Run("Don", func(b *testing.B) {
 		dec := decoder.New("schema")
 
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			out := &test{}
 			if err := dec.Decode(decoder.Map(in), out); err != nil {
 				b.Fatal(err)

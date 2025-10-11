@@ -3,19 +3,19 @@ package text_test
 import (
 	"testing"
 
-	"github.com/abemedia/go-don/internal/test"
+	"github.com/abemedia/go-don/internal/testutil"
 )
 
-var opt = test.EncodingOptions[string]{
+var opt = testutil.EncodingOptions[string]{
 	Mime:   "text/plain",
 	Raw:    "foo",
 	Parsed: "foo",
 }
 
 func TestText(t *testing.T) {
-	test.Encoding(t, opt)
+	testutil.TestEncoding(t, opt)
 }
 
 func BenchmarkText(b *testing.B) {
-	test.BenchmarkEncoding(b, opt)
+	testutil.BenchmarkEncoding(b, opt)
 }

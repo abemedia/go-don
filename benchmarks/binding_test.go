@@ -2,13 +2,13 @@ package benchmarks_test
 
 import (
 	"context"
-	stdhttptest "net/http/httptest"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/text"
-	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/gin-gonic/gin"
+	"github.com/valyala/fasthttp"
 )
 
 func BenchmarkDon_BindRequest(b *testing.B) {
@@ -24,9 +24,13 @@ func BenchmarkDon_BindRequest(b *testing.B) {
 	}))
 
 	h := api.RequestHandler()
-	ctx := httptest.NewRequest("POST", "/path?query=query", "", map[string]string{"header": "header"})
 
-	for i := 0; i < b.N; i++ {
+	ctx := &fasthttp.RequestCtx{}
+	ctx.Request.Header.SetMethod("POST")
+	ctx.Request.SetRequestURI("/path?query=query")
+	ctx.Request.Header.Set("Header", "header")
+
+	for b.Loop() {
 		h(ctx)
 	}
 }
@@ -47,11 +51,11 @@ func BenchmarkGin_BindRequest(b *testing.B) {
 		c.ShouldBindUri(req)
 	})
 
-	w := stdhttptest.NewRecorder()
-	r := stdhttptest.NewRequest("POST", "/path?query=query", nil)
-	r.Header.Add("header", "header")
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("POST", "/path?query=query", nil)
+	r.Header.Add("Header", "header")
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		router.ServeHTTP(w, r)
 	}
 }

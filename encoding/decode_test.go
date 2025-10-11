@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/abemedia/go-don/encoding"
-	"github.com/abemedia/go-don/pkg/httptest"
+	"github.com/abemedia/go-don/internal/testutil"
 	"github.com/valyala/fasthttp"
 )
 
@@ -56,7 +56,7 @@ func testRegisterDecoder[T encoding.DecoderConstraint](t *testing.T, dec T, cont
 			continue
 		}
 
-		req := httptest.NewRequest("", "", v, nil)
+		req := testutil.NewRequest("", "", v, nil)
 
 		var b []byte
 		if err := decode(req, &b); err != nil {

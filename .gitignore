@@ -13,3 +13,6 @@ vendor/
 # Go workspace
 go.work
 go.work.sum
+
+# macOS system files
+.DS_Store

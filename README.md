@@ -11,8 +11,7 @@ Don is a fast & simple API framework written in Go. It features a super-simple A
 [httprouter](https://github.com/abemedia/httprouter) it's blazing fast and has a low memory
 footprint.
 
-As Don uses Go generics it requires Go 1.18 to work.  
-Minor version updates should be considered breaking changes.
+While Don is still on v0, minor version updates should be considered breaking changes.
 
 ## Contents
 

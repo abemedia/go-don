@@ -1,6 +1,6 @@
 module github.com/abemedia/go-don
 
-go 1.18
+go 1.24
 
 require (
 	github.com/abemedia/httprouter v0.0.0-20230505023925-232e0e5a4b1b

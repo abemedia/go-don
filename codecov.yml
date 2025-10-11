@@ -1,0 +1,6 @@
+coverage:
+  ignore:
+    - benchmarks
+    - examples
+    - internal/testutil
+    - '**/testdata/**'

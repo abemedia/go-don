@@ -10,7 +10,7 @@ import (
 	"github.com/abemedia/go-don"
 	_ "github.com/abemedia/go-don/encoding/json"
 	_ "github.com/abemedia/go-don/encoding/text"
-	"github.com/abemedia/go-don/pkg/httptest"
+	"github.com/abemedia/go-don/internal/testutil"
 	"github.com/abemedia/httprouter"
 	"github.com/google/go-cmp/cmp"
 	"github.com/valyala/fasthttp"
@@ -40,7 +40,7 @@ func TestHandlerRequest(t *testing.T) {
 		return nil, nil
 	}))
 
-	api.RequestHandler()(httptest.NewRequest(
+	api.RequestHandler()(testutil.NewRequest(
 		fasthttp.MethodPost,
 		"/path?query=query",
 		`{"json":"json"}`,
@@ -236,7 +236,7 @@ func TestHandlerResponse(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		ctx := httptest.NewRequest(fasthttp.MethodPost, test.request.url, test.request.body, test.request.header)
+		ctx := testutil.NewRequest(fasthttp.MethodPost, test.request.url, test.request.body, test.request.header)
 
 		api := don.New(test.config)
 		api.Post("/"+strings.TrimPrefix(test.route, "/"), test.handler)
@@ -269,19 +269,19 @@ func BenchmarkHandler(b *testing.B) {
 	}
 
 	header := map[string]string{"Header": "header", "Accept": "text/plain"}
-	ctx := httptest.NewRequest("POST", "/path?query=query", "", header)
+	ctx := testutil.NewRequest("POST", "/path?query=query", "", header)
 	p := httprouter.Params{{Key: "path", Value: "path"}}
 
 	b.Run("Request", func(b *testing.B) {
 		h := don.H(func(ctx context.Context, req request) (any, error) { return nil, nil })
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			h(ctx, p)
 		}
 	})
 
 	b.Run("RequestPointer", func(b *testing.B) {
 		h := don.H(func(ctx context.Context, req *request) (any, error) { return nil, nil })
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			h(ctx, p)
 		}
 	})

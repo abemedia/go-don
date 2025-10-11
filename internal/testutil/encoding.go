@@ -1,4 +1,4 @@
-package test
+package testutil
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/encoding"
 	_ "github.com/abemedia/go-don/encoding/text" // default encoding
-	"github.com/abemedia/go-don/pkg/httptest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
@@ -22,19 +21,19 @@ type EncodingOptions[T any] struct {
 	Raw    string
 }
 
-func Encoding[T any](t *testing.T, opt EncodingOptions[T]) {
+func TestEncoding[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 	t.Run("Decode", func(t *testing.T) {
 		t.Helper()
-		Decode(t, opt)
+		TestDecode(t, opt)
 	})
 	t.Run("Encode", func(t *testing.T) {
 		t.Helper()
-		Encode(t, opt)
+		TestEncode(t, opt)
 	})
 }
 
-func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
+func TestDecode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
 	var diff string
@@ -45,7 +44,7 @@ func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
 		return nil, nil
 	}))
 
-	ctx := httptest.NewRequest(http.MethodPost, "/", opt.Raw, map[string]string{"Content-Type": opt.Mime})
+	ctx := NewRequest(http.MethodPost, "/", opt.Raw, map[string]string{"Content-Type": opt.Mime})
 	api.RequestHandler()(ctx)
 
 	if diff != "" {
@@ -57,7 +56,7 @@ func Decode[T any](t *testing.T, opt EncodingOptions[T]) {
 	}
 }
 
-func Encode[T any](t *testing.T, opt EncodingOptions[T]) {
+func TestEncode[T any](t *testing.T, opt EncodingOptions[T]) {
 	t.Helper()
 
 	api := don.New(nil)
@@ -65,7 +64,7 @@ func Encode[T any](t *testing.T, opt EncodingOptions[T]) {
 		return opt.Parsed, nil
 	}))
 
-	ctx := httptest.NewRequest(http.MethodPost, "/", "", map[string]string{"Accept": opt.Mime})
+	ctx := NewRequest(http.MethodPost, "/", "", map[string]string{"Accept": opt.Mime})
 	api.RequestHandler()(ctx)
 
 	if diff := cmp.Diff(opt.Raw, string(ctx.Response.Body()), ignoreUnexported[T]()); diff != "" {
@@ -108,7 +107,7 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 	}
 
 	rd := strings.NewReader(opt.Raw)
-	ctx := httptest.NewRequest("POST", "/", "", nil)
+	ctx := NewRequest("POST", "/", "", nil)
 	ctx.Request.SetBodyStream(rd, len(opt.Raw))
 
 	v := new(T)
@@ -116,7 +115,7 @@ func BenchmarkDecode[T any](b *testing.B, opt EncodingOptions[T]) {
 		val.Set(reflect.New(val.Type().Elem()))
 	}
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		rd.Seek(0, io.SeekStart) //nolint:errcheck
 		dec(ctx, v)              //nolint:errcheck
 	}
@@ -130,9 +129,9 @@ func BenchmarkEncode[T any](b *testing.B, opt EncodingOptions[T]) {
 		b.Fatal("encoder not found")
 	}
 
-	ctx := httptest.NewRequest("POST", "/", "", nil)
+	ctx := NewRequest("POST", "/", "", nil)
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		ctx.Response.ResetBody()
 		enc(ctx, opt.Parsed) //nolint:errcheck
 	}

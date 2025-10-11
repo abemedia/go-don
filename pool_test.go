@@ -28,14 +28,14 @@ func TestRequestPool(t *testing.T) {
 		zero := item{}
 		pool := don.NewRequestPool(zero)
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			v := pool.Get()
 			v.String = "test"
 			v.Pointer = &v.String
 			pool.Put(v)
 		}
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			if !reflect.DeepEqual(&zero, pool.Get()) {
 				t.Fatal("should be zero value")
 			}
@@ -46,7 +46,7 @@ func TestRequestPool(t *testing.T) {
 		zero := &item{}
 		pool := don.NewRequestPool(zero)
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			p := pool.Get()
 			v := *p
 			v.String = "test"
@@ -54,7 +54,7 @@ func TestRequestPool(t *testing.T) {
 			pool.Put(p)
 		}
 
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			if !reflect.DeepEqual(&zero, pool.Get()) {
 				t.Fatal("should be zero value")
 			}

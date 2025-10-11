@@ -19,7 +19,7 @@ var unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {
 	decoders := []decoder{}
 
-	for i := 0; i < typ.NumField(); i++ {
+	for i := range typ.NumField() {
 		f := typ.Field(i)
 		if f.PkgPath != "" {
 			continue // skip unexported fields

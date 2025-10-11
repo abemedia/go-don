@@ -29,7 +29,7 @@ func BenchmarkDon_HTTP(b *testing.B) {
 
 	url := fmt.Sprintf("http://%s/path", ln.Addr())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		fasthttp.Get(nil, url)
 	}
 
@@ -54,7 +54,7 @@ func BenchmarkGin_HTTP(b *testing.B) {
 
 	url := fmt.Sprintf("http://%s/path", ln.Addr())
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		fasthttp.Get(nil, url)
 	}
 

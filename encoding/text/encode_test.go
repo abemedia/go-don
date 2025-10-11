@@ -7,7 +7,7 @@ import (
 
 	"github.com/abemedia/go-don"
 	"github.com/abemedia/go-don/encoding"
-	"github.com/abemedia/go-don/pkg/httptest"
+	"github.com/abemedia/go-don/internal/testutil"
 	"github.com/google/go-cmp/cmp"
 	"github.com/valyala/fasthttp"
 )
@@ -45,7 +45,7 @@ func TestEncode(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", "", nil)
+		ctx := testutil.NewRequest(fasthttp.MethodGet, "/", "", nil)
 		if err := enc(ctx, test.in); err != nil {
 			t.Error(err)
 		} else {
@@ -71,7 +71,7 @@ func TestEncodeError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		ctx := httptest.NewRequest(fasthttp.MethodGet, "/", "", nil)
+		ctx := testutil.NewRequest(fasthttp.MethodGet, "/", "", nil)
 		if err := enc(ctx, test.in); err == nil {
 			t.Error("should return error")
 		} else if !errors.Is(err, test.want) {
