@@ -80,6 +80,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body: "",
 				Header: map[string]string{
 					"Content-Type": "text/plain; charset=utf-8",
+					"Connection":   "close",
 				},
 			},
 			handler: don.H(func(ctx context.Context, req any) (any, error) {
@@ -93,6 +94,7 @@ func TestHandlerResponse(t *testing.T) {
 				Body: "null",
 				Header: map[string]string{
 					"Content-Type": "application/json; charset=utf-8",
+					"Connection":   "close",
 				},
 			},
 			config: &don.Config{DefaultEncoding: "application/json", DisableNoContent: true},
@@ -243,7 +245,9 @@ func TestHandlerResponse(t *testing.T) {
 		api.RequestHandler()(ctx)
 
 		res := response{ctx.Response.StatusCode(), string(ctx.Response.Body()), map[string]string{}}
-		ctx.Response.Header.VisitAll(func(key, value []byte) { res.Header[string(key)] = string(value) })
+		for key, value := range ctx.Response.Header.All() {
+			res.Header[string(key)] = string(value)
+		}
 
 		if diff := cmp.Diff(test.want, res); diff != "" {
 			t.Errorf("%s:\n%s", test.message, diff)
