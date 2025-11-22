@@ -98,7 +98,7 @@ func (e *testError) MarshalText() ([]byte, error) {
 }
 
 func (e *testError) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`{"custom":%q}`, e.Error())), nil
+	return fmt.Appendf(nil, `{"custom":%q}`, e.Error()), nil
 }
 
 func (e *testError) MarshalXML(enc *xml.Encoder, start xml.StartElement) error {
