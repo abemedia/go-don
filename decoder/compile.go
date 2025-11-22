@@ -13,7 +13,7 @@ type decoder = func(reflect.Value, Getter) error
 
 func noopDecoder(reflect.Value, Getter) error { return nil }
 
-var unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+var unmarshalerType = reflect.TypeFor[encoding.TextUnmarshaler]()
 
 //nolint:cyclop,funlen
 func compile(typ reflect.Type, tagKey string, isPtr bool) (decoder, error) {

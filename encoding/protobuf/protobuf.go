@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	messageType = reflect.TypeOf((*proto.Message)(nil)).Elem()
+	messageType = reflect.TypeFor[proto.Message]()
 	cache       sync.Map
 )
 

@@ -122,5 +122,5 @@ func newUnmarshaler(typ reflect.Type) (func([]byte, reflect.Value) error, error)
 
 var (
 	unmarshalers    sync.Map
-	unmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+	unmarshalerType = reflect.TypeFor[encoding.TextUnmarshaler]()
 )
