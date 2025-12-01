@@ -32,7 +32,7 @@ jobs:
           json: true
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Filter packages with benchmarks
         id: set-matrix
@@ -55,7 +55,7 @@ jobs:
       matrix: ${{ fromJSON(needs.packages.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Go
         uses: actions/setup-go@v6
