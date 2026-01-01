@@ -9,7 +9,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5
 	github.com/valyala/fasthttp v1.68.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 )
 
