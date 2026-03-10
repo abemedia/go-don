@@ -74,6 +74,8 @@ jobs:
 
       - name: Compare benchmarks
         id: bench
+        env:
+          GOTOOLCHAIN: auto
         run: |
           go install golang.org/x/perf/cmd/benchstat@latest
           OUTPUT=$(benchstat before after)
