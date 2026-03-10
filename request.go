@@ -33,7 +33,7 @@ func decodeRequest[V any](path, query, header *decoder.CachedDecoder[V]) request
 		val := reflect.ValueOf(v).Elem()
 
 		if path != nil && len(p) > 0 {
-			if err := path.DecodeValue((decoder.Params)(p), val); err != nil {
+			if err := path.DecodeValue(decoder.Params(p), val); err != nil {
 				return ErrNotFound
 			}
 		}
