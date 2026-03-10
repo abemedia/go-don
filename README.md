@@ -109,13 +109,9 @@ and the response will be YAML encoded.
 
 If no `Content-Type` or `Accept` header is passed the default will be used.
 
-Formats need to be explicitly imported e.g.
-
-```go
-import _ "github.com/abemedia/go-don/encoding/yaml"
-```
-
 ### Currently supported formats
+
+Formats need to be explicitly imported to be registered.
 
 #### JSON
 
@@ -124,12 +120,20 @@ MIME: `application/json`
 Parses JSON requests & encodes responses as JSON. Use the `json` tag in your request & response
 structs.
 
+```go
+import _ "github.com/abemedia/go-don/encoding/json"
+```
+
 #### XML
 
 MIME: `application/xml`, `text/xml`
 
 Parses XML requests & encodes responses as XML. Use the `xml` tag in your request & response
 structs.
+
+```go
+import _ "github.com/abemedia/go-don/encoding/xml"
+```
 
 #### YAML
 
@@ -138,11 +142,19 @@ MIME: `application/yaml`, `text/yaml`, `application/x-yaml`, `text/x-yaml`, `tex
 Parses YAML requests & encodes responses as YAML. Use the `yaml` tag in your request & response
 structs.
 
+```go
+import _ "github.com/abemedia/go-don/encoding/yaml"
+```
+
 #### Form (input only)
 
 MIME: `application/x-www-form-urlencoded`, `multipart/form-data`
 
 Parses form data requests. Use the `form` tag in your request struct.
+
+```go
+import _ "github.com/abemedia/go-don/encoding/form"
+```
 
 #### Text
 
@@ -159,12 +171,20 @@ func MyHandler(ctx context.Context, req int64) (string, error) {
 If the request is a struct and the `Content-Type` header is set to `text/plain` it returns a
 `415 Unsupported Media Type` error.
 
+```go
+import _ "github.com/abemedia/go-don/encoding/text"
+```
+
 #### MessagePack
 
 MIME: `application/msgpack`, `application/x-msgpack`, `application/vnd.msgpack`
 
 Parses MessagePack requests & encodes responses as MessagePack. Use the `msgpack` tag in your
 request & response structs.
+
+```go
+import _ "github.com/abemedia/go-don/encoding/msgpack"
+```
 
 #### TOML
 
@@ -173,12 +193,20 @@ MIME: `application/toml`
 Parses TOML requests & encodes responses as TOML. Use the `toml` tag in your request & response
 structs.
 
+```go
+import _ "github.com/abemedia/go-don/encoding/toml"
+```
+
 #### Protocol Buffers
 
 MIME: `application/protobuf`, `application/x-protobuf`
 
 Parses protobuf requests & encodes responses as protobuf. Use pointer types generated with `protoc`
 as your request & response structs.
+
+```go
+import _ "github.com/abemedia/go-don/encoding/protobuf"
+```
 
 ### Adding custom encoding
 
