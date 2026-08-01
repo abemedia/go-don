@@ -41,7 +41,7 @@ func (d *Decoder) Decode(data Getter, v any) error {
 	dec, ok := d.cache.Load(t)
 	if !ok {
 		var err error
-		dec, err = compile(t, d.tag, t.Kind() == reflect.Ptr)
+		dec, err = compile(t, d.tag, t.Kind() == reflect.Pointer)
 		if err != nil {
 			if err != ErrTagNotFound { //nolint:errorlint,err113
 				return err

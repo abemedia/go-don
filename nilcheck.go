@@ -11,7 +11,7 @@ func newNilCheck(zero any) func(v any) bool {
 	}
 
 	switch typ.Kind() {
-	case reflect.String, reflect.Ptr, reflect.Interface:
+	case reflect.String, reflect.Pointer, reflect.Interface:
 		// Return true for empty string and nil pointer.
 		return func(v any) bool { return v == zero }
 	case reflect.Map:
