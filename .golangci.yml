@@ -5,9 +5,11 @@ linters:
     - depguard
     - exhaustive
     - exhaustruct
+    - exhaustruct_v5
     - gochecknoglobals
     - gochecknoinits
     - godox
+    - gomodguard # deprecated
     - ireturn
     - mnd
     - nilnil
@@ -19,13 +21,12 @@ linters:
     - wsl
     - wsl_v5
   settings:
-    gomodguard:
+    gomodguard_v2:
       blocked:
-        modules:
-          - encoding/json:
-              recommendations: [github.com/goccy/go-json]
-          - github.com/pkg/errors:
-              recommendations: [errors]
+        - module: encoding/json
+          recommendations: [github.com/goccy/go-json]
+        - module: github.com/pkg/errors
+          recommendations: [errors]
     govet:
       enable-all: true
     nolintlint:
@@ -60,13 +61,10 @@ linters:
 formatters:
   enable:
     - gci
-    - gofmt
     - gofumpt
-    - goimports
   settings:
-    gofmt:
-      rewrite-rules:
-        - pattern: interface{}
-          replacement: any
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
+        balance-calls: true
