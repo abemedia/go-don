@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/abemedia/httprouter v0.0.0-20230505023925-232e0e5a4b1b
-	github.com/goccy/go-json v0.10.6
+	github.com/goccy/go-json v0.11.2
 	github.com/google/go-cmp v0.7.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/valyala/fasthttp v1.73.0
